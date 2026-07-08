@@ -1,0 +1,12 @@
+diff --git a/gcore/multidim/gdal_multidim.h b/gcore/multidim/gdal_multidim.h
+index 0e8c52f..5b68503 100644
+--- a/gcore/multidim/gdal_multidim.h
++++ b/gcore/multidim/gdal_multidim.h
+@@ -16,6 +16,7 @@
+ #include "cpl_string.h"
+ #include "gdal.h"
+ #include "gdal_geotransform.h"
++#include "gdal_rat.h"
+ 
+ #include <cstddef>
+ #include <cstdint>
