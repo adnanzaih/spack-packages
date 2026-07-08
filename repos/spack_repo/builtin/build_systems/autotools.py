@@ -596,7 +596,7 @@ To resolve this problem, please try the following:
         # Else try to regenerate it, which requires a few build dependencies
         ensure_build_dependencies_or_raise(
             spec=spec,
-            dependencies=["autoconf", "automake", "libtool"],
+            dependencies=["autoconf", "automake"], # removed "libtool"
             error_msg="Cannot generate configure",
         )
 
