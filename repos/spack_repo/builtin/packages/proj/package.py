@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+import os
+
 from spack_repo.builtin.build_systems import autotools, cmake
 from spack_repo.builtin.build_systems.autotools import AutotoolsPackage
 from spack_repo.builtin.build_systems.cmake import CMakePackage
@@ -58,6 +60,10 @@ class Proj(CMakePackage, AutotoolsPackage):
     version("4.9.2", sha256="60bf9ad1ed1c18158e652dfff97865ba6fb2b67f1511bc8dceae4b3c7e657796")
     version("4.9.1", sha256="fca0388f3f8bc5a1a803d2f6ff30017532367992b30cf144f2d39be88f36c319")
 
+    variant("tiff", default=True, when="@7:", description="Enable TIFF support")
+    variant("shared", default=True, description="Enable shared libraries")
+    variant("pic", default=False, description="Enable position-independent code (PIC)")
+
     patch(
         "https://github.com/OSGeo/PROJ/commit/3f38a67a354a3a1e5cca97793b9a43860c380d95.patch?full_index=1",
         sha256="dc620ff1bbcc0ef4130d53a40a8693a1e2e72ebf83bd6289f1139d0f1aad2a40",
@@ -66,6 +72,9 @@ class Proj(CMakePackage, AutotoolsPackage):
 
     depends_on("c", type="build")  # generated
     depends_on("cxx", type="build")  # generated
+    depends_on("sqlite@3.11:", when="@6:")
+    depends_on("libtiff@4:", when="@7:+tiff")
+
 
     # https://proj.org/install.html#build-requirements
     with when("build_system=cmake"):
@@ -118,7 +127,9 @@ class AnyBuilder(BaseBuilder):
 
     @run_after("install")
     def install_datum_grids(self):
-        install_tree(join_path("share", "proj"), self.prefix.share.proj)
+        datum_grids = join_path("share", "proj")
+        if os.path.isdir(datum_grids):
+            install_tree(datum_grids, self.prefix.share.proj)
 
 
 class CMakeBuilder(AnyBuilder, cmake.CMakeBuilder):
@@ -126,10 +137,8 @@ class CMakeBuilder(AnyBuilder, cmake.CMakeBuilder):
         shared_arg = "BUILD_SHARED_LIBS" if self.spec.satisfies("@7:") else "BUILD_LIBPROJ_SHARED"
         args = [
             self.define_from_variant("ENABLE_TIFF", "tiff"),
-            self.define_from_variant("ENABLE_CURL", "curl"),
             self.define_from_variant(shared_arg, "shared"),
             # projsync needs curl
-            self.define_from_variant("BUILD_PROJSYNC", "curl"),
             self.define_from_variant("CMAKE_POSITION_INDEPENDENT_CODE", "pic"),
         ]
         if self.spec.satisfies("@6:") and self.pkg.run_tests:
@@ -141,8 +150,7 @@ class CMakeBuilder(AnyBuilder, cmake.CMakeBuilder):
         else:
             test_flag = "PROJ4_TESTS"
         args.append(self.define(test_flag, self.pkg.run_tests))
-        if self.spec.satisfies("%curl build_system=cmake"):
-            args.append(self.define("CMAKE_CXX_FLAGS", "-DCURL_STATICLIB"))
+        
         return args
 
 
@@ -156,11 +164,7 @@ class AutotoolsBuilder(AnyBuilder, autotools.AutotoolsBuilder):
         if self.spec.satisfies("@7:"):
             args.extend(self.enable_or_disable("tiff"))
 
-            if "+curl" in self.spec:
-                args.append("--with-curl=" + self.spec["curl"].prefix.bin.join("curl-config"))
-            else:
-                args.append("--without-curl")
-
+           
         args.extend(self.enable_or_disable("shared"))
         args.extend(self.with_or_without("pic"))
 
