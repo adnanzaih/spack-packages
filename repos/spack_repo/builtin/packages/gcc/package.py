@@ -218,21 +218,7 @@ class Gcc(AutotoolsPackage, GNUMirrorPackage, CompilerPackage):
     depends_on("c", type="build")
     depends_on("cxx", type="build")
     # mawk is not sufficient for go support
-    depends_on("gawk@3.1.5:", type="build")
-    depends_on("texinfo@4.7:", type="build")
-    depends_on("libtool", type="build")
-
-    depends_on("gmake@3.80:", type="build")
-    depends_on("perl@5", type="build")
-    depends_on("diffutils", type="build")
-
-    with when("@master"):
-        depends_on("flex", type="build")
-        # dependencies required for git versions
-        depends_on("m4@1.4.6:", type="build")
-        depends_on("automake@1.15.1:", type="build")
-        depends_on("autoconf@2.69:", type="build")
-
+    
     depends_on("gmp@4.3.2:")
 
     # GCC 7.3 does not compile with newer releases on some platforms, see
@@ -241,6 +227,9 @@ class Gcc(AutotoolsPackage, GNUMirrorPackage, CompilerPackage):
     depends_on("mpfr@3.1.0:", when="@10:")
     depends_on("mpc@1.0.1:", when="@4.5:")
 
+    depends_on("zlib-api", when="@6:")
+    depends_on("zstd", when="@10:")
+    
     # Already released GCC versions do not support any newer version of ISL
     #   GCC 5.4 https://github.com/spack/spack/issues/6902#issuecomment-433072097
     #   GCC 7.3 https://github.com/spack/spack/issues/6902#issuecomment-433030376
@@ -252,58 +241,8 @@ class Gcc(AutotoolsPackage, GNUMirrorPackage, CompilerPackage):
         depends_on("isl@0.15:0.20", when="@9:9.9")
         depends_on("isl@0.15:", when="@10:")
 
-    depends_on("zlib-api", when="@6:")
-    depends_on("zstd", when="@10:")
-    depends_on("iconv", when="platform=darwin")
-    depends_on("gnat", when="languages=ada")
-    depends_on(
-        "binutils+gas+ld+plugins~libiberty", when="+binutils", type=("build", "link", "run")
-    )
-    depends_on("mold", when="+mold")
-    depends_on("zip", type="build", when="languages=java")
-
     # The server is sometimes a bit slow to respond
     timeout = {"timeout": 60}
-
-    # TODO: integrate these libraries.
-    # depends_on('ppl')
-    # depends_on('cloog')
-
-    # https://gcc.gnu.org/install/test.html
-    with default_args(type="test"):
-        depends_on("dejagnu@1.4.4")
-        depends_on("expect")
-        depends_on("tcl")
-        depends_on("autogen@5.5.4:")
-        depends_on("guile@1.4.1:")
-
-    # See https://go.dev/doc/install/gccgo#Releases
-    with when("languages=go"):
-        provides("go-or-gccgo-bootstrap@:1.0", when="@4.7.1:")
-        provides("go-or-gccgo-bootstrap@:1.2", when="@4.9:")
-        provides("go-or-gccgo-bootstrap@:1.4", when="@5:")
-        provides("go-or-gccgo-bootstrap@:1.6.1", when="@6:")
-        provides("go-or-gccgo-bootstrap@:1.8.1", when="@7:")
-        provides("go-or-gccgo-bootstrap@:1.10.1", when="@8:")
-        provides("go-or-gccgo-bootstrap@:1.12.2", when="@9:")
-        provides("go-or-gccgo-bootstrap@:1.14.6", when="@10:")
-        provides("go-or-gccgo-bootstrap@1.16.3:1.16.5", when="@11:")
-
-        provides("golang@:1.0", when="@4.7.1:")
-        provides("golang@:1.2", when="@4.9:")
-        provides("golang@:1.4", when="@5:")
-        provides("golang@:1.6.1", when="@6:")
-        provides("golang@:1.8.1", when="@7:")
-        provides("golang@:1.10.1", when="@8:")
-        provides("golang@:1.12.2", when="@9:")
-        provides("golang@:1.14.6", when="@10:")
-        provides("golang@1.16.3:1.16.5", when="@11:")
-
-        # GCC 4.7.1 added full support for the Go 1.x programming language.
-        conflicts("@:4.7.0")
-
-        # Go is not supported on macOS
-        conflicts("platform=darwin", msg="GCC cannot build Go support on MacOS")
 
     # For a list of valid languages for a specific release,
     # run the following command in the GCC source directory:
