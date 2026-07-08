@@ -120,6 +120,15 @@ class Proj(CMakePackage, AutotoolsPackage):
         # * https://rasterio.readthedocs.io/en/latest/faq.html
         env.set("PROJ_LIB", self.prefix.share.proj)
 
+    def patch(self):
+        if self.spec.satisfies("@9.7: build_system=cmake %gcc@:8"):
+            filter_file(
+                "-Wdeprecated-copy-dtor",
+                "",
+                "CMakeLists.txt",
+                string=True,
+            )
+
 
 class AnyBuilder(BaseBuilder):
     def setup_build_environment(self, env: EnvironmentModifications) -> None:
