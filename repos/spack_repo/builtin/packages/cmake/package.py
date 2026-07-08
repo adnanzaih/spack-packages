@@ -109,10 +109,6 @@ class Cmake(Package):
     )
     variant("qtgui", default=False, description="Enables the build of the Qt GUI")
 
-    for spack_platform in ["freebsd", "linux", "darwin"]:
-        with when(f"platform={spack_platform}"):
-            variant("ncurses", default=True, description="Enables the build of the ncurses gui")
-
     # Revert the change that introduced a regression when parsing mpi link
     # flags, see: https://gitlab.kitware.com/cmake/cmake/issues/19516
     patch("cmake-revert-findmpi-link-flag-list.patch", when="@3.15.0")
@@ -168,33 +164,8 @@ class Cmake(Package):
     # transparent to patch Spack's versions of CMake's dependencies.
     conflicts("+ownlibs %nvhpc")
 
-    # Use Spack's curl even if +ownlibs, since that allows us to make use of
-    # the conflicts on the curl package for TLS libs like OpenSSL.
-    # In the past we let CMake build a vendored copy of curl, but had to
-    # provide Spack's TLS libs anyways, which is not flexible, and actually
-    # leads to issues where we have to keep track of the vendored curl version
-    # and its conflicts with OpenSSL.
-    #
-    # Windows is the exception, since Spack's curl defaults to tls=sspi
-    # on Windows, the same Schannel stack CMake's vendored cmcurl already uses.
-    # Keeping the default (+ownlibs) free of curl lets CMake bootstrap on
-    # Windows from nothing
-    for _requires_system_curl in (
-        "platform=linux",
-        "platform=darwin",
-        "platform=freebsd",
-        "platform=windows ~ownlibs",
-    ):
-        with when(_requires_system_curl):
-            depends_on("curl@:8.15", when="@:3.25")
-            depends_on("curl")
-
-            # https://gitlab.kitware.com/cmake/cmake/-/merge_requests/11134
-            conflicts("curl@8.16:", when="@:3.30")
-
-            # When using curl, cmake defaults to using system zlib too, probably
-            # because curl already depends on zlib. Therefore, also depend on zlib.
-            depends_on("zlib-api")
+    # https://gitlab.kitware.com/cmake/cmake/-/merge_requests/11134
+    conflicts("curl@8.16:", when="@:3.30")
 
     with when("~ownlibs"):
         # expat/zlib are used in CMake/CTest, so why not require them in libarchive.
@@ -208,8 +179,6 @@ class Cmake(Package):
                 depends_on("libuv@1.10.0:", when="@3.12.0:")
                 depends_on("rhash", when="@3.8.0:")
                 depends_on("jsoncpp build_system=meson", when="@3.2:")
-
-    depends_on("ncurses", when="+ncurses")
 
     with when("+doc"):
         depends_on("python@2.7.11:", type="build")
