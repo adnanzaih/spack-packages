@@ -46,14 +46,6 @@ class NetcdfC(AutotoolsPackage):
         hdf5 = self.spec["hdf5"]
         szip = self.spec["szip"]
 
-        config_args = [
-            "--disable-dap",
-            "--disable-libxml2",
-            "--disable-byterange",
-            "--disable-nczarr",
-            "--disable-plugins",
-        ]
-
         cppflags = " ".join(
             [
                 hdf5.headers.cpp_flags,
@@ -65,11 +57,7 @@ class NetcdfC(AutotoolsPackage):
         ldflags = " ".join("-L{0}".format(d) for d in lib_dirs)
 
         return [
-            "--disable-dap",
-            "--disable-libxml2",
-            "--disable-byterange",
-            "--disable-nczarr",
-            "--disable-plugins",
+            "--disable-dap-remote-tests",
             "CPPFLAGS={0}".format(cppflags),
             "CFLAGS={0}".format(cppflags),
             "LDFLAGS={0}".format(ldflags),
