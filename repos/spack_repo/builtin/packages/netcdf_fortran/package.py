@@ -2,10 +2,6 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-import glob
-import os
-from shutil import Error, copyfile
-
 from spack_repo.builtin.build_systems.autotools import AutotoolsPackage
 
 from spack.package import *
@@ -36,13 +32,8 @@ class NetcdfFortran(AutotoolsPackage):
     version("4.4.4", sha256="b2d395175f8d283e68c8be516e231a96b191ade67ad0caafaf7fa01b1e6b5d75")
     version("4.4.3", sha256="330373aa163d5931e475b5e83da5c1ad041e855185f24e6a8b85d73b48d6cda9")
 
-    variant("pic", default=True, description="Produce position-independent code (for shared libs)")
-    variant("shared", default=True, description="Enable shared library")
-    variant("doc", default=False, description="Enable building docs")
-
     depends_on("c", type="build")
     depends_on("fortran", type="build")
-
     depends_on("netcdf-c")
     depends_on("netcdf-c@4.7.4:", when="@4.5.3:")  # nc_def_var_szip required
     depends_on("doxygen", when="+doc", type="build")
@@ -109,81 +100,19 @@ class NetcdfFortran(AutotoolsPackage):
 
     @property
     def libs(self):
-        libraries = ["libnetcdff"]
-
-        query_parameters = self.spec.last_query.extra_parameters
-
-        if "shared" in query_parameters:
-            shared = True
-        elif "static" in query_parameters:
-            shared = False
-        else:
-            shared = "+shared" in self.spec
-
-        libs = find_libraries(libraries, root=self.prefix, shared=shared, recursive=True)
-
-        if libs:
-            return libs
-
-        msg = "Unable to recursively locate {0} {1} libraries in {2}"
-        raise NoLibrariesError(
-            msg.format("shared" if shared else "static", self.spec.name, self.spec.prefix)
-        )
+        return find_libraries("libnetcdff", root=self.prefix, recursive=True)
 
     def configure_args(self):
-        config_args = ["--enable-static"]
-        config_args += self.enable_or_disable("shared")
-        config_args += self.enable_or_disable("doxygen", variant="doc")
+        netcdf_c = self.spec["netcdf-c"]
+        cppflags = "-I{0}".format(netcdf_c.prefix.include)
+        ldflags = "-L{0}".format(netcdf_c.prefix.lib)
+        fflags = "-w -fallow-argument-mismatch"
 
-        netcdf_c_spec = self.spec["netcdf-c"]
-        if "+mpi" in netcdf_c_spec or "+parallel-netcdf" in netcdf_c_spec:
-            # Prefixing with 'mpiexec -n 4' is not necessarily the correct way
-            # to launch MPI programs on a particular machine (e.g. 'srun -n 4'
-            # with additional arguments might be the right one). Therefore, we
-            # make sure the parallel tests are not launched at all (although it
-            # is the default behaviour currently):
-            config_args.append("--disable-parallel-tests")
-            if self.spec.satisfies("@4.5.0:4.5.2"):
-                # Versions from 4.5.0 to 4.5.2 check whether the Fortran MPI
-                # interface is available and fail the configuration if it is
-                # not. However, the interface is needed for a subset of the test
-                # programs only (the library itself does not need it), which are
-                # not run by default and explicitly disabled above. To avoid the
-                # configuration failure, we set the following cache variable:
-                config_args.append("ac_cv_func_MPI_File_open=yes")
-
-        if "~shared" in netcdf_c_spec:
-            nc_config = which("nc-config", required=True)
-            config_args.append("LIBS={0}".format(nc_config("--libs", output=str).strip()))
-            if any(s in netcdf_c_spec for s in ["+mpi", "+parallel-netcdf", "^hdf5+mpi~shared"]):
-                config_args.append("CC=%s" % self.spec["mpi"].mpicc)
-
-        return config_args
-
-    def check(self):
-        make("check", parallel=self.spec.satisfies("@4.5:"))
-
-    @run_after("install")
-    def cray_module_filenames(self):
-        # Cray compiler searches for module files with uppercase names by
-        # default and with lowercase names when the '-ef' flag is specified.
-        # To avoid warning messages when compiler user applications in both
-        # cases, we create copies of all '*.mod' files in the prefix/include
-        # with names in upper- and lowercase.
-        if not self.spec.satisfies("%cce"):
-            return
-
-        with working_dir(self.spec.prefix.include):
-            for f in glob.glob("*.mod"):
-                name, ext = os.path.splitext(f)
-                try:
-                    # Create a copy with uppercase name:
-                    copyfile(f, name.upper() + ext)
-                except Error:
-                    # Assume that the exception tells us that the file with
-                    # uppercase name already exists. Try to create a file with
-                    # lowercase name then:
-                    try:
-                        copyfile(f, name.lower() + ext)
-                    except Error:
-                        pass
+        return [
+            "CPPFLAGS={0}".format(cppflags),
+            "LDFLAGS={0}".format(ldflags),
+            "FC={0}".format(self.compiler.fc),
+            "F77={0}".format(self.compiler.f77),
+            #"FCFLAGS={0}".format(fflags),
+            #"FFLAGS={0}".format(fflags),
+        ]

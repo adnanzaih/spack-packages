@@ -83,7 +83,7 @@ class LibjpegTurbo(CMakePackage):
     # NASM must be set.
     # TODO: Implement the selection between two supported assemblers.
     # depends_on('yasm', type='build')
-    depends_on("nasm", type="build")
+    #depends_on("nasm", type="build")
 
     @property
     def libs(self):

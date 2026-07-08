@@ -79,7 +79,7 @@ class Sqlite(AutotoolsPackage, NMakePackage):
             when=f"@:3.48 platform={plat}",
         )
 
-        depends_on("readline", when=f"platform={plat}")
+        #depends_on("readline", when=f"platform={plat}")
 
     variant("fts", default=True, description="Include fts4 and fts5 support")
 
@@ -97,7 +97,7 @@ class Sqlite(AutotoolsPackage, NMakePackage):
 
     depends_on("c", type="build")  # generated
 
-    depends_on("zlib-api")
+    #depends_on("zlib-api")
     depends_on("tcl", when="platform=windows")
 
     # See https://blade.tencent.com/magellan/index_en.html

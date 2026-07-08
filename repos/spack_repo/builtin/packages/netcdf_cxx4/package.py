@@ -2,12 +2,12 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-from spack_repo.builtin.build_systems.cmake import CMakePackage
+from spack_repo.builtin.build_systems.autotools import AutotoolsPackage
 
 from spack.package import *
 
 
-class NetcdfCxx4(CMakePackage):
+class NetcdfCxx4(AutotoolsPackage):
     """NetCDF (network Common Data Form) is a set of software libraries and
     machine-independent data formats that support the creation, access, and
     sharing of array-oriented scientific data. This is the C++ distribution."""
@@ -21,74 +21,49 @@ class NetcdfCxx4(CMakePackage):
 
     version("4.3.1", sha256="6a1189a181eed043b5859e15d5c080c30d0e107406fbb212c8fb9814e90f3445")
 
-    variant("shared", default=True, description="Enable shared library")
-    variant("pic", default=True, description="Produce position-independent code (for shared libs)")
-    variant("doc", default=False, description="Enable doxygen docs")
-    variant("tests", default=False, description="Enable CTest-based tests, dashboards.")
-
-    # If another cmake-built netcdf-c exists outside of spack  e.g., homebrew's libnetcdf,
-    # then cmake will choose that external netcdf-c.
-    # This approach ensures the config.cmake exists, and thus ensures the spack version is
-    #  found before the system's
-    depends_on("netcdf-c build_system=cmake")
+    depends_on("c", type="build")
+    depends_on("cxx", type="build")
     depends_on("hdf5")
-
-    # if we link against an mpi-aware hdf5 then this needs to also be mpi aware for tests
-    depends_on("mpi", when="+tests ^hdf5+mpi")
-    depends_on("doxygen", when="+doc", type="build")
+    depends_on("netcdf-c")
 
     filter_compiler_wrappers("ncxx4-config", relative_root="bin")
 
-    depends_on("c", type="build")
-    depends_on("cxx", type="build")
-
-    def flag_handler(self, name, flags):
-        if name == "cflags" and "+pic" in self.spec:
-            flags.append(self.compiler.cc_pic_flag)
-        if name == "cxxflags" and "+pic" in self.spec:
-            flags.append(self.compiler.cxx_pic_flag)
-
-        return flags, None, None
-
     @property
     def libs(self):
-        libraries = ["libnetcdf_c++4"]
-        shared = "+shared" in self.spec
+        return find_libraries("libnetcdf_c++4", root=self.prefix, recursive=True)
 
-        libs = find_libraries(libraries, root=self.prefix, shared=shared, recursive=True)
-        if libs:
-            return libs
+    def setup_build_environment(self, env: EnvironmentModifications) -> None:
+        env.set("CPATH", self._include_flags)
 
-        msg = "Unable to recursively locate {0} {1} libraries in {2}"
-        raise NoLibrariesError(
-            msg.format("shared" if shared else "static", self.spec.name, self.spec.prefix)
+    @property
+    def _include_flags(self):
+        hdf5 = self.spec["hdf5"]
+        netcdf_c = self.spec["netcdf-c"]
+
+        return " ".join(
+            [
+                "-I{0}".format(hdf5.prefix.include),
+                "-I{0}".format(netcdf_c.prefix.include),
+            ]
         )
 
-    def patch(self):
-        # An incorrect value is queried post find_package(HDF5)
-        # This looks to be resolved in master, but not any of the tag releases
-        # https://github.com/Unidata/netcdf-cxx4/issues/88
-        filter_file(
-            r"HDF5_C_LIBRARY_hdf5",
-            "HDF5_C_LIBRARIES",
-            join_path(self.stage.source_path, "CMakeLists.txt"),
-        )
+    @property
+    def _ldflags(self):
+        hdf5 = self.spec["hdf5"]
+        netcdf_c = self.spec["netcdf-c"]
 
-        filter_file(
-            r"HDF5_C_LIBRARY_hdf5",
-            "HDF5_C_LIBRARIES",
-            join_path(self.stage.source_path, "cxx4", "CMakeLists.txt"),
-        )
+        lib_dirs = dedupe(hdf5.libs.directories + netcdf_c.libs.directories)
+        return " ".join("-L{0}".format(d) for d in lib_dirs)
 
-    def cmake_args(self):
-        args = [
-            self.define_from_variant("BUILD_SHARED_LIBS", "shared"),
-            self.define_from_variant("ENABLE_DOXYGEN", "doc"),
-            self.define_from_variant("NCXX_ENABLE_TESTS", "tests"),
+    def configure_args(self):
+        cppflags = self._include_flags
+        ldflags = self._ldflags
+        cflags = "{0} {1} -lhdf5 -lz -lnetcdf".format(cppflags, ldflags)
+
+        return [
+            "--disable-filter-testing",
+            "CPPFLAGS={0}".format(cppflags),
+            "CFLAGS={0}".format(cflags),
+            "CXXFLAGS={0}".format(cflags),
+            "LDFLAGS={0}".format(ldflags),
         ]
-
-        return args
-
-    def check(self):
-        with working_dir(self.build_directory):
-            ctest()

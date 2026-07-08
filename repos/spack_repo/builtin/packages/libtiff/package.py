@@ -87,8 +87,8 @@ class Libtiff(CMakePackage, AutotoolsPackage):
     with when("build_system=cmake"):
         depends_on("cmake@3.9:", type="build")
 
-    depends_on("zlib-api", when="+zlib")
-    depends_on("zlib-api", when="+pixarlog")
+    #depends_on("zlib-api", when="+zlib")
+    #depends_on("zlib-api", when="+pixarlog")
     depends_on("jpeg@5:", when="+jpeg")
     depends_on("jbigkit", when="+jbig")
     depends_on("lerc", when="+lerc")

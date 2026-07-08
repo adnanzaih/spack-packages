@@ -150,7 +150,7 @@ class Hdf5(CMakePackage):
     variant("java", when="@1.10:", default=False, description="Enable Java support")
     variant("threadsafe", default=False, description="Enable thread-safe capabilities")
     variant("tools", default=True, description="Enable building tools")
-    variant("mpi", default=True, description="Enable MPI support")
+    variant("mpi", default=False, description="Enable MPI support")
     variant("szip", default=False, description="Enable szip support")
     # Build HDF5 with API compatibility.
     variant(
@@ -173,20 +173,7 @@ class Hdf5(CMakePackage):
         depends_on("mpi")
         depends_on("mpich+fortran", when="+fortran ^[virtuals=mpi] mpich")
 
-    depends_on("java", type=("build", "run"), when="+java")
     depends_on("szip", when="+szip")
-
-    depends_on("zlib-api")
-    # See https://github.com/HDFGroup/hdf5/pull/4147
-    depends_on(
-        "zlib-ng~new_strategies",
-        when="@:1.14.3,develop-1.8:develop-1.12 ^[virtuals=zlib-api] zlib-ng",
-    )
-
-    # The compiler wrappers (h5cc, h5fc, etc.) run 'pkg-config'.
-    # Skip this on Windows since pkgconfig is autotools
-    for plat in ["darwin", "linux"]:
-        depends_on("pkgconfig", when=f"platform={plat}", type="run")
 
     conflicts("+mpi", "^mpich@4.0:4.0.3")
     conflicts("api=v200", when="@1.6:1.14", msg="v200 is not compatible with this release")
@@ -211,9 +198,6 @@ class Hdf5(CMakePackage):
     conflicts("api=v110", when="@develop-1.8", msg="v110 is not compatible with this release")
     conflicts("api=v18", when="@1.6", msg="v18 is not compatible with this release")
 
-    # The Java wrappers cannot be built without shared libs.
-    conflicts("+java", when="~shared")
-    # Fortran fails built with shared for old HDF5 versions
     conflicts("+fortran", when="+shared@:1.8.15")
     # See https://github.com/spack/spack/issues/31085
     conflicts("+fortran+mpi", when="@1.8.22")
