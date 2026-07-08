@@ -58,31 +58,6 @@ class Proj(CMakePackage, AutotoolsPackage):
     version("4.9.2", sha256="60bf9ad1ed1c18158e652dfff97865ba6fb2b67f1511bc8dceae4b3c7e657796")
     version("4.9.1", sha256="fca0388f3f8bc5a1a803d2f6ff30017532367992b30cf144f2d39be88f36c319")
 
-    variant("tiff", default=True, when="@7:", description="Enable TIFF support")
-    variant("curl", default=True, when="@7:", description="Enable curl support")
-    variant("shared", default=True, description="Enable shared libraries")
-    variant("pic", default=False, description="Enable position-independent code (PIC)")
-
-    # https://github.com/OSGeo/PROJ#distribution-files-and-format
-    # https://github.com/OSGeo/PROJ-data
-    resource(
-        name="proj-data",
-        url="https://download.osgeo.org/proj/proj-data-1.13.tar.gz",
-        sha256="f1e5e42ba15426d01d1970be727af77ac9b88c472215497a5a433d0a16dd105b",
-        placement=join_path("share", "proj"),
-        when="@7:",
-    )
-
-    # https://github.com/OSGeo/PROJ#distribution-files-and-format
-    # https://github.com/OSGeo/proj-datumgrid
-    resource(
-        name="proj-datumgrid",
-        url="https://download.osgeo.org/proj/proj-datumgrid-1.8.tar.gz",
-        sha256="3ff6618a0acc9f0b9b4f6a62e7ff0f7bf538fb4f74de47ad04da1317408fcc15",
-        placement=join_path("share", "proj"),
-        when="@:6",
-    )
-
     patch(
         "https://github.com/OSGeo/PROJ/commit/3f38a67a354a3a1e5cca97793b9a43860c380d95.patch?full_index=1",
         sha256="dc620ff1bbcc0ef4130d53a40a8693a1e2e72ebf83bd6289f1139d0f1aad2a40",
@@ -121,18 +96,8 @@ class Proj(CMakePackage, AutotoolsPackage):
         # fixed in upstream proj as of 9
         patch("proj_8_curl_libraries.patch", when="@8")
 
-        depends_on("cmake@3.16:", when="@9.4:", type="build")
-        depends_on("cmake@3.9:", when="@6:", type="build")
-        depends_on("cmake@3.5:", when="@5", type="build")
-        depends_on("cmake@2.6:", when="@:4", type="build")
-
     with when("build_system=autotools"):
         depends_on("pkgconfig", when="@6:", type="build")
-
-    depends_on("sqlite@3.11:", when="@6:")
-    depends_on("libtiff@4:", when="@7:+tiff")
-    depends_on("curl@7.29:", when="@7:+curl")
-    depends_on("googletest@1.8:", when="@6:", type="test")
 
     build_system(
         conditional("autotools", when="@:8"), conditional("cmake", when="@5:"), default="cmake"

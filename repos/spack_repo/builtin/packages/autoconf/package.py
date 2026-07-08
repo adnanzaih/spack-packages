@@ -52,12 +52,6 @@ class Autoconf(AutotoolsPackage, GNUMirrorPackage):
         when="@2.62:2.69 ^perl@5.17:",
     )
 
-    # Note: m4 is not a pure build-time dependency of autoconf. m4 is
-    # needed when autoconf runs, not only when autoconf is built.
-    depends_on("m4@1.4.8:", type=("build", "run"), when="@2.72:")
-    depends_on("m4@1.4.6:", type=("build", "run"), when="@:2.71")
-    depends_on("perl", type=("build", "run"))
-
     build_directory = "spack-build"
 
     tags = ["build-tools"]
