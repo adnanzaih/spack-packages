@@ -14,6 +14,7 @@ class Archivetar(Package):
     license("MIT")
 
     version("0.18.2", tag="v0.18.2", commit="13af5a1591c36548c00ff6519e8b9f2f73da8a23")
+    version("0.17.2", tag="v0.17.2", commit="9d08f622dac18f59a04d3684fd8d134d12475eb2")
 
     resource(
         name="libcircle",
@@ -48,14 +49,14 @@ class Archivetar(Package):
     depends_on("cmake@3.22:", type="build")
     depends_on("gmake", type="build")
     depends_on("pkgconfig", type="build")
-    depends_on("python@3.10:3.10", type=("build", "run"))
+    depends_on("python+arc", type=("build", "run"))
 
     # mpiFileUtils still finds these through CMake; keeping them as ordinary
     # dependencies makes the bundled build less dependent on host OS headers.
-    depends_on("bzip2")
-    depends_on("libarchive")
-    depends_on("libcap", when="platform=linux")
-    depends_on("openssl")
+    #depends_on("bzip2")
+    #depends_on("libarchive")
+    #depends_on("libcap", when="platform=linux")
+    #depends_on("openssl")
 
     app_source_entries = (
         "GlobusTransfer",
