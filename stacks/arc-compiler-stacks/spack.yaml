@@ -30,6 +30,8 @@ spack:
     - netcdf-cxx4@4.3.1 ^netcdf-c@4.7.4 ^hdf5@1.14.6+hl+cxx+fortran
     - netcdf-fortran@4.6.2 ^netcdf-c@4.7.4 ^hdf5@1.14.6+hl+cxx+fortran
     - sqlite@3.53.1
+    - archivetar@0.18.2 ^python@3.13.13+arc
+    - archivetar@0.17.2 ^python@3.13.13+arc ^openmpi@4.1.6
     override:
       packages:
         c:
