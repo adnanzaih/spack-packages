@@ -11,20 +11,25 @@ spack:
 
   - group: gcc-8
     specs:
+    - python@3.9.25+arc
+    - python@3.10.20+arc
+    - python@3.11.15+arc
+    - python@3.12.13+arc
+    - python@3.13.13+arc
     - boost@1.78.0
-    - geos
+    - geos@3.14.1
     #- openmpi %gcc@8.5.0
     #- flexiblas %gcc@8.5.0
-    - libaec 
-    - proj 
-    - gdal@3.6.3 ^netcdf-c@4.7.4 ^hdf5+hl+cxx+fortran
-    - hdf5+hl+cxx+fortran
-    - libjpeg-turbo
-    - libtiff
-    - netcdf-c@4.7.4 ^hdf5+hl+cxx+fortran
-    - netcdf-cxx4 ^netcdf-c@4.7.4 ^hdf5+hl+cxx+fortran
-    - netcdf-fortran ^netcdf-c@4.7.4 ^hdf5+hl+cxx+fortran
-    - sqlite
+    - libaec@1.1.4
+    - proj@9.7.0
+    - gdal@3.6.3 ^netcdf-c@4.7.4 ^hdf5@1.14.6+hl+cxx+fortran
+    - hdf5@1.14.6+hl+cxx+fortran
+    - libjpeg-turbo@3.1.3
+    - libtiff@4.7.1
+    - netcdf-c@4.7.4 ^hdf5@1.14.6+hl+cxx+fortran
+    - netcdf-cxx4@4.3.1 ^netcdf-c@4.7.4 ^hdf5@1.14.6+hl+cxx+fortran
+    - netcdf-fortran@4.6.2 ^netcdf-c@4.7.4 ^hdf5@1.14.6+hl+cxx+fortran
+    - sqlite@3.53.1
     override:
       packages:
         c:
@@ -35,20 +40,25 @@ spack:
           prefer: [gcc@8.5.0]
   - group: gcc-15.1.0
     specs:
+    - python@3.9.25+arc
+    - python@3.10.20+arc
+    - python@3.11.15+arc
+    - python@3.12.13+arc
+    - python@3.13.13+arc
     - boost@1.78.0
-    - geos
+    - geos@3.14.1
     #- openmpi %gcc@15.1.0
     #- flexiblas %gcc@15.1.0
-    - libaec
-    - proj
-    - gdal ^netcdf-c ^hdf5+hl+cxx+fortran
-    - hdf5+hl+cxx+fortran
-    - libjpeg-turbo
-    - libtiff
-    - netcdf-c ^hdf5+hl+cxx+fortran
-    - netcdf-cxx4 ^netcdf-c ^hdf5+hl+cxx+fortran
-    - netcdf-fortran ^netcdf-c ^hdf5+hl+cxx+fortran
-    - sqlite
+    - libaec@1.1.4
+    - proj@9.7.0
+    - gdal@3.13.1 ^netcdf-c@4.10.0 ^hdf5@1.14.6+hl+cxx+fortran
+    - hdf5@1.14.6+hl+cxx+fortran
+    - libjpeg-turbo@3.1.3
+    - libtiff@4.7.1
+    - netcdf-c@4.10.0 ^hdf5@1.14.6+hl+cxx+fortran
+    - netcdf-cxx4@4.3.1 ^netcdf-c@4.10.0 ^hdf5@1.14.6+hl+cxx+fortran
+    - netcdf-fortran@4.6.2 ^netcdf-c@4.10.0 ^hdf5@1.14.6+hl+cxx+fortran
+    - sqlite@3.53.1
     override:
         packages:
           c:
@@ -59,20 +69,25 @@ spack:
             prefer: [gcc@15.1.0]
   - group: gcc-10.3.0
     specs:
+    - python@3.9.25+arc
+    - python@3.10.20+arc
+    - python@3.11.15+arc
+    - python@3.12.13+arc
+    - python@3.13.13+arc
     - boost@1.78.0
-    - geos
+    - geos@3.14.1
     #- openmpi %gcc@10.3.0
     #- flexiblas %gcc@10.3.0
-    - libaec
-    - proj
-    - gdal@3.13.1 ^netcdf-c ^hdf5+hl+cxx+fortran
-    - hdf5+hl+cxx+fortran
-    - libjpeg-turbo
-    - libtiff
-    - netcdf-c ^hdf5+hl+cxx+fortran
-    - netcdf-cxx4 ^netcdf-c ^hdf5+hl+cxx+fortran
-    - netcdf-fortran ^netcdf-c ^hdf5+hl+cxx+fortran
-    - sqlite
+    - libaec@1.1.4
+    - proj@9.7.0
+    - gdal@3.13.1 ^netcdf-c@4.10.0 ^hdf5@1.14.6+hl+cxx+fortran
+    - hdf5@1.14.6+hl+cxx+fortran
+    - libjpeg-turbo@3.1.3
+    - libtiff@4.7.1
+    - netcdf-c@4.10.0 ^hdf5@1.14.6+hl+cxx+fortran
+    - netcdf-cxx4@4.3.1 ^netcdf-c@4.10.0 ^hdf5@1.14.6+hl+cxx+fortran
+    - netcdf-fortran@4.6.2 ^netcdf-c@4.10.0 ^hdf5@1.14.6+hl+cxx+fortran
+    - sqlite@3.53.1
     override:
         packages:
           c:
@@ -84,19 +99,19 @@ spack:
   - group: llvm-22.1.3
     specs:
     - boost@1.88.0
-    - geos
+    - geos@3.14.1
     #- openmpi %llvm@22.1.3
     #- flexiblas %llvm@22.1.3
-    - libaec
-    - proj
+    - libaec@1.1.4
+    - proj@9.7.0
     #- gdal@3.13.1 ^netcdf-c ^hdf5+hl+cxx+fortran
-    - hdf5+hl+cxx+fortran
-    - libjpeg-turbo
-    - libtiff
-    - netcdf-c ^hdf5+hl+cxx+fortran
-    - netcdf-cxx4 ^netcdf-c ^hdf5+hl+cxx+fortran
-    - netcdf-fortran ^netcdf-c ^hdf5+hl+cxx+fortran
-    - sqlite
+    - hdf5@1.14.6+hl+cxx+fortran
+    - libjpeg-turbo@3.1.3
+    - libtiff@4.7.1
+    - netcdf-c@4.10.0 ^hdf5@1.14.6+hl+cxx+fortran
+    - netcdf-cxx4@4.3.1 ^netcdf-c@4.10.0 ^hdf5@1.14.6+hl+cxx+fortran
+    - netcdf-fortran@4.6.2 ^netcdf-c@4.10.0 ^hdf5@1.14.6+hl+cxx+fortran
+    - sqlite@3.53.1
     override:
         packages:
           c:
@@ -110,12 +125,12 @@ spack:
     - boost@1.78.0
     #- openmpi
     #- flexiblas
-    - fftw~mpi
-    - libaec %intel-oneapi-compilers-classic@2021.5.0
-    - hdf5+hl+cxx+fortran
-    - netcdf-c ^hdf5+hl+cxx+fortran
-    - netcdf-cxx4 ^netcdf-c ^hdf5+hl+cxx+fortran
-    - netcdf-fortran ^netcdf-c ^hdf5+hl+cxx+fortran
+    - fftw@3.3.11~mpi
+    - libaec@1.1.4 %intel-oneapi-compilers-classic@2021.5.0
+    - hdf5@1.14.6+hl+cxx+fortran
+    - netcdf-c@4.10.0 ^hdf5@1.14.6+hl+cxx+fortran
+    - netcdf-cxx4@4.3.1 ^netcdf-c@4.10.0 ^hdf5@1.14.6+hl+cxx+fortran
+    - netcdf-fortran@4.6.2 ^netcdf-c@4.10.0 ^hdf5@1.14.6+hl+cxx+fortran
     override:
         packages:
           c:
@@ -185,7 +200,7 @@ spack:
           environment:
             prepend_path:
               LD_LIBRARY_PATH: /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/compiler/lib/intel64_lin/
-              
+
     ##########################################################################################
     #                                       Externals                                        #
     ##########################################################################################
