@@ -1,0 +1,212 @@
+--- a/frmts/netcdf/netcdfdataset.h
++++ b/frmts/netcdf/netcdfdataset.h
+@@ -143,6 +143,12 @@
+ 
+ static const int NCDF_DEFLATE_LEVEL    = 1;  /* best time/size ratio */
+ 
++#if defined(NC_FillValue)
++#define NCDF_FillValue NC_FillValue
++#elif defined(_FillValue)
++#define NCDF_FillValue _FillValue
++#endif
++
+ /* helper for libnetcdf errors */
+ #define NCDF_ERR(status)                                                \
+     do {                                                                \
+--- a/frmts/netcdf/netcdfdataset.cpp
++++ b/frmts/netcdf/netcdfdataset.cpp
+@@ -432,10 +432,10 @@
+     const char *pszNoValueName = nullptr;
+ 
+     // Find attribute name, either _FillValue or missing_value.
+-    int status = nc_inq_att(cdfid, nZId, _FillValue, &atttype, &attlen);
++    int status = nc_inq_att(cdfid, nZId, NCDF_FillValue, &atttype, &attlen);
+     if( status == NC_NOERR )
+     {
+-        pszNoValueName = _FillValue;
++        pszNoValueName = NCDF_FillValue;
+     }
+     else
+     {
+@@ -1092,7 +1092,7 @@
+ 
+         const char * const papszIgnoreBand[] = { CF_ADD_OFFSET, CF_SCALE_FACTOR,
+                                           "valid_range", "_Unsigned",
+-                                          _FillValue, "coordinates",
++                                          NCDF_FillValue, "coordinates",
+                                           nullptr };
+         // Do not copy varname, stats, NETCDF_DIM_*, nodata
+         // and items in papszIgnoreBand.
+@@ -1410,33 +1410,33 @@
+             if( bSignedData )
+             {
+                 signed char cNoDataValue = static_cast<signed char>(dfNoData);
+-                status = nc_put_att_schar(cdfid, nZId, _FillValue,
++                status = nc_put_att_schar(cdfid, nZId, NCDF_FillValue,
+                                           nc_datatype, 1, &cNoDataValue);
+             }
+             else
+             {
+                 const unsigned char ucNoDataValue =
+                     static_cast<unsigned char>(dfNoData);
+-                status = nc_put_att_uchar(cdfid, nZId, _FillValue,
++                status = nc_put_att_uchar(cdfid, nZId, NCDF_FillValue,
+                                           nc_datatype, 1, &ucNoDataValue);
+             }
+         }
+         else if( eDataType == GDT_Int16 )
+         {
+             short nsNoDataValue = static_cast<short>(dfNoData);
+-            status = nc_put_att_short(cdfid, nZId, _FillValue,
++            status = nc_put_att_short(cdfid, nZId, NCDF_FillValue,
+                                       nc_datatype, 1, &nsNoDataValue);
+         }
+         else if( eDataType == GDT_Int32)
+         {
+             int nNoDataValue = static_cast<int>(dfNoData);
+-            status = nc_put_att_int(cdfid, nZId, _FillValue,
++            status = nc_put_att_int(cdfid, nZId, NCDF_FillValue,
+                                      nc_datatype, 1, &nNoDataValue);
+         }
+         else if( eDataType == GDT_Float32)
+         {
+             float fNoDataValue = static_cast<float>(dfNoData);
+-            status = nc_put_att_float(cdfid, nZId, _FillValue,
++            status = nc_put_att_float(cdfid, nZId, NCDF_FillValue,
+                                       nc_datatype, 1, &fNoDataValue);
+         }
+ #ifdef NETCDF_HAS_NC4
+@@ -1446,7 +1446,7 @@
+         {
+             unsigned short usNoDataValue =
+                 static_cast<unsigned short>(dfNoData);
+-            status = nc_put_att_ushort(cdfid, nZId, _FillValue,
++            status = nc_put_att_ushort(cdfid, nZId, NCDF_FillValue,
+                                        nc_datatype, 1, &usNoDataValue);
+         }
+         else if( eDataType == GDT_UInt32 &&
+@@ -1454,13 +1454,13 @@
+                  NCDF_FORMAT_NC4 )
+         {
+             unsigned int unNoDataValue = static_cast<unsigned int>(dfNoData);
+-            status = nc_put_att_uint(cdfid, nZId, _FillValue,
++            status = nc_put_att_uint(cdfid, nZId, NCDF_FillValue,
+                                      nc_datatype, 1, &unNoDataValue);
+         }
+ #endif
+         else
+         {
+-            status = nc_put_att_double(cdfid, nZId, _FillValue,
++            status = nc_put_att_double(cdfid, nZId, NCDF_FillValue,
+                                        nc_datatype, 1, &dfNoData);
+         }
+ 
+@@ -1537,14 +1537,14 @@
+                  NCDF_FORMAT_NC4 )
+         {
+             long long tmp = static_cast<long long>(nNoData);
+-            status = nc_put_att_longlong (cdfid, nZId, _FillValue,
++            status = nc_put_att_longlong (cdfid, nZId, NCDF_FillValue,
+                                           nc_datatype, 1, &tmp);
+         }
+         else
+ #endif
+         {
+             double dfNoData = static_cast<double>(nNoData);
+-            status = nc_put_att_double(cdfid, nZId, _FillValue,
++            status = nc_put_att_double(cdfid, nZId, NCDF_FillValue,
+                                        nc_datatype, 1, &dfNoData);
+         }
+ 
+@@ -1621,14 +1621,14 @@
+                  NCDF_FORMAT_NC4 )
+         {
+             unsigned long long tmp = static_cast<long long>(nNoData);
+-            status = nc_put_att_ulonglong (cdfid, nZId, _FillValue,
++            status = nc_put_att_ulonglong (cdfid, nZId, NCDF_FillValue,
+                                            nc_datatype, 1, &tmp);
+         }
+         else
+ #endif
+         {
+             double dfNoData = static_cast<double>(nNoData);
+-            status = nc_put_att_double(cdfid, nZId, _FillValue,
++            status = nc_put_att_double(cdfid, nZId, NCDF_FillValue,
+                                        nc_datatype, 1, &dfNoData);
+         }
+ 
+@@ -1679,7 +1679,7 @@
+         // Make sure we are in define mode.
+         static_cast<netCDFDataset *>(poDS)->SetDefineMode(true);
+ 
+-        status = nc_del_att(cdfid, nZId, _FillValue);
++        status = nc_del_att(cdfid, nZId, NCDF_FillValue);
+ 
+         NCDF_ERR(status);
+ 
+@@ -9218,7 +9218,7 @@
+     // Remove the following band meta but set them later from band data.
+     const char * const papszIgnoreBand[] = { CF_ADD_OFFSET, CF_SCALE_FACTOR,
+                                       "valid_range", "_Unsigned",
+-                                      _FillValue, "coordinates",
++                                      NCDF_FillValue, "coordinates",
+                                       nullptr };
+     const char * const papszIgnoreGlobal[] = { "NETCDF_DIM_EXTRA", nullptr };
+ 
+--- a/frmts/netcdf/netcdfmultidim.cpp
++++ b/frmts/netcdf/netcdfmultidim.cpp
+@@ -3092,7 +3092,7 @@
+                                 GetNCTypeSize(dt,
+                                     m_bPerfectDataTypeMatch,
+                                     m_nVarType)));
+-    int ret = nc_get_att(m_gid, m_varid, _FillValue, &abyTmp[0]);
++    int ret = nc_get_att(m_gid, m_varid, NCDF_FillValue, &abyTmp[0]);
+     if( ret != NC_NOERR )
+     {
+         m_abyNoData.clear();
+@@ -3121,7 +3121,7 @@
+     if( pNoData == nullptr )
+     {
+         m_abyNoData.clear();
+-        ret = nc_del_att(m_gid, m_varid, _FillValue);
++        ret = nc_del_att(m_gid, m_varid, NCDF_FillValue);
+     }
+     else
+     {
+@@ -3139,7 +3139,7 @@
+             NCDF_ERR(ret);
+         }
+ 
+-        ret = nc_put_att(m_gid, m_varid, _FillValue, m_nVarType, 1, &abyTmp[0]);
++        ret = nc_put_att(m_gid, m_varid, NCDF_FillValue, m_nVarType, 1, &abyTmp[0]);
+     }
+     NCDF_ERR(ret);
+     if( ret == NC_NOERR )
+@@ -3280,7 +3280,7 @@
+         szAttrName[0] = 0;
+         NCDF_ERR(nc_inq_attname(m_gid, m_varid, i, szAttrName));
+         if( bShowAll ||
+-            (!EQUAL(szAttrName, _FillValue) &&
++            (!EQUAL(szAttrName, NCDF_FillValue) &&
+              !EQUAL(szAttrName, CF_UNITS) &&
+              !EQUAL(szAttrName, CF_SCALE_FACTOR) &&
+              !EQUAL(szAttrName, CF_ADD_OFFSET) &&
+--- a/frmts/netcdf/netcdflayer.cpp
++++ b/frmts/netcdf/netcdflayer.cpp
+@@ -647,14 +647,14 @@
+ 
+ CPLErr netCDFLayer::GetFillValue( int nVarId, char **ppszValue )
+ {
+-    if( NCDFGetAttr(m_nLayerCDFId, nVarId, _FillValue, ppszValue) == CE_None )
++    if( NCDFGetAttr(m_nLayerCDFId, nVarId, NCDF_FillValue, ppszValue) == CE_None )
+         return CE_None;
+     return NCDFGetAttr(m_nLayerCDFId, nVarId, "missing_value", ppszValue);
+ }
+ 
+ CPLErr netCDFLayer::GetFillValue( int nVarId, double *pdfValue )
+ {
+-    if( NCDFGetAttr(m_nLayerCDFId, nVarId, _FillValue, pdfValue) == CE_None )
++    if( NCDFGetAttr(m_nLayerCDFId, nVarId, NCDF_FillValue, pdfValue) == CE_None )
+         return CE_None;
+     return NCDFGetAttr(m_nLayerCDFId, nVarId, "missing_value", pdfValue);
+ }

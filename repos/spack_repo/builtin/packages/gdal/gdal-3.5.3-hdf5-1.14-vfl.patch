@@ -1,0 +1,25 @@
+--- a/frmts/hdf5/hdf5vfl.h
++++ b/frmts/hdf5/hdf5vfl.h
+@@ -73,6 +73,9 @@
+ 
+ /* See https://support.hdfgroup.org/HDF5/doc/TechNotes/VFL.html */
+ static const H5FD_class_t HDF5_vsil_g = {
++#ifdef H5FD_CLASS_VERSION
++    H5FD_CLASS_VERSION,
++#endif
+ #ifdef HDF5_1_13_OR_LATER
+ /* value: 513 has been reserved with hdfgroup and is registered at:
+      * https://portal.hdfgroup.org/pages/viewpage.action?pageId=74188097 */
+@@ -106,6 +109,12 @@
+     nullptr,                    /* get_handle */
+     HDF5_vsil_read,             /* read */
+     HDF5_vsil_write,            /* write */
++#if defined(H5FD_CLASS_VERSION) && H5FD_CLASS_VERSION == 1
++    nullptr,                    /* read_vector */
++    nullptr,                    /* write_vector */
++    nullptr,                    /* read_selection */
++    nullptr,                    /* write_selection */
++#endif
+     nullptr,                    /* flush */
+     HDF5_vsil_truncate,         /* truncate */
+     nullptr,                    /* lock */
