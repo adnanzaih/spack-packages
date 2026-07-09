@@ -37,9 +37,15 @@ class Gdal(CMakePackage):
     version("3.11.2", sha256="bda41b7cf12f05995a00106ae0db1b784d9c307953d81c76d351c7dbeb121aeb")
     version("3.11.1", sha256="21341b39a960295bd3194bcc5f119f773229b4701cd752499fbd850f3cc160fd")
     version("3.11.0", sha256="ba1a17a74428bfd5c789ce293f59b6a3d8bfabab747431c33331ac0ac579ea71")
+    version("3.6.3", sha256="3cccbed883b1fb99b913966aa3a650ad930e7c3afc714f5823f9754176ee49ea")
+    version("3.5.3", sha256="d32223ddf145aafbbaec5ccfa5dbc164147fb3348a3413057f9b1600bb5b3890")
+
+    conflicts("@3.11:", when="%gcc@:9", msg="version 3.11+ requires GCC > 10")
 
     patch("gdal-3.12-gcc8-complete-rat.patch", when="@3.12: %gcc@:8")
-    
+    patch("gdal-3.5.3-netcdf-fillvalue.patch", when="@3.5.3")
+    patch("gdal-3.5.3-hdf5-1.14-vfl.patch", when="@3.5.3 ^hdf5@1.14:")
+
     depends_on("c", type="build")
     depends_on("cxx", type="build")
     depends_on("cmake@3.16:", type="build")
@@ -85,7 +91,7 @@ class CMakeBuilder(SpackCMakeBuilder):
             ]
         )
 
-        return [
+        args = [
             self.define("CMAKE_INSTALL_PREFIX", self.prefix),
             self.define("CMAKE_BUILD_TYPE", "Release"),
             self.define("BUILD_SHARED_LIBS", True),
@@ -108,3 +114,8 @@ class CMakeBuilder(SpackCMakeBuilder):
             self.define("GDAL_USE_NETCDF", True),
             self.define("GDAL_USE_POPPLER", False),
         ]
+
+        if self.spec.satisfies("%clang") or self.spec.satisfies("%apple-clang"):
+            args.append(self.define("CMAKE_CXX_STANDARD", 17))
+
+        return args
