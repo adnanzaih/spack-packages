@@ -5,8 +5,13 @@
 spack:
   view: false
   specs:
+  ##########################################################################################
+  #                                       Software                                         #
+  ##########################################################################################
+
   - group: gcc-8
     specs:
+    - boost@1.78.0
     - geos
     #- openmpi %gcc@8.5.0
     #- flexiblas %gcc@8.5.0
@@ -30,6 +35,7 @@ spack:
           prefer: [gcc@8.5.0]
   - group: gcc-15.1.0
     specs:
+    - boost@1.78.0
     - geos
     #- openmpi %gcc@15.1.0
     #- flexiblas %gcc@15.1.0
@@ -53,6 +59,7 @@ spack:
             prefer: [gcc@15.1.0]
   - group: gcc-10.3.0
     specs:
+    - boost@1.78.0
     - geos
     #- openmpi %gcc@10.3.0
     #- flexiblas %gcc@10.3.0
@@ -76,6 +83,7 @@ spack:
             prefer: [gcc@10.3.0]
   - group: llvm-22.1.3
     specs:
+    - boost@1.88.0
     - geos
     #- openmpi %llvm@22.1.3
     #- flexiblas %llvm@22.1.3
@@ -99,7 +107,7 @@ spack:
             prefer: [llvm@22.1.3]
   - group: intel-classic-compiler
     specs:
-    - boost
+    - boost@1.78.0
     #- openmpi
     #- flexiblas
     - fftw~mpi
@@ -120,6 +128,10 @@ spack:
     unify: false
     reuse: true
   packages:
+  ##########################################################################################
+  #                                       Compilers                                        #
+  ##########################################################################################
+  
     gcc:
       externals:
       - spec: gcc@8.5.0 languages:='c,c++,fortran'
@@ -173,9 +185,19 @@ spack:
           environment:
             prepend_path:
               LD_LIBRARY_PATH: /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/compiler/lib/intel64_lin/
+              
+    ##########################################################################################
+    #                                       Externals                                        #
+    ##########################################################################################
+
     perl:
       externals:
       - spec: perl@5.26.3
+        prefix: /usr
+    icu4c:
+      buildable: false
+      externals:
+      - spec: icu4c@60.3
         prefix: /usr
   modules:
     default:
