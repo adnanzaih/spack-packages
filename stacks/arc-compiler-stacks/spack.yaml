@@ -1,0 +1,184 @@
+# This is a Spack Environment file.
+#
+# It describes a set of packages to be installed, along with
+# configuration settings.
+spack:
+  view: false
+  specs:
+  - group: gcc-8
+    specs:
+    - geos
+    #- openmpi %gcc@8.5.0
+    #- flexiblas %gcc@8.5.0
+    - libaec 
+    - proj 
+    - gdal@3.6.3 ^netcdf-c@4.7.4 ^hdf5+hl+cxx+fortran
+    - hdf5+hl+cxx+fortran
+    - libjpeg-turbo
+    - libtiff
+    - netcdf-c@4.7.4 ^hdf5+hl+cxx+fortran
+    - netcdf-cxx4 ^netcdf-c@4.7.4 ^hdf5+hl+cxx+fortran
+    - netcdf-fortran ^netcdf-c@4.7.4 ^hdf5+hl+cxx+fortran
+    - sqlite
+    override:
+      packages:
+        c:
+          prefer: [gcc@8.5.0]
+        cxx:
+          prefer: [gcc@8.5.0]
+        fortran:
+          prefer: [gcc@8.5.0]
+  - group: gcc-15.1.0
+    specs:
+    - geos
+    #- openmpi %gcc@15.1.0
+    #- flexiblas %gcc@15.1.0
+    - libaec
+    - proj
+    - gdal ^netcdf-c ^hdf5+hl+cxx+fortran
+    - hdf5+hl+cxx+fortran
+    - libjpeg-turbo
+    - libtiff
+    - netcdf-c ^hdf5+hl+cxx+fortran
+    - netcdf-cxx4 ^netcdf-c ^hdf5+hl+cxx+fortran
+    - netcdf-fortran ^netcdf-c ^hdf5+hl+cxx+fortran
+    - sqlite
+    override:
+        packages:
+          c:
+            prefer: [gcc@15.1.0]
+          cxx:
+            prefer: [gcc@15.1.0]
+          fortran:
+            prefer: [gcc@15.1.0]
+  - group: gcc-10.3.0
+    specs:
+    - geos
+    #- openmpi %gcc@10.3.0
+    #- flexiblas %gcc@10.3.0
+    - libaec
+    - proj
+    - gdal@3.13.1 ^netcdf-c ^hdf5+hl+cxx+fortran
+    - hdf5+hl+cxx+fortran
+    - libjpeg-turbo
+    - libtiff
+    - netcdf-c ^hdf5+hl+cxx+fortran
+    - netcdf-cxx4 ^netcdf-c ^hdf5+hl+cxx+fortran
+    - netcdf-fortran ^netcdf-c ^hdf5+hl+cxx+fortran
+    - sqlite
+    override:
+        packages:
+          c:
+            prefer: [gcc@10.3.0]
+          cxx:
+            prefer: [gcc@10.3.0]
+          fortran:
+            prefer: [gcc@10.3.0]
+  - group: llvm-22.1.3
+    specs:
+    - geos
+    #- openmpi %llvm@22.1.3
+    #- flexiblas %llvm@22.1.3
+    - libaec
+    - proj
+    #- gdal@3.13.1 ^netcdf-c ^hdf5+hl+cxx+fortran
+    - hdf5+hl+cxx+fortran
+    - libjpeg-turbo
+    - libtiff
+    - netcdf-c ^hdf5+hl+cxx+fortran
+    - netcdf-cxx4 ^netcdf-c ^hdf5+hl+cxx+fortran
+    - netcdf-fortran ^netcdf-c ^hdf5+hl+cxx+fortran
+    - sqlite
+    override:
+        packages:
+          c:
+            prefer: [llvm@22.1.3]
+          cxx:
+            prefer: [llvm@22.1.3]
+          fortran:
+            prefer: [llvm@22.1.3]
+  - group: intel-classic-compiler
+    specs:
+    - boost
+    #- openmpi
+    #- flexiblas
+    - fftw~mpi
+    - libaec %intel-oneapi-compilers-classic@2021.5.0
+    - hdf5+hl+cxx+fortran
+    - netcdf-c ^hdf5+hl+cxx+fortran
+    - netcdf-cxx4 ^netcdf-c ^hdf5+hl+cxx+fortran
+    - netcdf-fortran ^netcdf-c ^hdf5+hl+cxx+fortran
+    override:
+        packages:
+          c:
+            prefer: [intel-oneapi-compilers-classic@2021.5.0]
+          cxx:
+            prefer: [intel-oneapi-compilers-classic@2021.5.0]
+          fortran:
+            prefer: [intel-oneapi-compilers-classic@2021.5.0]
+  concretizer:
+    unify: false
+    reuse: true
+  packages:
+    gcc:
+      externals:
+      - spec: gcc@8.5.0 languages:='c,c++,fortran'
+        prefix: /usr
+        extra_attributes:
+          compilers:
+            c: /usr/bin/gcc
+            cxx: /usr/bin/g++
+            fortran: /usr/bin/gfortran
+      - spec: gcc@10.3.0 languages:='c,c++,fortran'
+        prefix: /sw/pkgs/arc/gcc/10.3.0
+        extra_attributes:
+          compilers:
+            c: /sw/pkgs/arc/gcc/10.3.0/bin/gcc
+            cxx: /sw/pkgs/arc/gcc/10.3.0/bin/g++
+            fortran: /sw/pkgs/arc/gcc/10.3.0/bin/gfortran
+      - spec: gcc@15.1.0 languages:='c,c++,fortran'
+        prefix: /sw/pkgs/arc/gcc/15.1.0
+        extra_attributes:
+          compilers:
+            c: /sw/pkgs/arc/gcc/15.1.0/bin/gcc
+            cxx: /sw/pkgs/arc/gcc/15.1.0/bin/g++
+            fortran: /sw/pkgs/arc/gcc/15.1.0/bin/gfortran
+    llvm:
+      externals:
+      - spec: llvm@22.1.3+flang openmp=runtime
+        prefix: /sw/pkgs/arc/llvm/22.1.3
+        extra_attributes:
+          compilers:
+            c: /sw/pkgs/arc/llvm/22.1.3/bin/clang
+            cxx: /sw/pkgs/arc/llvm/22.1.3/bin/clang++
+            fortran: /sw/pkgs/arc/llvm/22.1.3/bin/flang
+          extra_rpaths:
+          - /sw/pkgs/arc/llvm/22.1.3/lib/x86_64-unknown-linux-gnu/
+          environment:
+                  prepend_path:
+                          LD_LIBRARY_PATH: /sw/pkgs/arc/llvm/22.1.3/lib/x86_64-unknown-linux-gnu/
+    intel-oneapi-compilers-classic:
+      externals:
+      - spec: intel-oneapi-compilers-classic@2021.5.0
+        prefix: /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux
+        extra_attributes:
+          compilers:
+            c: /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/bin/intel64/icc
+            cxx: /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/bin/intel64/icpc
+            fortran: /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/bin/intel64/ifort
+          flags:
+            ldflags: -L/sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/compiler/lib/intel64_lin/
+          extra_rpaths:
+          - /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/compiler/lib/intel64_lin/
+          environment:
+            prepend_path:
+              LD_LIBRARY_PATH: /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/compiler/lib/intel64_lin/
+    perl:
+      externals:
+      - spec: perl@5.26.3
+        prefix: /usr
+  modules:
+    default:
+      lmod:
+        core_compilers:
+        - gcc@8.5.0/w6akmqjjogstolgcqh5loghofzx54fk5
