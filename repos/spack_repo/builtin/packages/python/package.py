@@ -166,6 +166,12 @@ class Python(Package):
 
     extendable = True
 
+    variant(
+        "arc",
+        default=False,
+        description="Use ARC build-script-style flags and system-provided dependencies",
+    )
+
     # Variants to avoid cyclical dependencies for concretizer
     variant("libxml2", default=True, description="Use a gettext library build with libxml2")
 
@@ -214,41 +220,48 @@ class Python(Package):
 
     depends_on("c", type="build")
     depends_on("cxx", type="build")
+    depends_on("cmake", type="build")
+    depends_on("gmake", type="build")
+    depends_on("pkgconfig", type="build")
+
+    conflicts("platform=windows", when="+arc", msg="+arc uses the Unix configure/make build")
+    requires("+shared", when="+arc", msg="+arc passes --enable-shared")
+    requires("+optimizations", when="+arc", msg="+arc passes --enable-optimizations")
+    requires("+pythoncmd", when="+arc", msg="+arc installs the python command symlink")
 
     if sys.platform != "win32":
-        depends_on("gmake", type="build")
-        depends_on("pkgconfig", type="build")
-        depends_on("gettext +libxml2", when="+libxml2")
-        depends_on("iconv", when="~libxml2")
-        depends_on("gettext ~libxml2", when="~libxml2 ^[virtuals=iconv] libiconv")
+        with when("~arc"):
+            depends_on("gettext +libxml2", when="+libxml2")
+            depends_on("iconv", when="~libxml2")
+            depends_on("gettext ~libxml2", when="~libxml2 ^[virtuals=iconv]gettext")
 
-        # Optional dependencies
-        # See detect_modules() in setup.py for details
-        depends_on("readline", when="+readline")
-        depends_on("ncurses", when="+readline")
-        depends_on("openssl", when="+ssl")
-        # https://docs.python.org/3/whatsnew/3.7.html#build-changes
-        depends_on("openssl@1.0.2:", when="+ssl")
-        # https://docs.python.org/3.10/whatsnew/3.10.html#build-changes
-        depends_on("openssl@1.1.1:", when="@3.10:+ssl")
-        depends_on("sqlite@3.0.8:", when="@:3.9+sqlite3")
-        # https://docs.python.org/3.10/whatsnew/3.10.html#build-changes
-        depends_on("sqlite@3.7.15:", when="@3.10:+sqlite3")
-        depends_on("gdbm", when="+dbm")  # alternatively ndbm or berkeley-db
-        depends_on("zlib-api", when="+zlib")
-        depends_on("bzip2", when="+bz2")
-        depends_on("xz libs=shared", when="+lzma")
-        depends_on("zstd libs=shared", when="+zstd")
-        depends_on("expat", when="+pyexpat")
-        depends_on("libffi", when="+ctypes")
-        # https://docs.python.org/3/whatsnew/3.11.html#build-changes
-        depends_on("tk@8.5.12:", when="@3.11: +tkinter")
-        depends_on("tk", when="+tkinter")
-        depends_on("tcl@8.5.12:", when="@3.11: +tkinter")
-        depends_on("tcl", when="+tkinter")
-        depends_on("uuid", when="+uuid")
-        depends_on("tix", when="+tix")
-        depends_on("libxcrypt", when="+crypt")
+            # Optional dependencies
+            # See detect_modules() in setup.py for details
+            depends_on("readline", when="+readline")
+            depends_on("ncurses", when="+readline")
+            depends_on("openssl", when="+ssl")
+            # https://docs.python.org/3/whatsnew/3.7.html#build-changes
+            depends_on("openssl@1.0.2:", when="+ssl")
+            # https://docs.python.org/3.10/whatsnew/3.10.html#build-changes
+            depends_on("openssl@1.1.1:", when="@3.10:+ssl")
+            depends_on("sqlite@3.0.8:", when="@:3.9+sqlite3")
+            # https://docs.python.org/3.10/whatsnew/3.10.html#build-changes
+            depends_on("sqlite@3.7.15:", when="@3.10:+sqlite3")
+            depends_on("gdbm", when="+dbm")  # alternatively ndbm or berkeley-db
+            depends_on("zlib-api", when="+zlib")
+            depends_on("bzip2", when="+bz2")
+            depends_on("xz libs=shared", when="+lzma")
+            depends_on("zstd libs=shared", when="+zstd")
+            depends_on("expat", when="+pyexpat")
+            depends_on("libffi", when="+ctypes")
+            # https://docs.python.org/3/whatsnew/3.11.html#build-changes
+            depends_on("tk@8.5.12:", when="@3.11: +tkinter")
+            depends_on("tk", when="+tkinter")
+            depends_on("tcl@8.5.12:", when="@3.11: +tkinter")
+            depends_on("tcl", when="+tkinter")
+            depends_on("uuid", when="+uuid")
+            depends_on("tix", when="+tix")
+            depends_on("libxcrypt", when="+crypt")
 
     patch(
         "https://bugs.python.org/file44413/alignment.patch",
@@ -604,8 +617,18 @@ class Python(Package):
             copy(lib, prefix.libs)
             install_pdb(lib, prefix.libs)
 
+    def arc_configure_args(self):
+        return [
+            "--with-ensurepip=upgrade",
+            "--enable-shared",
+            "--enable-optimizations",
+        ]
+
     def configure_args(self):
         spec = self.spec
+        if spec.satisfies("+arc"):
+            return self.arc_configure_args()
+
         config_args = []
         cflags = []
 
@@ -760,9 +783,16 @@ class Python(Package):
                     )
             else:
                 # See https://autotools.io/automake/silent.html
-                params = ["V=1"]
-                params += self.build_targets
-                make(*params)
+                if spec.satisfies("+arc"):
+                    make("V=1")
+                    try:
+                        make("-k", "test")
+                    except ProcessError:
+                        tty.warn("make test failed for python+arc; continuing")
+                else:
+                    params = ["V=1"]
+                    params += self.build_targets
+                    make(*params)
 
     def install(self, spec, prefix):
         """Makes the install targets specified by
@@ -774,6 +804,11 @@ class Python(Package):
             else:
                 # See https://github.com/python/cpython/issues/102007
                 make(*self.install_targets, f"COMPILEALL_OPTS=-j{make_jobs}", parallel=False)
+                if spec.satisfies("+arc"):
+                    pip3 = os.path.join(prefix.bin, "pip3")
+                    pip = os.path.join(prefix.bin, "pip")
+                    if os.path.exists(pip3) and not os.path.lexists(pip):
+                        symlink(pip3, pip)
 
     @run_after("install")
     def filter_compilers(self):
