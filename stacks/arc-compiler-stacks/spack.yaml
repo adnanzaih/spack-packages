@@ -18,7 +18,7 @@ spack:
     - python@3.13.13+arc
     - boost@1.78.0
     - geos@3.14.1
-    #- openmpi %gcc@8.5.0
+    - openmpi@5.0.10+arc
     #- flexiblas %gcc@8.5.0
     - libaec@1.1.4
     - proj@9.7.0
@@ -30,8 +30,8 @@ spack:
     - netcdf-cxx4@4.3.1 ^netcdf-c@4.7.4 ^hdf5@1.14.6+hl+cxx+fortran
     - netcdf-fortran@4.6.2 ^netcdf-c@4.7.4 ^hdf5@1.14.6+hl+cxx+fortran
     - sqlite@3.53.1
-    - archivetar@0.18.2 ^python@3.13.13+arc
-    - archivetar@0.17.2 ^python@3.13.13+arc ^openmpi@4.1.6
+    - archivetar@0.18.2 ^python@3.13.13+arc ^openmpi@5.0.10+arc
+    - archivetar@0.17.2 ^python@3.13.13+arc ^openmpi@5.0.10+arc
     override:
       packages:
         c:
@@ -49,7 +49,7 @@ spack:
     - python@3.13.13+arc
     - boost@1.78.0
     - geos@3.14.1
-    #- openmpi %gcc@15.1.0
+    - openmpi@5.0.10+arc
     #- flexiblas %gcc@15.1.0
     - libaec@1.1.4
     - proj@9.7.0
@@ -78,7 +78,7 @@ spack:
     - python@3.13.13+arc
     - boost@1.78.0
     - geos@3.14.1
-    #- openmpi %gcc@10.3.0
+    - openmpi@5.0.10+arc
     #- flexiblas %gcc@10.3.0
     - libaec@1.1.4
     - proj@9.7.0
@@ -102,7 +102,7 @@ spack:
     specs:
     - boost@1.88.0
     - geos@3.14.1
-    #- openmpi %llvm@22.1.3
+    - openmpi@5.0.10+arc
     #- flexiblas %llvm@22.1.3
     - libaec@1.1.4
     - proj@9.7.0
@@ -125,7 +125,7 @@ spack:
   - group: intel-classic-compiler
     specs:
     - boost@1.78.0
-    #- openmpi
+    - openmpi@5.0.10+arc
     #- flexiblas
     - fftw@3.3.11~mpi
     - libaec@1.1.4 %intel-oneapi-compilers-classic@2021.5.0
@@ -219,5 +219,12 @@ spack:
   modules:
     default:
       lmod:
+        hash_length: 0
         core_compilers:
         - gcc@8.5.0/w6akmqjjogstolgcqh5loghofzx54fk5
+        core_specs:
+        - gcc@8.5.0
+        - gcc@10.3.0
+        - gcc@15.1.0
+        - llvm@22.1.3
+        - intel-oneapi-compilers-classic@2021.5.0

@@ -258,6 +258,12 @@ class Openmpi(AutotoolsPackage, CudaPackage, ROCmPackage):
     variant("atomics", default=True, description="Enable built-in atomics")
     variant("java", default=False, when="@1.7.4:", description="Build Java support")
     variant("static", default=False, description="Build static libraries")
+    variant(
+        "arc",
+        default=False,
+        when="@5:",
+        description="Use the ARC OpenMPI configuration with system PMIx, Slurm, UCX, and verbs",
+    )
     variant("sqlite3", default=False, when="@1.7.3:1", description="Build SQLite3 support")
     variant("vt", default=True, description="Build VampirTrace support")
     variant(
@@ -444,9 +450,12 @@ with '-Wl,-commons,use_dylibs' and without
     # May be able to get working for LLVM 18/19 using FC=flang-new
     conflicts("%fortran=clang %llvm@:19")
 
+    requires("@5:", when="+arc", msg="ARC's OpenMPI configuration is based on OpenMPI 5")
+
     filter_compiler_wrappers("openmpi/*-wrapper-data*", relative_root="share")
 
     extra_install_tests = "examples"
+    arc_pmix_major = "5"
 
     @classmethod
     def determine_version(cls, exe):
@@ -620,6 +629,136 @@ with '-Wl,-commons,use_dylibs' and without
 
         return find_libraries(libraries, root=self.prefix, shared=True, recursive=True)
 
+    @property
+    def _arc_pmix_record_path(self):
+        return join_path(self.prefix, ".spack-arc-pmix-prefix")
+
+    @classmethod
+    def _arc_pmix_libdir(cls, prefix):
+        for libdir in ("lib", "lib64"):
+            candidate = join_path(prefix, libdir)
+            if not os.path.isdir(candidate):
+                continue
+            if any(name.startswith("libpmix.") for name in os.listdir(candidate)):
+                return candidate
+        return None
+
+    @classmethod
+    def _arc_pmix_is_usable(cls, prefix):
+        return bool(
+            os.path.isdir(prefix)
+            and os.path.exists(join_path(prefix, "include", "pmix.h"))
+            and cls._arc_pmix_libdir(prefix)
+        )
+
+    @classmethod
+    def _arc_pmix_version(cls, prefix):
+        basename = os.path.basename(os.path.normpath(prefix))
+        match = re.search(r"(\d+(?:\.\d+)*)", basename)
+        if match:
+            return Version(match.group(1))
+
+        version_header = join_path(prefix, "include", "pmix_version.h")
+        if not os.path.exists(version_header):
+            return Version("0")
+
+        version_parts = {}
+        with open(version_header, "r", encoding="utf-8") as fh:
+            for line in fh:
+                match = re.match(r"#define\s+PMIX_VERSION_(MAJOR|MINOR|RELEASE)\s+(\d+)", line)
+                if match:
+                    version_parts[match.group(1)] = match.group(2)
+
+        if "MAJOR" not in version_parts:
+            return Version("0")
+
+        return Version(
+            "{0}.{1}.{2}".format(
+                version_parts["MAJOR"],
+                version_parts.get("MINOR", "0"),
+                version_parts.get("RELEASE", "0"),
+            )
+        )
+
+    @classmethod
+    def _arc_pmix_major(cls, prefix):
+        major = str(cls._arc_pmix_version(prefix)).split(".")[0]
+        return major if major and major != "0" else None
+
+    @classmethod
+    def _detect_arc_pmix_prefix(cls):
+        for env_var in ("SPACK_OPENMPI_ARC_PMIX_PREFIX", "ARC_PMIX_PREFIX", "PMIX_ROOT"):
+            prefix = os.environ.get(env_var)
+            if not prefix:
+                continue
+            if cls._arc_pmix_is_usable(prefix):
+                if cls._arc_pmix_major(prefix) == cls.arc_pmix_major:
+                    return prefix
+                raise InstallError(
+                    "{0} points to PMIx {1}; ARC OpenMPI expects PMIx v{2}".format(
+                        env_var, cls._arc_pmix_version(prefix), cls.arc_pmix_major
+                    )
+                )
+            raise InstallError("{0} is set but is not a usable PMIx prefix".format(env_var))
+
+        root = "/opt/pmix"
+        candidates = []
+        if cls._arc_pmix_is_usable(root):
+            candidates.append(root)
+        if os.path.isdir(root):
+            for entry in os.listdir(root):
+                prefix = join_path(root, entry)
+                if cls._arc_pmix_is_usable(prefix):
+                    candidates.append(prefix)
+
+        if not candidates:
+            raise InstallError(
+                "ARC OpenMPI requires a usable PMIx installation under /opt/pmix "
+                "or SPACK_OPENMPI_ARC_PMIX_PREFIX"
+            )
+
+        compatible = [x for x in candidates if cls._arc_pmix_major(x) == cls.arc_pmix_major]
+        if not compatible:
+            found = ", ".join("{0} ({1})".format(x, cls._arc_pmix_version(x)) for x in candidates)
+            raise InstallError(
+                "ARC OpenMPI requires PMIx v{0} under /opt/pmix; found: {1}".format(
+                    cls.arc_pmix_major, found
+                )
+            )
+
+        return sorted(compatible, key=lambda x: (cls._arc_pmix_version(x), x))[-1]
+
+    def _arc_pmix_prefix(self):
+        record = self._arc_pmix_record_path
+        if os.path.exists(record):
+            with open(record, "r", encoding="utf-8") as fh:
+                recorded_prefix = fh.read().strip()
+            if recorded_prefix:
+                if not self._arc_pmix_is_usable(recorded_prefix):
+                    raise InstallError(
+                        "Recorded ARC PMIx prefix is no longer usable: {0}".format(
+                            recorded_prefix
+                        )
+                    )
+                return recorded_prefix
+        return self._detect_arc_pmix_prefix()
+
+    def _arc_slurm_mpi_type(self):
+        major = self._arc_pmix_major(self._arc_pmix_prefix())
+        if major:
+            return "pmix_v{0}".format(major)
+        return "pmix_v5"
+
+    def _arc_config_args(self):
+        return [
+            "--with-pmix={0}".format(self._arc_pmix_prefix()),
+            "--with-libevent=external",
+            "--with-hwloc=external",
+            "--with-slurm",
+            "--with-ucx",
+            "--with-verbs",
+        ]
+
     def setup_run_environment(self, env: EnvironmentModifications) -> None:
         # Because MPI is both a runtime and a compiler, we have to setup the
         # compiler components as part of the run environment.
@@ -633,6 +772,21 @@ with '-Wl,-commons,use_dylibs' and without
         # we just *add* functionality
         if self.spec.satisfies("@1.7:"):
             env.set("MPIFC", join_path(self.prefix.bin, "mpifort"))
+
+        if self.spec.satisfies("+arc"):
+            pmix_prefix = self._arc_pmix_prefix()
+            pmix_libdir = self._arc_pmix_libdir(pmix_prefix)
+            env.prepend_path("PATH", self.prefix.bin)
+            env.prepend_path("MANPATH", join_path(self.prefix, "share", "man"))
+            env.prepend_path("LD_LIBRARY_PATH", self.prefix.lib)
+            env.prepend_path("LD_LIBRARY_PATH", pmix_libdir)
+            env.prepend_path("PKG_CONFIG_PATH", self.prefix.lib.pkgconfig)
+            env.set("MPI_HOME", self.prefix)
+            env.set("SLURM_MPI_TYPE", self._arc_slurm_mpi_type())
+            env.set("UCX_TLS", "^tcp")
+            env.set("OMPI_MCA_btl_openib_warn_no_device_params_found", "0")
+            env.set("OMPI_MCA_btl_vader_single_copy_mechanism", "none")
+            env.set("OPAL_COMMON_UCX_OPAL_MEM_HOOKS", "1")
 
     def setup_dependent_build_environment(
         self, env: EnvironmentModifications, dependent_spec: Spec
@@ -758,6 +912,8 @@ with '-Wl,-commons,use_dylibs' and without
 
     def configure_args(self):
         spec = self.spec
+        cflags = []
+        cxxflags = []
         config_args = [
             "--enable-shared",
             "--disable-silent-rules",
@@ -772,7 +928,11 @@ with '-Wl,-commons,use_dylibs' and without
 
         config_args.extend(self.enable_or_disable("builtin-atomics", variant="atomics"))
 
-        if spec.satisfies("+pmi"):
+        if spec.satisfies("+arc"):
+            config_args.extend(self._arc_config_args())
+            cflags.append("-O3")
+            cxxflags.append("-O3")
+        elif spec.satisfies("+pmi"):
             config_args.append(f"--with-pmi={spec['slurm'].prefix}")
         else:
             config_args.extend(self.with_or_without("pmi"))
@@ -802,19 +962,20 @@ with '-Wl,-commons,use_dylibs' and without
         if spec.satisfies("@4.0.1:"):
             config_args.append("--enable-mpi1-compatibility")
 
-        # Fabrics
-        if "fabrics=auto" not in spec:
-            config_args.extend(self.with_or_without("fabrics"))
+        if not spec.satisfies("+arc"):
+            # Fabrics
+            if "fabrics=auto" not in spec:
+                config_args.extend(self.with_or_without("fabrics"))
 
-        if spec.satisfies("@2.0.0:"):
-            config_args.append(self.with_or_without_xpmem("fabrics=xpmem" in spec))
+            if spec.satisfies("@2.0.0:"):
+                config_args.append(self.with_or_without_xpmem("fabrics=xpmem" in spec))
 
-        # Schedulers
-        if "schedulers=auto" not in spec:
-            config_args.extend(self.with_or_without("schedulers"))
+            # Schedulers
+            if "schedulers=auto" not in spec:
+                config_args.extend(self.with_or_without("schedulers"))
 
-        if spec.satisfies("schedulers=lsf"):
-            config_args.append(f"--with-lsf-libdir={spec['lsf'].libs.directories[0]}")
+            if spec.satisfies("schedulers=lsf"):
+                config_args.append(f"--with-lsf-libdir={spec['lsf'].libs.directories[0]}")
 
         config_args.extend(self.enable_or_disable("memchecker"))
         if spec.satisfies("+memchecker"):
@@ -875,7 +1036,7 @@ with '-Wl,-commons,use_dylibs' and without
 
         if spec.satisfies("%nvhpc@:20.11"):
             # Workaround compiler issues
-            config_args.append("CFLAGS=-O1")
+            cflags.append("-O1")
 
         if "+openshmem" in spec:
             config_args.append("--enable-oshmem")
@@ -905,7 +1066,7 @@ with '-Wl,-commons,use_dylibs' and without
         #
 
         if spec.satisfies("@5.0.0:"):
-            config_args.append("CFLAGS=-DYY_BUF_SIZE=1048576")
+            cflags.append("-DYY_BUF_SIZE=1048576")
 
         #
         # disable romio for 5.0.0 or newer if using Intel OneAPI owing to a problem
@@ -934,7 +1095,20 @@ with '-Wl,-commons,use_dylibs' and without
 
         config_args += self.enable_or_disable("debug")
 
+        if cflags:
+            config_args.append("CFLAGS={0}".format(" ".join(cflags)))
+        if cxxflags:
+            config_args.append("CXXFLAGS={0}".format(" ".join(cxxflags)))
+
         return config_args
+
+    @run_after("install")
+    def record_arc_pmix_prefix(self):
+        if not self.spec.satisfies("+arc"):
+            return
+
+        with open(self._arc_pmix_record_path, "w", encoding="utf-8") as fh:
+            fh.write("{0}\n".format(self._arc_pmix_prefix()))
 
     # For v4 and lower
     @run_after("install")
