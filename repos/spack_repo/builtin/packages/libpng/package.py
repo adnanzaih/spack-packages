@@ -42,7 +42,7 @@ class Libpng(CMakePackage):
     depends_on("cmake@2.8.3:", type="build", when="@1.5.30:")
     depends_on("cmake@2.4.3:", type="build", when="@1.2.57:")
 
-    depends_on("zlib-api")
+   #depends_on("zlib-api")
 
     variant(
         "libs",
@@ -71,8 +71,8 @@ class Libpng(CMakePackage):
 class CMakeBuilder(CMakeBuilder):
     def cmake_args(self):
         args = [
-            self.define("CMAKE_CXX_FLAGS", self.spec["zlib-api"].headers.include_flags),
-            self.define("ZLIB_ROOT", self.spec["zlib-api"].prefix),
+            #self.define("CMAKE_CXX_FLAGS", self.spec["zlib-api"].headers.include_flags),
+            #self.define("ZLIB_ROOT", self.spec["zlib-api"].prefix),
             self.define("PNG_SHARED", "shared" in self.spec.variants["libs"].value),
             self.define("PNG_STATIC", "static" in self.spec.variants["libs"].value),
             self.define_from_variant("CMAKE_POSITION_INDEPENDENT_CODE", "pic"),
@@ -81,9 +81,9 @@ class CMakeBuilder(CMakeBuilder):
         if self.spec.satisfies("@1.2.57"):
             args.append(self.define("PNG_NO_STDIO", not self.spec.satisfies("+stdio")))
 
-        zlib_lib = self.spec["zlib-api"].libs
-        if zlib_lib:
-            args.append(self.define("ZLIB_LIBRARY", zlib_lib[0]))
+        #zlib_lib = self.spec["zlib-api"].libs
+        #if zlib_lib:
+        #    args.append(self.define("ZLIB_LIBRARY", zlib_lib[0]))
         if self.spec.satisfies("platform=darwin target=aarch64:"):
             args.append("-DPNG_ARM_NEON=off")
         return args

@@ -46,50 +46,64 @@ class R(AutotoolsPackage):
     version("4.3.1", sha256="8dd0bf24f1023c6f618c3b317383d291b4a494f40d73b983ac22ffea99e4ba99")
     version("4.3.0", sha256="45dcc48b6cf27d361020f77fde1a39209e997b81402b3663ca1c010056a6a609")
 
-    variant("X", default=False, description="Enable X11 support (TCLTK, PNG, JPEG, TIFF, CAIRO)")
+    variant("X", default=True, description="Enable X11 support (TCLTK, PNG, JPEG, TIFF, CAIRO)")
     variant("java", default=False, description="Enable Java support")
     variant("memory_profiling", default=False, description="Enable memory profiling")
     variant("rmath", default=False, description="Build standalone Rmath library")
+    variant("arc", default=True, description="Build R with ARC's site configuration")
 
     depends_on("c", type="build")
     depends_on("cxx", type="build")
     depends_on("fortran", type="build")
-    depends_on("findutils", type="build")
-    depends_on("texinfo@6.8:", when="@4.6:")
-    depends_on("texinfo", type="build")
+    #depends_on("findutils", type="build")
+    #depends_on("texinfo", type="build")
 
     depends_on("blas")
     requires("^openblas symbol_suffix=none", when="^openblas")
     depends_on("lapack")
+    requires("^[virtuals=blas,lapack] flexiblas", when="+arc")
+    requires("+X", when="+arc", msg="+arc follows ARC's X11-enabled R build")
+    requires("+java", when="+arc", msg="+arc follows ARC's Java-enabled R build")
 
     depends_on("zlib-api")
     depends_on("zlib@1.2.5:", when="^[virtuals=zlib-api] zlib")
-    depends_on("bzip2")
-    depends_on("xz")
-    depends_on("zstd", when="@4.5:")
-    depends_on("libdeflate", when="@4.4:")
-    depends_on("curl+libidn2")
-    depends_on("libtirpc")
-    depends_on("ncurses")
-    depends_on("readline")
-    depends_on("pcre2")
-    depends_on("gettext")
-    depends_on("icu4c")
-    depends_on("which", type=("build", "run"))
-    depends_on("java", when="+java", type=("build", "run"))
+    #depends_on("bzip2")
+    #depends_on("xz")
+    #depends_on("zstd", when="@4.5:")
+    #depends_on("libdeflate", when="@4.4:")
+    #depends_on("curl+libidn2")
+    #depends_on("libtirpc")
+    #depends_on("ncurses")
+    #depends_on("readline")
+    #depends_on("pcre2")
+    #depends_on("gettext")
+    #depends_on("icu4c")
+    #depends_on("which", type=("build", "run"))
+    #depends_on("java", when="+java", type=("build", "run"))
+
+    with when("+arc"):
+        depends_on("pkgconfig", type="build")
+        #depends_on("git", type=("build", "run"))
+        #depends_on("libgit2@1.0:")
+        #depends_on("libxml2")
+        #depends_on("openssl@1.0.2:")
+        #depends_on("fontconfig")
+        #depends_on("freetype")
+        #depends_on("fribidi")
+        #depends_on("pandoc", type=("build", "run"))
 
     with when("+X"):
-        depends_on("cairo+X+gobject+pdf")
-        depends_on("pango+X")
-        depends_on("harfbuzz+graphite2")
+        #depends_on("cairo+X+gobject+pdf")
+        #depends_on("pango+X")
+        #depends_on("harfbuzz+graphite2")
         depends_on("jpeg")
         depends_on("libpng")
         depends_on("libtiff")
-        depends_on("libx11")
-        depends_on("libxt")
-        depends_on("libxmu")
-        depends_on("tcl")
-        depends_on("tk")
+        #depends_on("libx11")
+        #depends_on("libxt")
+        #depends_on("libxmu")
+        #depends_on("tcl")
+        #depends_on("tk")
 
     # Make R use a symlink to which in Sys.which, otherwise an absolute path
     # gets stored as compressed byte code, which is not relocatable
@@ -105,6 +119,8 @@ class R(AutotoolsPackage):
     conflicts("@:4.4.2 %gcc@15:")
 
     build_directory = "spack-build"
+    arc_cran_mirror = "https://repo.miserver.it.umich.edu/cran/"
+    arc_r_packages = ("doParallel", "devtools", "flexiblas")
 
     @classmethod
     def determine_version(cls, exe):
@@ -133,6 +149,24 @@ class R(AutotoolsPackage):
     @property
     def etcdir(self):
         return join_path(prefix, "rlib", "R", "etc")
+
+    def setup_build_environment(self, env: EnvironmentModifications) -> None:
+        if self.spec.satisfies("+arc"):
+            
+            for path in ("/usr/lib64/pkgconfig", "/usr/lib/pkgconfig", "/usr/share/pkgconfig"):
+                if os.path.isdir(path):
+                    env.append_path("PKG_CONFIG_PATH", path)
+
+            arc_flags = "-O3 -mtune=native"
+            env.set("CFLAGS", arc_flags)
+            env.set("CPPFLAGS", arc_flags)
+            env.set("FFLAGS", arc_flags)
+            env.set("R_PAPERSIZE", "letter")
+            env.set("FLEXIBLAS_ROOT", self.spec["blas"].prefix)
+
+        if self.spec.satisfies("+java"):
+            env.set("JAVA_HOME", "/usr/lib/jvm/jre")
+        
 
     @run_after("install")
     def install_rmath(self):
@@ -165,7 +199,6 @@ class R(AutotoolsPackage):
             "--libdir={0}".format(join_path(prefix, "rlib")),
             "--enable-R-shlib",
             "--enable-R-framework=no",
-            "--without-recommended-packages",
             f"LDFLAGS=-Wl,-rpath,{extra_rpath}",
             f"--with-blas={blas_flags}",
             f"--with-lapack={lapack_flags}",
@@ -173,8 +206,12 @@ class R(AutotoolsPackage):
             "ac_cv_path_PDFTEX=",
             "ac_cv_path_TEX=",
             "ac_cv_path_TEXI2DVI=",
-            f"--with-libintl-prefix={spec['gettext'].prefix}",
         ]
+
+        if "+arc" in spec:
+            config_args.append("--mandir={0}".format(join_path(prefix, "man")))
+        else:
+            config_args.append("--without-recommended-packages")
 
         if "+X" in spec:
             config_args.append("--with-cairo")
@@ -183,12 +220,6 @@ class R(AutotoolsPackage):
             config_args.append("--with-libtiff")
             config_args.append("--with-tcltk")
             config_args.append("--with-x")
-
-            tcl_config_path = join_path(spec["tcl"].libs.directories[0], "tclConfig.sh")
-            config_args.append("--with-tcl-config={0}".format(tcl_config_path))
-
-            tk_config_path = join_path(spec["tk"].libs.directories[0], "tkConfig.sh")
-            config_args.append("--with-tk-config={0}".format(tk_config_path))
         else:
             config_args.append("--without-cairo")
             config_args.append("--without-jpeglib")
@@ -208,6 +239,12 @@ class R(AutotoolsPackage):
 
         return config_args
 
+    @run_after("build")
+    def arc_check(self):
+        if "+arc" in self.spec:
+            with working_dir(self.build_directory):
+                make("check", parallel=False)
+    '''
     @run_after("install")
     def copy_makeconf(self):
         # Ensure full library flags are included in Makeconf
@@ -229,9 +266,28 @@ class R(AutotoolsPackage):
         src_makeconf = join_path(self.etcdir, "Makeconf")
         dst_makeconf = join_path(self.etcdir, "Makeconf.spack")
         install(src_makeconf, dst_makeconf)
-
+    '''
     # To respect order of execution, we should filter after we made the copy above
     filter_compiler_wrappers("Makeconf", relative_root=os.path.join("rlib", "R", "etc"))
+
+    @run_after("install")
+    def install_arc_r_packages(self):
+        if "~arc" in self.spec:
+            return
+
+        r_library = join_path(self.prefix, self.r_lib_dir)
+        mkdirp(r_library)
+        rscript = Executable(join_path(self.prefix.bin, "Rscript"))
+
+        for package in self.arc_r_packages:
+            rscript(
+                "-e",
+                (
+                    "Sys.setenv(R_LIBS_USER=''); "
+                    "install.packages('%s', lib='%s', repos='%s', Ncpus=%d)"
+                    % (package, r_library, self.arc_cran_mirror, make_jobs)
+                ),
+            )
 
     # ========================================================================
     # Set up environment to make install easy for R extensions.
@@ -284,6 +340,11 @@ class R(AutotoolsPackage):
 
         if "+rmath" in self.spec:
             env.prepend_path("LD_LIBRARY_PATH", join_path(self.prefix, "rlib"))
+
+        if "+arc" in self.spec:
+            env.prepend_path("MANPATH", join_path(self.prefix, "man"))
+            env.set("R_PAPERSIZE", "letter")
+            env.set("JAVA_HOME", "/usr/lib/jvm/jr")
 
     def setup_dependent_package(self, module, dependent_spec):
         """Called before R modules' install() methods. In most cases,
