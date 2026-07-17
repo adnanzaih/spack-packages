@@ -57,7 +57,7 @@ spack:
           prefer:
           - "@1.0.7"
   concretizer:
-    unify: false
+    unify: when_possible
     reuse: true
     ##########################################################################################
     #                                         Modules                                        #
