@@ -21,11 +21,11 @@ spack:
     override:
       packages:
         c:
-          prefer: [gcc@10.3.0]
+          prefer: [gcc@14]
         cxx:
-          prefer: [gcc@10.3.0]
+          prefer: [gcc@14]
         fortran:
-          prefer: [gcc@10.3.0]
+          prefer: [gcc@14]
   concretizer:
     unify: true
     reuse: true
@@ -38,106 +38,52 @@ spack:
         java: [openjdk]
     gcc:
       externals:
-      - spec: gcc@8.5.0 languages:='c,c++,fortran'
+      - spec: gcc@14 languages:='c,c++,fortran'
         prefix: /usr
         extra_attributes:
           compilers:
             c: /usr/bin/gcc
             cxx: /usr/bin/g++
             fortran: /usr/bin/gfortran
-      - spec: gcc@10.3.0 languages:='c,c++,fortran'
-        prefix: /sw/pkgs/arc/gcc/10.3.0
-        extra_attributes:
-          compilers:
-            c: /sw/pkgs/arc/gcc/10.3.0/bin/gcc
-            cxx: /sw/pkgs/arc/gcc/10.3.0/bin/g++
-            fortran: /sw/pkgs/arc/gcc/10.3.0/bin/gfortran
-      - spec: gcc@15.1.0 languages:='c,c++,fortran'
-        prefix: /sw/pkgs/arc/gcc/15.1.0
-        extra_attributes:
-          compilers:
-            c: /sw/pkgs/arc/gcc/15.1.0/bin/gcc
-            cxx: /sw/pkgs/arc/gcc/15.1.0/bin/g++
-            fortran: /sw/pkgs/arc/gcc/15.1.0/bin/gfortran
-    llvm:
-      externals:
-      - spec: llvm@22.1.3+flang openmp=runtime
-        prefix: /sw/pkgs/arc/llvm/22.1.3
-        extra_attributes:
-          compilers:
-            c: /sw/pkgs/arc/llvm/22.1.3/bin/clang
-            cxx: /sw/pkgs/arc/llvm/22.1.3/bin/clang++
-            fortran: /sw/pkgs/arc/llvm/22.1.3/bin/flang
-          extra_rpaths:
-          - /sw/pkgs/arc/llvm/22.1.3/lib/x86_64-unknown-linux-gnu/
-          environment:
-                  prepend_path:
-                          LD_LIBRARY_PATH: /sw/pkgs/arc/llvm/22.1.3/lib/x86_64-unknown-linux-gnu/
-    intel-oneapi-compilers-classic:
-      externals:
-      - spec: intel-oneapi-compilers-classic@2021.5.0
-        prefix: /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux
-        extra_attributes:
-          compilers:
-            c: /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/bin/intel64/icc
-            cxx: /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/bin/intel64/icpc
-            fortran: /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/bin/intel64/ifort
-          flags:
-            ldflags: -L/sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/compiler/lib/intel64_lin/
-          extra_rpaths:
-          - /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/compiler/lib/intel64_lin/
-          environment:
-            prepend_path:
-              LD_LIBRARY_PATH: /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/compiler/lib/intel64_lin/
-
     ##########################################################################################
     #                                       Externals                                        #
     ##########################################################################################
 
     perl:
       externals:
-      - spec: perl@5.26.3
+      - spec: perl@5.40
         prefix: /usr
     icu4c:
       buildable: false
       externals:
-      - spec: icu4c@60.3
+      - spec: icu4c@74
         prefix: /usr
-    openjdk:
-      buildable: true
-      externals:
-      - spec: openjdk@1.8.0
-        prefix: /usr/lib/jvm/jre
-      - spec: openjdk@18.0.1.1
-        prefix: /sw/pkgs/arc/openjdk/jdk-18.0.1.1
-      - spec: openjdk@26.0.1
-        prefix: /sw/pkgs/arc/openjdk/jdk-26.0.1
     autoconf:
       buildable: false
       externals:
-      - spec: autoconf@2.69
+      - spec: autoconf@2.71
         prefix: /usr
     pkgconf:
       buildable: false
       externals:
-      - spec: pkgconf@2.5.1
+      - spec: pkgconf@2
         prefix: /usr
     bash:
       buildable: false
       externals:
-      - spec: bash@4.4.20
+      - spec: bash@5.2
         prefix: /usr
     git:
       buildable: false
       externals:
-      - spec: git@2.43.7
+      - spec: git@2.52
         prefix: /usr
     openssl:
       buildable: false
       externals:
-      - spec: openssl@1.1.1
+      - spec: openssl@3.5
         prefix: /usr
-        
+
     ##########################################################################################
     #                                         Modules                                        #
     ##########################################################################################
@@ -153,18 +99,14 @@ spack:
           hdf5~threadsafe: 'hdf5/{version}-nonatomic'
           intel-oneapi-compilers-classic: 'intel/{version}'
           miniforge3: 'mamba/{version}'
-          py-mpi4py: 'mpi4py/{version}' 
+          py-mpi4py: 'mpi4py/{version}'
         hash_length: 0
         hierarchy: []
         core_specs:
-        - gcc@8.5.0
-        - gcc-runtime@8.5.0
-        - gcc@10.3.0
-        - gcc@15.1.0
-        - llvm@22.1.3
-        - intel-oneapi-compilers-classic@2021.5.0
+        - gcc@14
+        - gcc-runtime@14
         exclude:
-        - gcc-runtime@8.5.0
+        - gcc-runtime@14
         - glibc
         - autoconf
         - compiler-wrapper
