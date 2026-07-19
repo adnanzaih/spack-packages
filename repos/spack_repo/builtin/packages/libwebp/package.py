@@ -41,9 +41,9 @@ class Libwebp(AutotoolsPackage):
 
     depends_on("automake", type="build")
     depends_on("autoconf", type="build")
-    depends_on("libtool", type="build")
-    depends_on("m4", type="build")
-    depends_on("giflib", when="+gif")
+    #depends_on("libtool", type="build")
+    #depends_on("m4", type="build")
+    #depends_on("giflib", when="+gif")
     depends_on("jpeg", when="+jpeg")
     depends_on("libpng", when="+png")
     depends_on("libtiff", when="+tiff")

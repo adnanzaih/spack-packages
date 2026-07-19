@@ -2,12 +2,12 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-from spack_repo.builtin.build_systems.r import RPackage
+from spack_repo.builtin.build_systems.r import RCollectivePackage
 
 from spack.package import *
 
 
-class RProj(RPackage):
+class RProj(RCollectivePackage):
     """Generic Coordinate System Transformations Using 'PROJ'.
 
     A wrapper around the generic coordinate transformation software 'PROJ'
@@ -28,13 +28,20 @@ class RProj(RPackage):
     depends_on("r@2.10:", type=("build", "run"))
     depends_on("r@3.0.2:", type=("build", "run"), when="@0.4.0:")
 
-    depends_on("r-lifecycle", type=("build", "run"), when="@0.5.0:")
-    depends_on("r-wk", type=("build", "run"), when="@0.5.0:")
+    #depends_on("r-lifecycle", type=("build", "run"), when="@0.5.0:")
+    #depends_on("r-wk", type=("build", "run"), when="@0.5.0:")
 
     depends_on("proj@6.3.1:", type=("build", "run"), when="@0.4.5:")
+    depends_on("gdal@3.0.0:", type=("build", "run"), when="@0.4.5:")
+    depends_on("geos@3.8.0:", type=("build", "run"), when="@0.4.5:")
     # pkgconfig for proj requires libtiff-4 and libcurl
     depends_on("libtiff@4", type=("build", "run"))
-    depends_on("curl", type=("build", "run"))
+    #depends_on("curl", type=("build", "run"))
 
     def setup_build_environment(self, env: EnvironmentModifications) -> None:
-        env.prepend_path("LD_LIBRARY_PATH", self.spec["proj"].prefix.lib)
+        for name in ("proj", "gdal", "geos"):
+            for directory in reversed(self.spec[name].libs.directories):
+                env.prepend_path("LD_LIBRARY_PATH", directory)
+
+        for name in ("gdal", "geos"):
+            env.prepend_path("PATH", self.spec[name].prefix.bin)

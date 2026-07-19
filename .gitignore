@@ -1,6 +1,8 @@
 /spack-core
 /pyrightconfig.json
 
+stacks/arc-compiler-stacks/.spack-env
+
 ###########################
 # Python-specific ignores #
 ###########################

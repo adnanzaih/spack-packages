@@ -98,7 +98,7 @@ class Freetype(AutotoolsPackage, CMakePackage):
 
     depends_on("c", type="build")  # generated
 
-    depends_on("bzip2")
+    #depends_on("bzip2")
     depends_on("libpng")
     for plat in ["linux", "darwin"]:
         depends_on("pkgconfig", type="build", when="platform=%s" % plat)
@@ -139,7 +139,7 @@ class AutotoolsBuilder(AutotoolsBuilder):
             "--with-brotli=no",
             "--with-bzip2=yes",
             "--with-harfbuzz=no",
-            "--with-png=yes",
+            f"--with-png={self.spec['libpng'].prefix}",
             "--with-zlib=no",
         ]
         if self.spec.satisfies("@2.9.1:"):
@@ -147,7 +147,6 @@ class AutotoolsBuilder(AutotoolsBuilder):
         args.extend(self.enable_or_disable("shared"))
         args.extend(self.with_or_without("pic"))
         return args
-
 
 class CMakeBuilder(CMakeBuilder):
     def cmake_args(self):
@@ -160,3 +159,4 @@ class CMakeBuilder(CMakeBuilder):
             self.define_from_variant("BUILD_SHARED_LIBS", "shared"),
             self.define_from_variant("CMAKE_POSITION_INDEPENDENT_CODE", "pic"),
         ]
+

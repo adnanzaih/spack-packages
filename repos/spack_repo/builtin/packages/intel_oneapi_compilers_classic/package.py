@@ -51,7 +51,7 @@ class IntelOneapiCompilersClassic(Package, CompilerPackage):
 
     stdcxx_libs = ("-cxxlib",)
 
-    provides("c", "cxx", when="@:2021.10")
+    provides("c", "cxx")
     provides("fortran")
 
     version_map = {
