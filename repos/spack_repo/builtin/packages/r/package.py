@@ -27,6 +27,8 @@ class R(AutotoolsPackage):
     license("GPL-2.0-or-later")
 
     version("trunk", svn="https://svn.r-project.org/R/trunk")
+    version("4.6.1", sha256="4da6e61d2c0aac5f14a2e7e432cb5fcc269efe83da4293050ba7f03dff4e2cf4")
+    version("4.6.0", sha256="b8dc9b4543660c7b596b87938df532394350360976527d344228ee0ed12e45ec")
     version("4.5.3", sha256="aa5c1ed4293c7271ac513d654670356ac0e8a6ad5e42be014365d11150b5b8f2")
     version("4.5.2", sha256="0d71ff7106ec69cd7c67e1e95ed1a3cee355880931f2eb78c530014a9e379f20")
     version("4.5.1", sha256="b42a7921400386645b10105b91c68728787db5c4c83c9f6c30acdce632e1bb70")
@@ -59,8 +61,8 @@ class R(AutotoolsPackage):
     requires("+X", when="+arc", msg="+arc follows ARC's X11-enabled R build")
     requires("+java", when="+arc", msg="+arc follows ARC's Java-enabled R build")
 
-    depends_on("zlib-api")
-    depends_on("zlib@1.2.5:", when="^[virtuals=zlib-api] zlib")
+    #depends_on("zlib-api")
+    #depends_on("zlib@1.2.5:", when="^[virtuals=zlib-api] zlib")
     #depends_on("bzip2")
     #depends_on("xz")
     #depends_on("zstd", when="@4.5:")
@@ -82,7 +84,8 @@ class R(AutotoolsPackage):
         #depends_on("libxml2")
         #depends_on("openssl@1.0.2:")
         #depends_on("fontconfig")
-        #depends_on("freetype")
+        depends_on("freetype")
+        depends_on("libwebp+libwebpmux")
         #depends_on("fribidi")
         #depends_on("pandoc", type=("build", "run"))
 
