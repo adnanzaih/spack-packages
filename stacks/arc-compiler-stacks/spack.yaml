@@ -32,8 +32,14 @@ spack:
     - libgd@2.3.3
     - r@4.6.1+arc ^flexiblas ^jpeg ^libtiff ^libpng
     - r@4.6.0+arc ^flexiblas ^jpeg ^libtiff ^libpng
-    - rtidyverse ^r@4.6.1+arc ^flexiblas ^jpeg ^libtiff ^libpng
-    - rtidyverse ^r@4.6.0+arc ^flexiblas ^jpeg ^libtiff ^libpng
+    - rtidyverse@2.0.0 ^r@4.6.1+arc ^flexiblas ^jpeg ^libtiff ^libpng
+    - rtidyverse@2.0.0 ^r@4.6.0+arc ^flexiblas ^jpeg ^libtiff ^libpng
+    # wont build with gcc 8.5.0, but leaving it here for the future.
+    #- rgeospatial ^rtidyverse@2.0.0 ^r@4.6.0+arc ^flexiblas ^jpeg ^libtiff ^libpng ^gdal@3.6.3 ^netcdf-c@4.7.4 ^hdf5@1.14.6+hl+cxx+fortran ^libaec@1.1.4
+    - cuda@12
+    - cuda@13
+    - cudnn ^cuda@12
+    - cudnn ^cuda@13
     override:
       packages:
         c:
@@ -58,11 +64,13 @@ spack:
     - netcdf-cxx4@4.3.1 ^netcdf-c@4.7.4 ^hdf5@1.14.6+hl+cxx+fortran ^libaec@1.1.4
     - netcdf-fortran@4.6.2 ^netcdf-c@4.7.4 ^hdf5@1.14.6+hl+cxx+fortran ^libaec@1.1.4
     - gdal@3.6.3 ^netcdf-c@4.7.4 ^hdf5@1.14.6+hl+cxx+fortran ^libaec@1.1.4
+    - gdal@3.13.1 ^netcdf-c@4.7.4 ^hdf5@1.14.6+hl+cxx+fortran ^libaec@1.1.4
     - sqlite@3.53.1
     - libsodium@1.0.22
     - libgd@2.3.3
     - r@4.6.1+arc ^flexiblas ^jpeg ^libtiff ^libpng
-    - rtidyverse ^r@4.6.1+arc ^flexiblas ^jpeg ^libtiff ^libpng
+    - rtidyverse@2.0.0 ^r@4.6.1+arc ^flexiblas ^jpeg ^libtiff ^libpng
+    - rgeospatial ^rtidyverse@2.0.0 ^r@4.6.1+arc ^flexiblas ^jpeg ^libtiff ^libpng ^gdal@3.13.1 ^netcdf-c@4.7.4 ^hdf5@1.14.6+hl+cxx+fortran ^libaec@1.1.4
     override:
       packages:
         c:
