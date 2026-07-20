@@ -341,7 +341,7 @@ class R(AutotoolsPackage):
         if "+arc" in self.spec:
             env.prepend_path("MANPATH", join_path(self.prefix, "man"))
             env.set("R_PAPERSIZE", "letter")
-            env.set("JAVA_HOME", "/usr/lib/jvm/jr")
+            env.set("JAVA_HOME", "/usr/lib/jvm/jre")
 
     def setup_dependent_package(self, module, dependent_spec):
         """Called before R modules' install() methods. In most cases,
