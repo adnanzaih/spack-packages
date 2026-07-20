@@ -31,8 +31,9 @@ spack:
     - libsodium@1.0.22
     - libgd@2.3.3
     - r@4.6.1+arc ^flexiblas ^jpeg ^libtiff ^libpng
-    - r-proj ^r@4.6.1+arc ^gdal@3.6.3 ^netcdf-c@4.7.4 ^hdf5@1.14.6+hl+cxx+fortran ^libaec@1.1.4
-    #- rtidyverse ^r@4.6.1+arc ^flexiblas ^jpeg ^libtiff ^libpng
+    - r@4.6.0+arc ^flexiblas ^jpeg ^libtiff ^libpng
+    - rtidyverse ^r@4.6.1+arc ^flexiblas ^jpeg ^libtiff ^libpng
+    - rtidyverse ^r@4.6.0+arc ^flexiblas ^jpeg ^libtiff ^libpng
     override:
       packages:
         c:
@@ -60,6 +61,8 @@ spack:
     - sqlite@3.53.1
     - libsodium@1.0.22
     - libgd@2.3.3
+    - r@4.6.1+arc ^flexiblas ^jpeg ^libtiff ^libpng
+    - rtidyverse ^r@4.6.1+arc ^flexiblas ^jpeg ^libtiff ^libpng
     override:
       packages:
         c:
@@ -90,9 +93,7 @@ spack:
     - libsodium@1.0.22
     - libgd@2.3.3
     - r@4.6.1+arc ^flexiblas ^jpeg ^libtiff ^libpng
-    - r@4.6.0+arc ^flexiblas ^jpeg ^libtiff ^libpng
-    - r-proj ^r@4.6.1+arc ^gdal@3.13.1 ^netcdf-c@4.10.0 ^hdf5@1.14.6+hl+cxx+fortran ^libaec@1.1.4
-    - rtidyverse ^r@4.6.0+arc ^flexiblas ^jpeg ^libtiff ^libpng
+    - rtidyverse ^r@4.6.1+arc ^flexiblas ^jpeg ^libtiff ^libpng
     override:
       packages:
         c:
@@ -242,6 +243,11 @@ spack:
       externals:
       - spec: autoconf@2.69
         prefix: /usr
+    pkgconf:
+      buildable: false
+      externals:
+      - spec: pkgconf@2.5.1
+        prefix: /usr
         
     ##########################################################################################
     #                                         Modules                                        #
@@ -254,8 +260,10 @@ spack:
           r: 'R/{version}'
           intel-oneapi-compilers-classic: 'intel/{version}'
         hash_length: 0
-        core_compilers:
-        - gcc@8.5.0/w6akmqjjogstolgcqh5loghofzx54fk5
+                
+        hierarchy:
+          - r
+          - mpi
         core_specs:
         - gcc@8.5.0
         - gcc-runtime@8.5.0
