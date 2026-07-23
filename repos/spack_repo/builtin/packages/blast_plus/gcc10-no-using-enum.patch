@@ -1,0 +1,44 @@
+diff --git a/c++/src/objtools/cleanup/cleanup.cpp b/c++/src/objtools/cleanup/cleanup.cpp
+--- a/c++/src/objtools/cleanup/cleanup.cpp
++++ b/c++/src/objtools/cleanup/cleanup.cpp
+@@ -2455,12 +2455,11 @@ static bool s_IsPartial(const CMolInfo& molInfo)
+         return false;
+     }
+ 
+-    using enum CMolInfo::ECompleteness;
+     switch (molInfo.GetCompleteness()) {
+-    case eCompleteness_partial:
+-    case eCompleteness_no_left:
+-    case eCompleteness_no_right:
+-    case eCompleteness_no_ends:
++    case CMolInfo::eCompleteness_partial:
++    case CMolInfo::eCompleteness_no_left:
++    case CMolInfo::eCompleteness_no_right:
++    case CMolInfo::eCompleteness_no_ends:
+         return true;
+     default:
+         break;
+@@ -2559,15 +2558,14 @@ static void s_UpdateTitleString(const CBioseq_Handle& bsh, const CBioSource& src
+ 
+     const auto genome = (src.IsSetGenome() ? src.GetGenome() : CBioSource::eGenome_unknown);
+ 
+-    using enum CBioSource::EGenome;
+-    if (genome >= eGenome_chloroplast &&
+-        genome <= eGenome_chromatophore &&
+-        genome != eGenome_extrachrom &&
+-        genome != eGenome_transposon &&
+-        genome != eGenome_insertion_seq &&
+-        genome != eGenome_proviral &&
+-        genome != eGenome_virion &&
+-        genome != eGenome_chromosome) {
++    if (genome >= CBioSource::eGenome_chloroplast &&
++        genome <= CBioSource::eGenome_chromatophore &&
++        genome != CBioSource::eGenome_extrachrom &&
++        genome != CBioSource::eGenome_transposon &&
++        genome != CBioSource::eGenome_insertion_seq &&
++        genome != CBioSource::eGenome_proviral &&
++        genome != CBioSource::eGenome_virion &&
++        genome != CBioSource::eGenome_chromosome) {
+         auto organelle = CBioSource::GetOrganelleByGenome(genome);
+         if (! NStr::IsBlank(organelle)) {
+             sTitle += " (" + string(organelle) + ")";

@@ -29,12 +29,12 @@ class Libbeagle(AutotoolsPackage, CudaPackage):
 
     depends_on("autoconf", type="build")
     depends_on("automake", type="build")
-    depends_on("libtool", type="build")
-    depends_on("m4", type="build")
+    #depends_on("libtool", type="build")
+    #depends_on("m4", type="build")
 
     depends_on("subversion", type="build")
     depends_on("pkgconfig", type="build")
-    depends_on("java", type="build")
+    depends_on("openjdk", type="build")
     depends_on("opencl", when="+opencl")
 
     cuda_arch_values = CudaPackage.cuda_arch_values

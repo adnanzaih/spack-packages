@@ -32,3 +32,10 @@ class XxdStandalone(MakefilePackage):
     def install(self, spec, prefix):
         mkdirp(prefix.bin)
         install(os.path.join(self.build_directory, "src", "xxd", "xxd"), prefix.bin)
+
+    def patch(self):
+        filter_file(
+            r"^extern long int (strtol|ftell)\(\);\n",
+            "",
+            "src/xxd/xxd.c",
+        )

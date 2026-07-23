@@ -37,6 +37,7 @@ class BlastPlus(AutotoolsPackage):
     # aren't any .svn dirs in the tree, so I've updated their patch
     # to just comment out the block.
     patch("blast-make-fix2.5.0.diff", when="@2.5.0:2.6.0")
+    patch("gcc10-no-using-enum.patch", when="@2.17.0 %gcc@:10")
 
     # See https://github.com/Homebrew/homebrew-science/issues/2337#issuecomment-170011511
     @when("@:2.2.31")
@@ -54,7 +55,7 @@ class BlastPlus(AutotoolsPackage):
     depends_on("c", type="build")  # generated
     depends_on("cxx", type="build")  # generated
 
-    depends_on("cpio", type="build")
+    #depends_on("cpio", type="build")
 
     variant("static", default=False, description="Build with static linkage")
     variant("jpeg", default=True, description="Build with jpeg support")
@@ -77,20 +78,20 @@ class BlastPlus(AutotoolsPackage):
     depends_on("libpng", when="+png")
     depends_on("freetype", when="+freetype")
     # depends_on('hdf5', when='+hdf5')
-    depends_on("gnutls", when="+gnutls")
-    depends_on("openssl", when="+openssl")
-    depends_on("zlib-api", when="+zlib")
-    depends_on("bzip2", when="+bzip2")
-    depends_on("lzo", when="+lzo")
-    depends_on("pcre", when="+pcre")
+    #depends_on("gnutls", when="+gnutls")
+    #depends_on("openssl", when="+openssl")
+    #depends_on("zlib-api", when="+zlib")
+    #depends_on("bzip2", when="+bzip2")
+    #depends_on("lzo", when="+lzo")
+    #depends_on("pcre", when="+pcre")
 
-    depends_on("python@:3.11", when="+python")
-    depends_on("py-setuptools@48:", when="+python ^python@3.12:", type="build")
+    depends_on("python+arc", when="+python")
+    #depends_on("py-setuptools@48:", when="+python ^python@3.12:", type="build")
     depends_on("perl", when="+perl")
 
     depends_on("lmdb", when="@2.7.1:")
     depends_on("sqlite", when="+sqlite")
-    depends_on("zstd", when="+zstd")
+    #depends_on("zstd", when="+zstd")
 
     configure_directory = "c++"
 
@@ -139,7 +140,7 @@ class BlastPlus(AutotoolsPackage):
         #     )
         # else:
         #     config_args.append('--without-hdf5')
-
+        '''
         if spec.satisfies("+zlib"):
             config_args.append(f"--with-z={self.spec['zlib-api'].prefix}")
         else:
@@ -169,7 +170,7 @@ class BlastPlus(AutotoolsPackage):
             config_args.append(f"--with-pcre={self.spec['pcre'].prefix}")
         else:
             config_args.append("--without-pcre")
-
+        '''
         if spec.satisfies("+python"):
             config_args.append(f"--with-python={self.spec['python'].home}")
         else:
@@ -183,7 +184,7 @@ class BlastPlus(AutotoolsPackage):
         with when("+sqlite"):
             config_args.append(f"--with-sqlite3={self.spec['sqlite'].prefix}")
 
-        with when("+zstd"):
-            config_args.append(f"--with-zstd={self.spec['zstd'].prefix}")
+        #with when("+zstd"):
+        #    config_args.append(f"--with-zstd={self.spec['zstd'].prefix}")
 
         return config_args

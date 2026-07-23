@@ -476,6 +476,8 @@ class Openjdk(Package):
 
             version(ver, sha256=pkg[0], url=pkg[1], preferred=is_preferred)
 
+    version("18.0.1.1")
+    
     variant(
         "certs",
         default="none",
@@ -486,6 +488,7 @@ class Openjdk(Package):
 
     provides("java@25", when="@25.0:25")
     provides("java@21", when="@21.0:21")
+    provides("java@18", when="@18.0:18")
     provides("java@17", when="@17.0:17")
     provides("java@16", when="@16.0:16")
     provides("java@15", when="@15.0:15")

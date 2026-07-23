@@ -27,8 +27,8 @@ class Bamtools(CMakePackage):
 
     depends_on("cxx", type="build")  # generated
 
-    depends_on("zlib-api", type="link")
-    depends_on("jsoncpp")
+    #depends_on("zlib-api", type="link")
+    #depends_on("jsoncpp")
 
     def cmake_args(self):
         args = []

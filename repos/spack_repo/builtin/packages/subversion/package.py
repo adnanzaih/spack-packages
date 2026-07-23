@@ -48,13 +48,13 @@ class Subversion(AutotoolsPackage):
 
     depends_on("apr")
     depends_on("apr-util")
-    depends_on("zlib-api")
+    #depends_on("zlib-api")
     depends_on("sqlite@3.8.2:")
     depends_on("expat")
     depends_on("lz4", when="@1.10:")
     depends_on("utf8proc", when="@1.10:")
     depends_on("serf", when="+serf")
-    depends_on("gettext", when="+nls")
+    #depends_on("gettext", when="+nls")
 
     extends("perl", when="+perl")
     depends_on("swig@1.3.24:3.0.0", when="+perl")
@@ -74,7 +74,7 @@ class Subversion(AutotoolsPackage):
                 spec["expat"].libs.directories[0],
                 spec["expat"].libs.names[0],
             ),
-            "--with-zlib={0}".format(spec["zlib-api"].prefix),
+            #"--with-zlib={0}".format(spec["zlib-api"].prefix),
             "--without-apxs",
             "--without-trang",
             "--without-doxygen",
@@ -112,13 +112,13 @@ class Subversion(AutotoolsPackage):
 
         if "+nls" in spec:
             args.append("--enable-nls")
-            if "intl" in spec["gettext"].libs.names:
+            #if "intl" in spec["gettext"].libs.names:
                 # Using .libs.link_flags is the canonical way to add these arguments,
                 # but since libintl is much smaller than the rest and also the only
                 # necessary one, we would specify it by hand here
-                args.append("LIBS=-lintl")
-                if not is_system_path(spec["gettext"].prefix):
-                    args.append("LDFLAGS={0}".format(spec["gettext"].libs.search_flags))
+            #    args.append("LIBS=-lintl")
+            #    if not is_system_path(spec["gettext"].prefix):
+            #        args.append("LDFLAGS={0}".format(spec["gettext"].libs.search_flags))
         else:
             args.append("--disable-nls")
 
