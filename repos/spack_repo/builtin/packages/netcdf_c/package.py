@@ -2,7 +2,14 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+import itertools
+import os
+import pathlib
+import sys
+
+from spack_repo.builtin.build_systems import autotools, cmake
 from spack_repo.builtin.build_systems.autotools import AutotoolsPackage
+from spack_repo.builtin.build_systems.cmake import CMakePackage
 
 from spack.package import *
 
@@ -164,7 +171,10 @@ class NetcdfC(AutotoolsPackage):
     variant("fsync", default=True, description="Enable fsync support")
     variant("nczarr_zip", default=True, description="Enable NCZarr zipfile format storage")
     variant("optimize", default=True, description="Enable -O2 for a more optimized lib")
-    variant("logging", default=True, description="Enable logging")
+    variant("logging", default=False, description="Enable logging")
+    variant("utilities", default=True, description="Build command-line utilities")
+    variant("tests", default=True, description="Build test programs")
+    variant("examples", default=True, description="Build example programs")
 
     variant("szip", default=True, description="Enable Szip compression plugin")
     variant("blosc", default=True, description="Enable Blosc compression plugin")
@@ -326,7 +336,7 @@ class CMakeBuilder(AnyBuilder, cmake.CMakeBuilder):
         base_cmake_args = [
             self.define_from_variant("BUILD_SHARED_LIBS", "shared"),
             self.define_from_variant(nc + "ENABLE_BYTERANGE", "byterange"),
-            self.define(nc + "BUILD_UTILITIES", True),
+            self.define_from_variant(nc + "BUILD_UTILITIES", "utilities"),
             self.define(nc + "ENABLE_NETCDF_4", True),
             self.define_from_variant(nc + "ENABLE_DAP", "dap"),
             self.define_from_variant(nc + "ENABLE_HDF4", "hdf4"),
@@ -334,6 +344,12 @@ class CMakeBuilder(AnyBuilder, cmake.CMakeBuilder):
             self.define_from_variant(nc + "ENABLE_FSYNC", "fsync"),
             self.define(nc + "ENABLE_LARGE_FILE_SUPPORT", True),
             self.define_from_variant("NETCDF_ENABLE_LOGGING", "logging"),
+            self.define_from_variant(nc + "ENABLE_TESTS", "tests"),
+            self.define_from_variant(nc + "ENABLE_UNIT_TESTS", "tests"),
+            self.define_from_variant(nc + "ENABLE_EXAMPLES", "examples"),
+            self.define_from_variant("BUILD_TESTING", "tests"),
+            self.define_from_variant(nc + "ENABLE_NCZARR_ZIP", "nczarr_zip"),
+            self.define_from_variant("ENABLE_NCZARR_ZIP", "nczarr_zip"),
         ]
         if any(self.spec.satisfies(s) for s in ["+mpi", "+parallel-netcdf", "^hdf5+mpi~shared"]):
             base_cmake_args.append(
@@ -419,23 +435,201 @@ class AutotoolsBuilder(AnyBuilder, autotools.AutotoolsBuilder):
                 filter_file("-lstdc++", "", *filenames, string=True)
 
     def configure_args(self):
-        hdf5 = self.spec["hdf5"]
-        szip = self.spec["szip"]
+        config_args = [
+            "--enable-v2",
+            "--enable-static",
+            "--enable-largefile",
+        ]
 
-        cppflags = " ".join(
-            [
-                hdf5.headers.cpp_flags,
-                szip.headers.cpp_flags,
-            ]
+        config_args += self.enable_or_disable("utilities")
+        config_args += self.enable_or_disable("test", variant="tests")
+        config_args += self.enable_or_disable("examples")
+
+        if self.spec.satisfies("@4.8.0:"):
+            config_args.append("--enable-hdf5")
+        else:
+            config_args.append("--enable-netcdf-4")
+
+        # NCZarr was added in version 4.8.0 as an experimental feature and became a supported one
+        # in version 4.8.1:
+        if self.spec.satisfies("@4.8.1:"):
+            config_args.append("--enable-nczarr")
+        elif self.spec.satisfies("@4.8.0"):
+            config_args.append("--disable-nczarr")
+
+        if self.spec.satisfies("@4.9.0:+shared"):
+            # The plugins are not built when the shared libraries are disabled:
+            config_args.extend(
+                ["--enable-plugins", "--with-plugin-dir={0}".format(self.prefix.plugins)]
+            )
+
+        # The option was introduced in version 4.3.1 and does nothing starting version 4.6.1:
+        if self.spec.satisfies("@4.3.1:4.6.0"):
+            config_args.append("--enable-dynamic-loading")
+
+        if self.spec.satisfies("@4.4:"):
+            config_args += self.enable_or_disable("parallel4", variant="mpi")
+
+        config_args += self.enable_or_disable("pnetcdf", variant="parallel-netcdf")
+
+        config_args += self.enable_or_disable("hdf4")
+
+        config_args += self.enable_or_disable("shared")
+
+        config_args += self.enable_or_disable("dap")
+        if self.spec.satisfies("@4.9.0:"):
+            # Prevent linking to system libxml2:
+            config_args += self.enable_or_disable("libxml2", variant="dap")
+
+        if "+byterange" in self.spec:
+            config_args.append("--enable-byterange")
+        elif self.spec.satisfies("@4.7.0:"):
+            config_args.append("--disable-byterange")
+
+        if self.spec.satisfies("@4.3.2:4.9.2"):
+            config_args += self.enable_or_disable("jna")
+
+        config_args += self.enable_or_disable("fsync")
+
+        config_args += self.enable_or_disable("logging")
+
+        if any(self.spec.satisfies(s) for s in ["+mpi", "+parallel-netcdf", "^hdf5+mpi~shared"]):
+            config_args.append("CC={0}".format(self.spec["mpi"].mpicc))
+
+        # In general, we rely on the compiler wrapper to inject the required CPPFLAGS and LDFLAGS.
+        # However, the injected LDFLAGS are invisible for the configure script and are added
+        # neither to the pkg-config nor to the nc-config files. Therefore, we generate LDFLAGS
+        # based on the contents of the following list and pass them to the configure script:
+        lib_search_dirs = []
+
+        # In general, we rely on the configure script to generate the required linker flags in the
+        # right order. However, the configure script does not know and does not check for several
+        # possible transitive dependencies and we have to pass them as the LIBS argument. The list
+        # is generated based on the contents of the following list:
+        extra_libs = []
+
+        if "+parallel-netcdf" in self.spec:
+            lib_search_dirs.extend(self.spec["parallel-netcdf"].libs.directories)
+
+        if "+hdf4" in self.spec:
+            hdf = self.spec["hdf"]
+            lib_search_dirs.extend(hdf.libs.directories)
+            # The configure script triggers unavoidable overlinking to jpeg:
+            lib_search_dirs.extend(hdf["jpeg"].libs.directories)
+            if "~shared" in hdf:
+                # We do not use self.spec["hdf:transitive"].libs to avoid even more duplicates
+                # introduced by the configure script:
+                if "+szip" in hdf:
+                    extra_libs.append(hdf["szip"].libs)
+                if "+external-xdr ^libtirpc" in hdf:
+                    extra_libs.append(hdf["rpc"].libs)
+                extra_libs.append(hdf["zlib-api"].libs)
+
+        hdf5 = self.spec["hdf5:hl"]
+        lib_search_dirs.extend(hdf5.libs.directories)
+        if "~shared" in hdf5:
+            if "+szip" in hdf5:
+                extra_libs.append(hdf5["szip"].libs)
+            extra_libs.append(hdf5["zlib-api"].libs)
+
+        if self.spec.satisfies("@4.9.0:+shared"):
+            lib_search_dirs.extend(self.spec["zlib-api"].libs.directories)
+        else:
+            # Prevent overlinking to zlib:
+            config_args.append("ac_cv_search_deflate=")
+
+        if "+nczarr_zip" in self.spec:
+            lib_search_dirs.extend(self.spec["libzip"].libs.directories)
+        elif self.spec.satisfies("@4.9.2:"):
+            # Prevent linking to libzip to disable the feature:
+            config_args.append("ac_cv_search_zip_open=no")
+        elif self.spec.satisfies("@4.8.0:"):
+            # Prevent linking to libzip to disable the feature:
+            config_args.append("ac_cv_lib_zip_zip_open=no")
+
+        if "+szip" in self.spec:
+            lib_search_dirs.extend(self.spec["szip"].libs.directories)
+        elif self.spec.satisfies("@4.9.0:"):
+            # Prevent linking to szip to disable the plugin:
+            config_args.append("ac_cv_lib_sz_SZ_BufftoBuffCompress=no")
+
+        if self.spec.satisfies("@4.9.3:"):
+            # If the plugin is built (i.e. when +shared), we want to ensure that the configure
+            # scripts checks for -lbz2 delivered by the bzip2 package. If the plugin is not built,
+            # we ensure that the configure script does not pick up system bzip2 (see below), but we
+            # also want to skip the checks for -lbzip2. Therefore, we pass the following option in
+            # both cases:
+            config_args.append("--enable-filter-bz2")
+        if self.spec.satisfies("@4.9.0:"):
+            if "+shared" in self.spec:
+                lib_search_dirs.extend(self.spec["bzip2"].libs.directories)
+            else:
+                # Prevent redundant entries mentioning system bzip2 in nc-config and pkg-config
+                # files:
+                config_args.append("ac_cv_lib_bz2_BZ2_bzCompress=no")
+
+        if "+zstd" in self.spec:
+            if self.spec.satisfies("@4.9.3:"):
+                config_args.append("--enable-filter-zstd")
+            lib_search_dirs.extend(self.spec["zstd"].libs.directories)
+        elif self.spec.satisfies("@4.9.3:"):
+            config_args.append("--disable-filter-zstd")
+        elif self.spec.satisfies("@4.9.0:"):
+            # Prevent linking to system zstd:
+            config_args.append("ac_cv_lib_zstd_ZSTD_compress=no")
+
+        if "+blosc" in self.spec:
+            if self.spec.satisfies("@4.9.3:"):
+                config_args.append("--enable-filter-blosc")
+            lib_search_dirs.extend(self.spec["c-blosc"].libs.directories)
+        elif self.spec.satisfies("@4.9.3:"):
+            config_args.append("--disable-filter-blosc")
+        elif self.spec.satisfies("@4.9.0:"):
+            # Prevent linking to system c-blosc:
+            config_args.append("ac_cv_lib_blosc_blosc_init=no")
+
+        if self.spec.satisfies("@:4.7~dap+byterange"):
+            extra_libs.append(self.spec["curl"].libs)
+        elif "+dap" in self.spec or "+byterange" in self.spec:
+            lib_search_dirs.extend(self.spec["curl"].libs.directories)
+        elif self.spec.satisfies("@4.7.0"):
+            # This particular version fails if curl is not found, even if it is not needed
+            # (see https://github.com/Unidata/netcdf-c/issues/1390). Note that the following does
+            # not trigger linking to system curl for this version because DAP support is disabled:
+            config_args.append("ac_cv_lib_curl_curl_easy_setopt=yes")
+        else:
+            # Prevent linking to system curl (for versions 4.8.0 and newer) and the redundant check
+            # for curl (for older versions):
+            config_args.append("ac_cv_lib_curl_curl_easy_setopt=no")
+
+        if not self.spec.satisfies("@:4.4,main"):
+            # Suppress the redundant check for m4:
+            config_args.append("ac_cv_prog_NC_M4=false")
+
+        lib_search_dirs.extend(d for libs in extra_libs for d in libs.directories)
+        # Remove duplicates and system prefixes:
+        lib_search_dirs = filter_system_paths(dedupe(lib_search_dirs))
+        config_args.append(
+            "LDFLAGS={0}".format(" ".join("-L{0}".format(d) for d in lib_search_dirs))
         )
 
-        lib_dirs = dedupe(hdf5.libs.directories + szip.libs.directories)
-        ldflags = " ".join("-L{0}".format(d) for d in lib_dirs)
+        extra_lib_names = [n for libs in extra_libs for n in libs.names]
+        # Remove duplicates in the reversed order:
+        extra_lib_names = reversed(list(dedupe(reversed(extra_lib_names))))
+        config_args.append("LIBS={0}".format(" ".join("-l{0}".format(n) for n in extra_lib_names)))
 
-        return [
-            "--disable-dap-remote-tests",
-            "CPPFLAGS={0}".format(cppflags),
-            "CFLAGS={0}".format(cppflags),
-            "LDFLAGS={0}".format(ldflags),
-            "LIBS=-lhdf5 -lsz -lz",
-        ]
+        return config_args
+
+    def check(self):
+        # Build all tests in parallel:
+        make("check", "TESTS=", parallel=True)
+        # Run the tests serially if needed. Also, run with the the --keep-going (-k) flag to run
+        # all tests even if a test in a subdirectory fails:
+        make(
+            "check",
+            "-k",
+            # The h5_test fails when run in parallel (it looks like the issues with running the
+            # tests in parallel were fixed around version 4.6.0,
+            # see https://github.com/Unidata/netcdf-c/commit/812c2fd4d108cca927582c0d84049c0f271bb9e0):
+            parallel=self.spec.satisfies("@4.6.0:"),
+        )
