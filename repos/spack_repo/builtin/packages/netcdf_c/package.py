@@ -588,20 +588,6 @@ class AutotoolsBuilder(AnyBuilder, autotools.AutotoolsBuilder):
             # Prevent linking to system c-blosc:
             config_args.append("ac_cv_lib_blosc_blosc_init=no")
 
-        if self.spec.satisfies("@:4.7~dap+byterange"):
-            extra_libs.append(self.spec["curl"].libs)
-        elif "+dap" in self.spec or "+byterange" in self.spec:
-            lib_search_dirs.extend(self.spec["curl"].libs.directories)
-        elif self.spec.satisfies("@4.7.0"):
-            # This particular version fails if curl is not found, even if it is not needed
-            # (see https://github.com/Unidata/netcdf-c/issues/1390). Note that the following does
-            # not trigger linking to system curl for this version because DAP support is disabled:
-            config_args.append("ac_cv_lib_curl_curl_easy_setopt=yes")
-        else:
-            # Prevent linking to system curl (for versions 4.8.0 and newer) and the redundant check
-            # for curl (for older versions):
-            config_args.append("ac_cv_lib_curl_curl_easy_setopt=no")
-
         if not self.spec.satisfies("@:4.4,main"):
             # Suppress the redundant check for m4:
             config_args.append("ac_cv_prog_NC_M4=false")
