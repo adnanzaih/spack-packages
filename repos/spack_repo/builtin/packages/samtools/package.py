@@ -51,11 +51,10 @@ class Samtools(Package):
     depends_on("cxx", type="build")  # generated
 
     depends_on("gmake", type="build")
-    depends_on("zlib-api")
-    depends_on("ncurses")
-    depends_on("perl", type="run")
-    depends_on("python", type="run")
-
+    #depends_on("zlib-api")
+    #depends_on("ncurses")
+    #depends_on("perl", type="run")
+    depends_on("python", type="run")    
     # htslib became standalone @1.3.1, must use corresponding version
     depends_on("htslib@1.23.1", when="@1.23.1")
     depends_on("htslib@1.21", when="@1.21")
@@ -80,19 +79,19 @@ class Samtools(Package):
     depends_on("htslib@1.3.1", when="@1.3.1")
 
     def install(self, spec, prefix):
-        curses_lib = self.spec["ncurses"].libs.link_flags
+        #curses_lib = self.spec["ncurses"].libs.link_flags
 
         if self.spec.version >= Version("1.3.1"):
             configure(
                 f"--prefix={prefix}",
                 f"--with-htslib={self.spec['htslib'].prefix}",
-                "--with-ncurses",
-                f"CURSES_LIB={curses_lib}",
+                # "--with-ncurses",
+                # f"CURSES_LIB={curses_lib}",
             )
             make()
             make("install")
         else:
-            make(f"prefix={prefix}", f"LIBCURSES={curses_lib}")
+            #make(f"prefix={prefix}", f"LIBCURSES={curses_lib}")
             if self.spec.version == Version("0.1.8"):
                 make(f"prefix={prefix}")
             else:

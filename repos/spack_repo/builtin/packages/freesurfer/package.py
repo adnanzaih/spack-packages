@@ -29,12 +29,11 @@ class Freesurfer(Package):
     version("7.1.1", sha256="6098b166fee8644f44f9ec88f3ffe88d05f2bc033cca60443e99e3e56f2e166b")
     version("7.1.0", sha256="1b8f26fe5c712433ddb74c47fe1895ed1d9fbff46cfae8aaae2697cb65ae8840")
 
-    depends_on("mesa-glu")
-    depends_on("qt")
-    depends_on("tcsh")
-    depends_on("bc")
-    depends_on("perl")
-
+    #depends_on("mesa-glu")
+    #depends_on("qt")
+    #depends_on("tcsh")
+    #depends_on("bc")
+    #depends_on("perl")    
     def url_for_version(self, version):
         return "https://surfer.nmr.mgh.harvard.edu/pub/dist/freesurfer/{0}/freesurfer-linux-centos7_x86_64-{1}.tar.gz".format(
             version, version

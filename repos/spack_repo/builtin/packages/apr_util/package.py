@@ -32,7 +32,7 @@ class AprUtil(AutotoolsPackage):
     depends_on("expat")
     depends_on("iconv")
 
-    depends_on("openssl", when="+crypto")
+    #depends_on("openssl", when="+crypto")
     depends_on("gdbm", when="+gdbm")
     depends_on("postgresql", when="+pgsql")
     depends_on("sqlite", when="+sqlite")
@@ -61,7 +61,7 @@ class AprUtil(AutotoolsPackage):
         ]
 
         if spec.satisfies("+crypto"):
-            args.extend(["--with-crypto", f"--with-openssl={spec['openssl'].prefix}"])
+            args.extend(["--with-crypto"])
         else:
             args.append("--without-crypto")
 
