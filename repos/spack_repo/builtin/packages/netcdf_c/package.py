@@ -33,14 +33,390 @@ class NetcdfC(AutotoolsPackage):
     version("4.7.1", sha256="583e6b89c57037293fc3878c9181bb89151da8c6015ecea404dd426fea219b2c")
     version("4.7.0", sha256="26d03164074363b3911ed79b7cddd045c22adf5ebaf978943db11a1d9f15e9d3")
 
+    with when("build_system=cmake"):
+        # TODO: document why we need to revert https://github.com/Unidata/netcdf-c/pull/1731
+        #  with the following patch:
+        patch("4.8.1-win-hdf5-with-zlib.patch", when="@4.8.1:4.9.2 platform=windows")
+
+        # TODO: https://github.com/Unidata/netcdf-c/pull/2595 contains some of the changes
+        # made in this patch but is not sufficent to replace the patch. There is currently
+        # no upstream PR (or set of PRs) covering all changes in this path.
+        # When #2595 lands, this patch should be updated to include only
+        # the changes not incorporated into that PR
+        patch("netcdfc_correct_and_export_link_interface.patch", when="@:4.8")
+        patch("netcdfc_4.9_correct_and_export_link_interface.patch", when="@4.9:4.9.2")
+
+        # Building netcdf-c w/ hdf5+mpi causes CMake's FindMPI to inject a path to the current
+        # netcdf-c source directory into its targets interface properties causing CMake configure
+        # failures. This patch strips the source dir from the MPI include interface
+        patch("strip_csd_from_mpi_inc.patch", when="@4.7.1:4.9.2 platform=windows")
+
+        # Netcdf's source for the h5deflate target contains includes for zlib headers
+        # but fails to include that header in the include interface in the relevant
+        # CMake target, this patch adds that.
+        # Similar to https://github.com/Unidata/netcdf-c/pull/3132
+        patch("netcdf-4.9.3-deflate-include-zlib.patch", when="@4.9.3")
+
+        # Netcdf-c, on Windows, attempts to glob from the CMake prefix path
+        # which is wrong for a multidue of development and CMake practices reasons
+        # is error prone because it uses Windows paths (and prevents installation)
+        # and has no relation to actual runtime requirements for netcdf-c
+        # Additionally, Spack on Windows already does this for every package
+        # so remove this behavior from netcdf-c
+        patch("netcdf-c-4.9.3_no_glob_deps.patch", when="@4.9.3 platform=windows")
+        patch("netcdf-c-4.7-9.2_no_glob_deps.patch", when="@4.7:4.9.2 platform=windows")
+
+    # Some of the patches touch configure.ac and, therefore, require forcing the autoreconf stage:
+    _force_autoreconf_when = []
+    with when("build_system=autotools"):
+        # See https://github.com/Unidata/netcdf-c/pull/1752
+        patch(
+            "https://github.com/Unidata/netcdf-c/commit/386e2695286702156eba27ab7c68816efb192230.patch?full_index=1",
+            sha256="cb928a91f87c1615a0788f95b95d7a2e3df91dc16822f8b8a34a85d4e926c0de",
+            when="@4.7.3:4.7.4 +parallel-netcdf",
+        )
+        _force_autoreconf_when.append("@4.7.3:4.7.4 +parallel-netcdf")
+
+        # See https://github.com/Unidata/netcdf-c/pull/2293
+        patch(
+            "https://github.com/Unidata/netcdf-c/commit/a7ea050ebb3c412a99cc352859d5176a9b5ef986.patch?full_index=1",
+            sha256="38d34de38bad99737d3308867071196f20a3fb39b936de7bfcfbc85eb0c7ef54",
+            when="@4.8.1",
+        )
+        _force_autoreconf_when.append("@4.8.1")
+
+        # See https://github.com/Unidata/netcdf-c/pull/2710
+        # Versions 4.9.0 and 4.9.1 had a bug in the configure script, which worked to our benefit.
+        # The bug has been fixed in
+        # https://github.com/Unidata/netcdf-c/commit/267b26f1239310ca7ba8304315834939f7cc9886 and
+        # now we need a patch in cases when we build for macOS with DAP disabled:
+        patch(
+            "https://github.com/Unidata/netcdf-c/commit/cfe6231aa6b018062b443cbe2fd9073f15283344.patch?full_index=1",
+            sha256="4e105472de95a1bb5d8b0b910d6935ce9152777d4fe18b678b58347fa0122abc",
+            when="@4.9.2~dap platform=darwin",
+        )
+        _force_autoreconf_when.append("@4.9.2~dap platform=darwin")
+
+    with when("@4.7.2"):
+        # Fix headers
+        # See https://github.com/Unidata/netcdf-c/pull/1505
+        patch(
+            "https://github.com/Unidata/netcdf-c/commit/cca9ae64f622bb2b7f164fa352c820b5fe4d132c.patch?full_index=1",
+            sha256="495b3e5beb7f074625bcec2ca76aebd339e42719e9c5ccbedbdcc4ffb81a7450",
+        )
+        # See https://github.com/Unidata/netcdf-c/pull/1508
+        patch(
+            "https://github.com/Unidata/netcdf-c/commit/f0dc61a73c8a35432034c8d262f1893a0090c3ed.patch?full_index=1",
+            sha256="19e7f31b96536928621b1c29bb6d1a57bcb7aa672cea8719acf9ac934cdd2a3e",
+        )
+
+    # See https://github.com/Unidata/netcdf-c/pull/2618
+    patch(
+        "https://github.com/Unidata/netcdf-c/commit/00a722b253bae186bba403d0f92ff1eba719591f.patch?full_index=1",
+        sha256="25b83de1e081f020efa9e21c94c595220849f78c125ad43d8015631d453dfcb9",
+        when="@4.9.0:4.9.1~mpi+parallel-netcdf",
+    )
+
+    # See https://github.com/Unidata/netcdf-c/issues/2674
+    patch(
+        "https://github.com/Unidata/netcdf-c/commit/f8904d5a1d89420dde0f9d2c0e051ba08d08e086.patch?full_index=1",
+        sha256="0161eb870fdfaf61be9d70132c9447a537320342366362e76b8460c823bf95ca",
+        when="@4.9.0:4.9.2",
+    )
+
+    # Address the CVE-2025-14933 vulnerability (https://github.com/advisories/GHSA-cg32-6v27-jr43).
+    # See https://github.com/Unidata/netcdf-c/pull/3153
+    patch(
+        "https://github.com/Unidata/netcdf-c/commit/0e0cb290673fa5a8056df603a95d6bdc7865e9c4.patch?full_index=1",
+        sha256="5adacbeb7021ba59e6cdb23bb0095c720b9da925b276418c66d5eb9c8ddb0d56",
+        when="@:4.9",
+    )
+    # https://github.com/Unidata/netcdf-c/issues/3199
+    patch("cmakelists_mpi_symbols.patch", when="build_system=cmake")
+
+    # Address the CVE-2025-14933 vulnerability (https://github.com/advisories/GHSA-cg32-6v27-jr43).
+    # See https://github.com/Unidata/netcdf-c/pull/3153
+    patch(
+        "https://github.com/Unidata/netcdf-c/commit/0e0cb290673fa5a8056df603a95d6bdc7865e9c4.patch?full_index=1",
+        sha256="5adacbeb7021ba59e6cdb23bb0095c720b9da925b276418c66d5eb9c8ddb0d56",
+        when="@:4.9",
+    )
+
+    def patch(self):
+        """Fix bad code in ncgen/CMakeLists.txt that removes
+        the rpath for dependencies like hdf5."""
+        if self.spec.satisfies("build_system=cmake"):
+            filter_file(
+                "SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)",
+                "SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)",
+                "ncgen/CMakeLists.txt",
+                string=True,
+            )
+
+    variant("mpi", default=True, description="Enable parallel I/O for netcdf-4")
+    variant("parallel-netcdf", default=True, description="Enable parallel I/O for classic files")
+    variant("hdf4", default=True, description="Enable HDF4 support")
+    variant("pic", default=True, description="Produce position-independent code (for shared libs)")
+    variant("shared", default=True, description="Enable shared library")
+    variant("dap", default=True, description="Enable DAP support")
+    variant("byterange", default=True, description="Enable byte-range I/O")
+    variant("jna", default=True, description="Enable JNA support")
+    variant("fsync", default=True, description="Enable fsync support")
+    variant("nczarr_zip", default=True, description="Enable NCZarr zipfile format storage")
+    variant("optimize", default=True, description="Enable -O2 for a more optimized lib")
+    variant("logging", default=True, description="Enable logging")
+
+    variant("szip", default=True, description="Enable Szip compression plugin")
+    variant("blosc", default=True, description="Enable Blosc compression plugin")
+    variant("zstd", default=True, description="Enable Zstandard compression plugin")
+
     depends_on("c", type="build")
-    depends_on("hdf5")
-    depends_on("szip")
-    #depends_on("libxml2")
+    depends_on("hdf~netcdf", when="+hdf4")
+    depends_on("parallel-netcdf", when="+parallel-netcdf")
+    # We need to build with MPI wrappers if any of the two
+    # parallel I/O features is enabled:
+    # https://docs.unidata.ucar.edu/nug/current/getting_and_building_netcdf.html#build_parallel
+    depends_on("mpi", when="+mpi")
+    depends_on("mpi", when="+parallel-netcdf")
+
+    # We also need to use MPI wrappers when building against static MPI-enabled HDF5:
+    depends_on("mpi", when="^hdf5+mpi~shared")
+
+    # High-level API of HDF5 1.8.9 or later is required for netCDF-4 support:
+    # https://docs.unidata.ucar.edu/nug/current/getting_and_building_netcdf.html
+    depends_on("hdf5@1.8.9:+hl")
+
+    # We need HDF5 with mpi support to enable parallel I/O.
+    depends_on("hdf5+mpi", when="+mpi")
+
+    # Although NetCDF 4.8.0 builds and passes the respective tests against HDF5 1.12.0 with the
+    # default API (i.e. the problem reported in https://github.com/Unidata/netcdf-c/issues/1965 is
+    # not reproducible), the configure script fails if HDF5 1.12.0 is built without api=v18
+    # (according to the error message emitted by the configure script) or api=v110 (according to
+    # the comments in the configure script and its implementation). The check that led to the
+    # failure was removed in version 4.8.1 (https://github.com/Unidata/netcdf-c/pull/2044). To
+    # keep it simple, we require HDF5 1.10.x or older:
+    depends_on("hdf5@:1.10", when="@4.8.0")
+
+    with when("+byterange"):
+        # HDF5 implements H5allocate_memory starting version 1.8.15:
+        depends_on("hdf5@1.8.15:")
+        # HDF5 defines H5FD_FEAT_DEFAULT_VFD_COMPATIBLE (required when version 1.10.x is used)
+        # starting version 1.10.2:
+        depends_on("hdf5@:1.9,1.10.2:")
+        # The macro usage was adjusted (required when versions 1.8.23+, 1.10.8+, 1.12.1+ and
+        # 1.13.0+ of HDF5 are used) in NetCDF 4.8.1
+        # (see https://github.com/Unidata/netcdf-c/pull/2034):
+        depends_on("hdf5@:1.8.22,1.10.0:1.10.7,1.12.0,1.13:", when="@:4.8.0")
+        # Compatibility with HDF5 1.14.x was introduced in NetCDF 4.9.2
+        # (see https://github.com/Unidata/netcdf-c/pull/2615):
+        depends_on("hdf5@:1.12", when="@:4.9.1")
+
+    depends_on("libzip", when="+nczarr_zip")
+
+    # According to the documentation (see
+    # https://docs.unidata.ucar.edu/nug/current/getting_and_building_netcdf.html), zlib 1.2.5 or
+    # later is required for netCDF-4 compression. However, zlib became a direct dependency only
+    # starting NetCDF 4.9.0 (for the deflate plugin):
+    depends_on("zlib-api", when="@4.9.0:+shared")
+    depends_on("zlib@1.2.5:", when="^[virtuals=zlib-api] zlib")
+    # Use the vendored bzip2 on Windows:
+    for __p in ["darwin", "linux"]:
+        depends_on("bzip2", when="@4.9.0:+shared platform={0}".format(__p))
+    del __p
+    # Byte-range requires DAP starting version 4.9.3:
+    requires("+dap", when="@4.9.3:+byterange")
+
+    # JNA was added in 4.3.2 and removed in 4.9.3:
+    conflicts("+jna", when="@:4.7.0,4.9.3:")
+
+
+    # NCZarr was added in version 4.8.0 as an experimental feature and became a supported one in
+    # version 4.8.1:
+    conflicts("+nczarr_zip", when="@:4.8.0")
+
+    # The features were introduced in version 4.9.0:
+    with when("@:4.8"):
+        conflicts("+szip")
+        conflicts("+blosc")
+        conflicts("+zstd")
+
+    depends_on("szip", when="+szip")
+    depends_on("c-blosc", when="+blosc")
+    depends_on("zstd", when="+zstd")
+
+    default_build_system = "cmake" if sys.platform == "win32" else "autotools"
+
+    build_system("cmake", "autotools", default=default_build_system)
+
+    def setup_run_environment(self, env: EnvironmentModifications) -> None:
+        if self.spec.satisfies("@4.9.0:+shared"):
+            # Both HDF5 and NCZarr backends honor the same environment variable:
+            env.append_path("HDF5_PLUGIN_PATH", self.prefix.plugins)
+
+    def flag_handler(self, name, flags):
+        if self.spec.satisfies("build_system=autotools"):
+            if name == "cflags":
+                if "+pic" in self.spec:
+                    flags.append(self.compiler.cc_pic_flag)
+                if "+optimize" in self.spec:
+                    flags.append("-O2")
+        return flags, None, None
+    def patch(self):
+        # Needed due to the patch applied to fix CVE-2025-14933.
+        # A `#include <stdint.h>` is introduced in version 4.8.1.
+        # Refer to https://github.com/spack/spack-packages/issues/5524
+        if self.spec.satisfies("@:4.8.0"):
+            filter_file(
+                "#define NCCONFIGURE_H 1",
+                "#define NCCONFIGURE_H 1\n\n#ifdef HAVE_STDINT_H\n#include <stdint.h>\n#endif",
+                "include/ncconfigure.h",
+                string=True,
+            )
+
+    def patch(self):
+        # Needed due to the patch applied to fix CVE-2025-14933.
+        # A `#include <stdint.h>` is introduced in version 4.8.1.
+        # Refer to https://github.com/spack/spack-packages/issues/5524
+        if self.spec.satisfies("@:4.8.0"):
+            filter_file(
+                "#define NCCONFIGURE_H 1",
+                "#define NCCONFIGURE_H 1\n\n#ifdef HAVE_STDINT_H\n#include <stdint.h>\n#endif",
+                "include/ncconfigure.h",
+                string=True,
+            )
 
     @property
     def libs(self):
-        return find_libraries("libnetcdf", root=self.prefix, recursive=True)
+        shared = "+shared" in self.spec
+        return find_libraries("libnetcdf", root=self.prefix, shared=shared, recursive=True)
+
+
+class AnyBuilder(BaseBuilder):
+    def setup_dependent_build_environment(
+        self, env: EnvironmentModifications, dependent_spec: Spec
+    ) -> None:
+        # Some packages, e.g. ncview, refuse to build if the compiler path returned by nc-config
+        # differs from the path to the compiler that the package should be built with. Therefore,
+        # we have to shadow nc-config from self.prefix.bin, which references the real compiler,
+        # with a backed up version, which references Spack compiler wrapper.
+        if os.path.exists(self._nc_config_backup_dir):
+            env.prepend_path("PATH", self._nc_config_backup_dir)
+
+    @property
+    def _nc_config_backup_dir(self):
+        return join_path(self.pkg.metadata_dir, "spack-nc-config")
+
+    @run_after("install")
+    def backup_nc_config(self):
+        # We expect this to be run before filter_compiler_wrappers:
+        nc_config_file = self.prefix.bin.join("nc-config")
+        if os.path.exists(nc_config_file):
+            mkdirp(self._nc_config_backup_dir)
+            install(nc_config_file, self._nc_config_backup_dir)
+
+    filter_compiler_wrappers("nc-config", relative_root="bin")
+
+
+class CMakeBuilder(AnyBuilder, cmake.CMakeBuilder):
+    def cmake_args(self):
+        # In 4.9.3, all CMake options were prefixed.
+        # Ref. https://github.com/Unidata/netcdf-c/pull/2895
+        nc = "NETCDF_" if self.spec.satisfies("@4.9.3:") else ""
+        base_cmake_args = [
+            self.define_from_variant("BUILD_SHARED_LIBS", "shared"),
+            self.define_from_variant(nc + "ENABLE_BYTERANGE", "byterange"),
+            self.define(nc + "BUILD_UTILITIES", True),
+            self.define(nc + "ENABLE_NETCDF_4", True),
+            self.define_from_variant(nc + "ENABLE_DAP", "dap"),
+            self.define_from_variant(nc + "ENABLE_HDF4", "hdf4"),
+            self.define(nc + "ENABLE_PARALLEL_TESTS", False),
+            self.define_from_variant(nc + "ENABLE_FSYNC", "fsync"),
+            self.define(nc + "ENABLE_LARGE_FILE_SUPPORT", True),
+            self.define_from_variant("NETCDF_ENABLE_LOGGING", "logging"),
+        ]
+        if any(self.spec.satisfies(s) for s in ["+mpi", "+parallel-netcdf", "^hdf5+mpi~shared"]):
+            base_cmake_args.append(
+                self.define("CMAKE_C_COMPILER", pathlib.Path(self.spec["mpi"].mpicc).as_posix())
+            )
+        if "+parallel-netcdf" in self.pkg.spec:
+            base_cmake_args.append(self.define(nc + "ENABLE_PNETCDF", True))
+        if self.pkg.spec.satisfies("@4.3.1:"):
+            base_cmake_args.append(self.define(nc + "ENABLE_DYNAMIC_LOADING", True))
+        if "platform=windows" in self.pkg.spec:
+            # Enforce the usage of the vendored version of bzip2 on Windows:
+            base_cmake_args.append(self.define("Bz2_INCLUDE_DIRS", ""))
+
+        # FIND_SHARED_LIBS has different prefix
+        nc = "NETCDF_" if self.spec.satisfies("@4.9.3:") else "NC_"
+        if "+shared" in self.pkg.spec["hdf5"]:
+            base_cmake_args.append(self.define(nc + "FIND_SHARED_LIBS", True))
+        else:
+            base_cmake_args.append(self.define(nc + "FIND_SHARED_LIBS", False))
+
+        # The plugins are not built when the shared libraries are disabled:
+        if self.spec.satisfies("@4.9.3:+shared"):
+            # This toggle is not defined in the top-level CMake parameters but is still
+            # used by the plugin config; so we work around this bug for now
+            base_cmake_args.extend(
+                [
+                    self.define("ENABLE_PLUGIN_INSTALL", True),
+                    self.define(
+                        "NETCDF_WITH_PLUGIN_DIR", pathlib.Path(self.prefix.plugins).as_posix()
+                    ),
+                ]
+            )
+        elif self.spec.satisfies("@4.9.0:+shared"):
+            base_cmake_args.append(
+                self.define("PLUGIN_INSTALL_DIR", pathlib.Path(self.prefix.plugins).as_posix())
+            )
+        return base_cmake_args
+
+    @run_after("install")
+    def patch_hdf5_pkgconfigcmake(self):
+        """
+        Incorrect hdf5 library names are put in the package config files
+        due to incorrectly using hdf5 target names
+        https://github.com/spack/spack/pull/42878
+        """
+        if sys.platform == "win32":
+            return
+
+        pkgconfig_file = find(self.prefix, "netcdf.pc", recursive=True)
+        ncconfig_file = find(self.prefix, "nc-config", recursive=True)
+        settingsconfig_file = find(self.prefix, "libnetcdf.settings", recursive=True)
+
+        files = pkgconfig_file + ncconfig_file + settingsconfig_file
+        config = "shared" if self.spec.satisfies("+shared") else "static"
+        filter_file(f"hdf5-{config}", "hdf5", *files, ignore_absent=True)
+        filter_file(f"hdf5_hl-{config}", "hdf5_hl", *files, ignore_absent=True)
+
+
+class AutotoolsBuilder(AnyBuilder, autotools.AutotoolsBuilder):
+    @property
+    def force_autoreconf(self):
+        return any(self.spec.satisfies(s) for s in self.pkg._force_autoreconf_when)
+
+    @when("@4.6.3:")
+    def autoreconf(self, pkg, spec, prefix):
+        if not os.path.exists(self.configure_abs_path):
+            Executable("./bootstrap")()
+
+    @run_before("autoreconf")
+    def filter_stdcxx(self):
+        # Starting version 4.8.0, the library includes C++ source files. None of those files is
+        # compiled in any configuration that we currently support. The C++ compiler is also never
+        # called for the compilation and linking (e.g. libnczarr.la, which is linked with
+        # --tag=CXX, is a convenience library and therefore is created with AR, not CXX). However,
+        # the Automake files are implemented to append -lstdc++ to the list of linker flags even
+        # when unnecessary, which we fix with the following patching:
+        if self.spec.satisfies("@4.8.0:"):
+            # Patch Makefile.in files to cover the case when autoreconf if skipped:
+            filenames = find(self.configure_directory, "Makefile.in", recursive=True)
+            # Patch the Automake include file to cover the case when autoreconf is run:
+            filenames.append(join_path(self.configure_directory, "lib_flags.am"))
+            with keep_modification_time(*filenames):
+                filter_file("-lstdc++", "", *filenames, string=True)
 
     def configure_args(self):
         hdf5 = self.spec["hdf5"]
