@@ -3,6 +3,9 @@
 # It describes a set of packages to be installed, along with
 # configuration settings.
 spack:
+  config:
+      install_tree:
+        root: /sw/pkgs/arc/staging/spack
   view: false
   specs:
   ##########################################################################################
@@ -268,6 +271,9 @@ spack:
 
   modules:
     default:
+      roots:
+        lmod: /sw/pkgs/arc/staging/biospack/biomodules
+        tcl: /sw/pkgs/arc/staging/biospack/biomodules
       lmod:
         projections:
           r: 'R/{version}'
