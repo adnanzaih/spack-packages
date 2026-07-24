@@ -36,8 +36,8 @@ spack:
     - libgd@2.3.3
     - r@4.6.1+arc ^flexiblas@3.4.2 ^libjpeg-turbo@3.1.3 ^libtiff@4.7.1 ^libpng@1.6.58
     - r@4.6.0+arc ^flexiblas@3.4.2 ^libjpeg-turbo@3.1.3 ^libtiff@4.7.1 ^libpng@1.6.58
-    - rtidyverse@2.0.0 ^r@4.6.1+arc ^flexiblas@3.4.2 ^libjpeg-turbo@3.1.3 ^libtiff@4.7.1 ^libpng@1.6.58
-    - rtidyverse@2.0.0 ^r@4.6.0+arc ^flexiblas@3.4.2 ^libjpeg-turbo@3.1.3 ^libtiff@4.7.1 ^libpng@1.6.58
+    - rtidyverse@2.0.0 ^libjpeg-turbo@3.1.3 ^libtiff@4.7.1 ^libpng@1.6.58 ^r@4.6.1+arc ^flexiblas@3.4.2
+    - rtidyverse@2.0.0 ^libjpeg-turbo@3.1.3 ^libtiff@4.7.1 ^libpng@1.6.58 ^r@4.6.0+arc ^flexiblas@3.4.2
     # wont build with gcc 8.5.0, but leaving it here for the future.
     #- rgeospatial ^rtidyverse@2.0.0 ^r@4.6.0+arc ^flexiblas ^jpeg ^libtiff ^libpng ^gdal@3.6.3 ^netcdf-c@4.7.4 ^hdf5@1.14.6+hl+cxx+fortran ^libaec@1.1.4
     - cuda@12.9.1
@@ -75,7 +75,7 @@ spack:
     - libsodium@1.0.22
     - libgd@2.3.3
     - r@4.6.1+arc ^flexiblas@3.4.2 ^libjpeg-turbo@3.1.3 ^libtiff@4.7.1 ^libpng@1.6.58
-    - rtidyverse@2.0.0 ^r@4.6.1+arc ^flexiblas@3.4.2 ^libjpeg-turbo@3.1.3 ^libtiff@4.7.1 ^libpng@1.6.58
+    - rtidyverse@2.0.0 ^libjpeg-turbo@3.1.3 ^libtiff@4.7.1 ^libpng@1.6.58 ^r@4.6.1+arc ^flexiblas@3.4.2
     - rgeospatial@1.5-18 ^rtidyverse@2.0.0 ^r@4.6.1+arc ^flexiblas@3.4.2 ^libjpeg-turbo@3.1.3 ^libtiff@4.7.1 ^libpng@1.6.58 ^gdal@3.13.1 ^netcdf-c@4.7.4 ^hdf5@1.14.6+hl+cxx+fortran ^libaec@1.1.4
     override:
       packages:
@@ -107,7 +107,7 @@ spack:
     - libsodium@1.0.22
     - libgd@2.3.3
     - r@4.6.1+arc ^flexiblas@3.4.2 ^libjpeg-turbo@3.1.3 ^libtiff@4.7.1 ^libpng@1.6.58
-    - rtidyverse@2.0.0 ^r@4.6.1+arc ^flexiblas@3.4.2 ^libjpeg-turbo@3.1.3 ^libtiff@4.7.1 ^libpng@1.6.58
+    - rtidyverse@2.0.0 ^libjpeg-turbo@3.1.3 ^libtiff@4.7.1 ^libpng@1.6.58 ^r@4.6.1+arc ^flexiblas@3.4.2
     override:
       packages:
         c:
@@ -272,14 +272,13 @@ spack:
   modules:
     default:
       roots:
-        lmod: /sw/pkgs/arc/staging/biospack/biomodules
-        tcl: /sw/pkgs/arc/staging/biospack/biomodules
+        lmod: /sw/pkgs/arc/staging/spack/modules
+        tcl: /sw/pkgs/arc/staging/spack/modules
       lmod:
         projections:
           r: 'R/{version}'
           intel-oneapi-compilers-classic: 'intel/{version}'
         hash_length: 0
-                
         hierarchy:
           - r
           - mpi
