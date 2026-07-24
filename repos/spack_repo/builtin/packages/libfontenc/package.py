@@ -22,7 +22,7 @@ class Libfontenc(AutotoolsPackage, XorgPackage):
 
     depends_on("c", type="build")
 
-    depends_on("zlib-api")
+    #depends_on("zlib-api")
 
     depends_on("xproto", type="build")
     depends_on("pkgconfig", type="build")
