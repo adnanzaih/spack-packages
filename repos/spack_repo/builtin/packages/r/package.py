@@ -78,7 +78,7 @@ class R(AutotoolsPackage):
     #depends_on("java", when="+java", type=("build", "run"))
 
     with when("+arc"):
-        depends_on("pkgconfig", type="build")
+        #depends_on("pkgconfig", type="build")
         #depends_on("git", type=("build", "run"))
         #depends_on("libgit2@1.0:")
         #depends_on("libxml2")
@@ -149,11 +149,6 @@ class R(AutotoolsPackage):
 
     def setup_build_environment(self, env: EnvironmentModifications) -> None:
         if self.spec.satisfies("+arc"):
-            
-            for path in ("/usr/lib64/pkgconfig", "/usr/lib/pkgconfig", "/usr/share/pkgconfig"):
-                if os.path.isdir(path):
-                    env.append_path("PKG_CONFIG_PATH", path)
-
             arc_flags = "-O3 -mtune=native"
             env.set("CFLAGS", arc_flags)
             env.set("CPPFLAGS", arc_flags)

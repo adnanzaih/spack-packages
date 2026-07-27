@@ -28,10 +28,10 @@ class Rtidyverse(RCollectivePackage):
 
 
     depends_on("r@3.3:", type=("build", "run"))
-    depends_on("libpng", type=("build", "link", "run"))
-    depends_on("libtiff", type=("build", "link", "run"))
-    depends_on("jpeg", type=("build", "link", "run"))
-    depends_on("pkgconfig", type="build")
+    #depends_on("libpng", type=("build", "link", "run"))
+    #depends_on("libtiff", type=("build", "link", "run"))
+    #depends_on("jpeg", type=("build", "link", "run"))
+    #depends_on("pkgconfig", type="build")
 
     #def setup_build_environment(self, env: EnvironmentModifications) -> None:
     #    for name in ("libpng", "libtiff", "jpeg"):

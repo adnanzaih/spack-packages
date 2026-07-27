@@ -1,0 +1,153 @@
+# This is a Spack Environment file.
+#
+# It describes a set of packages to be installed, along with
+# configuration settings.
+spack:
+  config:
+      install_tree:
+        root: /sw/pkgs/arc/staging/qupath
+  upstreams:
+    arc-compiler-stacks:
+      install_tree: /sw/pkgs/arc/staging/spack
+    bioinformatics:
+      install_tree: /sw/pkgs/arc/staging/biospack
+  view: false
+  specs:
+  ##########################################################################################
+  #                                       Software                                         #
+  ##########################################################################################
+
+  - group: qupath
+    specs:
+    - qupath@0.7.0+djl+pytorch ^py-torch@2.7.1+cuda+cudnn~rocm cuda_arch=80 ^cairo@1.18.4+X
+    override:
+      packages:
+        c:
+          prefer: [gcc@10.3.0]
+        cxx:
+          prefer: [gcc@10.3.0]
+        fortran:
+          prefer: [gcc@10.3.0]
+  concretizer:
+    unify: false
+    reuse: true
+  packages:
+  ##########################################################################################
+  #                                       Compilers                                        #
+  ##########################################################################################
+    all:
+      providers:
+        java: [openjdk]
+    gcc:
+      externals:
+      - spec: gcc@8.5.0 languages:='c,c++,fortran'
+        prefix: /usr
+        extra_attributes:
+          compilers:
+            c: /usr/bin/gcc
+            cxx: /usr/bin/g++
+            fortran: /usr/bin/gfortran
+      - spec: gcc@10.3.0 languages:='c,c++,fortran'
+        prefix: /sw/pkgs/arc/gcc/10.3.0
+        extra_attributes:
+          compilers:
+            c: /sw/pkgs/arc/gcc/10.3.0/bin/gcc
+            cxx: /sw/pkgs/arc/gcc/10.3.0/bin/g++
+            fortran: /sw/pkgs/arc/gcc/10.3.0/bin/gfortran
+      - spec: gcc@15.1.0 languages:='c,c++,fortran'
+        prefix: /sw/pkgs/arc/gcc/15.1.0
+        extra_attributes:
+          compilers:
+            c: /sw/pkgs/arc/gcc/15.1.0/bin/gcc
+            cxx: /sw/pkgs/arc/gcc/15.1.0/bin/g++
+            fortran: /sw/pkgs/arc/gcc/15.1.0/bin/gfortran
+    llvm:
+      externals:
+      - spec: llvm@22.1.3+flang openmp=runtime
+        prefix: /sw/pkgs/arc/llvm/22.1.3
+        extra_attributes:
+          compilers:
+            c: /sw/pkgs/arc/llvm/22.1.3/bin/clang
+            cxx: /sw/pkgs/arc/llvm/22.1.3/bin/clang++
+            fortran: /sw/pkgs/arc/llvm/22.1.3/bin/flang
+          extra_rpaths:
+          - /sw/pkgs/arc/llvm/22.1.3/lib/x86_64-unknown-linux-gnu/
+          environment:
+                  prepend_path:
+                          LD_LIBRARY_PATH: /sw/pkgs/arc/llvm/22.1.3/lib/x86_64-unknown-linux-gnu/
+    intel-oneapi-compilers-classic:
+      externals:
+      - spec: intel-oneapi-compilers-classic@2021.5.0
+        prefix: /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux
+        extra_attributes:
+          compilers:
+            c: /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/bin/intel64/icc
+            cxx: /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/bin/intel64/icpc
+            fortran: /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/bin/intel64/ifort
+          flags:
+            ldflags: -L/sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/compiler/lib/intel64_lin/
+          extra_rpaths:
+          - /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/compiler/lib/intel64_lin/
+          environment:
+            prepend_path:
+              LD_LIBRARY_PATH: /sw/pkgs/arc/intel/2022.1.2/compiler/2022.0.2/linux/compiler/lib/intel64_lin/
+
+    ##########################################################################################
+    #                                       Externals                                        #
+    ##########################################################################################
+
+    perl:
+      externals:
+      - spec: perl@5.26.3
+        prefix: /usr
+    icu4c:
+      buildable: false
+      externals:
+      - spec: icu4c@60.3
+        prefix: /usr
+    openjdk:
+      externals:
+      - spec: openjdk@1.8.0
+        prefix: /usr/lib/jvm/jre
+      - spec: openjdk@18.0.1.1
+        prefix: /sw/pkgs/arc/openjdk/jdk-18.0.1.1
+    autoconf:
+      buildable: false
+      externals:
+      - spec: autoconf@2.69
+        prefix: /usr
+    pkgconf:
+      buildable: false
+      externals:
+      - spec: pkgconf@2.5.1
+        prefix: /usr
+        
+    ##########################################################################################
+    #                                         Modules                                        #
+    ##########################################################################################
+
+  modules:
+    default:
+      roots:
+        lmod: /sw/pkgs/arc/staging/qupath/modules
+        tcl: /sw/pkgs/arc/staging/qupath/modules
+      lmod:
+        projections:
+          r: 'R/{version}'
+          intel-oneapi-compilers-classic: 'intel/{version}'
+        hash_length: 0
+        hierarchy:
+          - r
+          - mpi
+        core_specs:
+        - gcc@8.5.0
+        - gcc-runtime@8.5.0
+        - gcc@10.3.0
+        - gcc@15.1.0
+        - llvm@22.1.3
+        - intel-oneapi-compilers-classic@2021.5.0
+        exclude:
+        - gcc-runtime@8.5.0
+        - glibc
+        - autoconf
+        - compiler-wrapper
