@@ -34,7 +34,7 @@ class Fontconfig(AutotoolsPackage):
     depends_on("pkgconfig", type="build")
     depends_on("font-util")
     depends_on("uuid", when="@2.13.1:")
-    depends_on("python@3:", type="build", when="@2.13.93:")
+    #depends_on("python@3:+arc", type="build", when="@2.13.93:")
 
     variant("pic", default=False, description="Enable position-independent code (PIC)")
 

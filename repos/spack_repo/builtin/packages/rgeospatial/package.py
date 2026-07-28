@@ -36,3 +36,4 @@ class Rgeospatial(RCollectivePackage):
     #depends_on("pkgconfig", type="build")
     depends_on('netcdf-fortran')
     depends_on('hdf5+hl+cxx+fortran')
+    depends_on("java", type=("build", "run"))

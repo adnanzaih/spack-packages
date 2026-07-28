@@ -75,7 +75,7 @@ class R(AutotoolsPackage):
     #depends_on("gettext")
     #depends_on("icu4c")
     #depends_on("which", type=("build", "run"))
-    #depends_on("java", when="+java", type=("build", "run"))
+    depends_on("java", when="+java", type=("build", "run"))
 
     with when("+arc"):
         #depends_on("pkgconfig", type="build")
@@ -154,8 +154,9 @@ class R(AutotoolsPackage):
             env.set("R_PAPERSIZE", "letter")
             env.set("FLEXIBLAS_ROOT", self.spec["blas"].prefix)
 
+            
         if self.spec.satisfies("+java"):
-            env.set("JAVA_HOME", "/usr/lib/jvm/jre")
+            env.set("JAVA_HOME", self.spec["java"].prefix)
         
 
     @run_after("install")
@@ -330,7 +331,7 @@ class R(AutotoolsPackage):
         if "+arc" in self.spec:
             env.prepend_path("MANPATH", join_path(self.prefix, "man"))
             env.set("R_PAPERSIZE", "letter")
-            env.set("JAVA_HOME", "/usr/lib/jvm/jre")
+            env.set("JAVA_HOME", self.spec["java"].prefix)
 
     def setup_dependent_package(self, module, dependent_spec):
         """Called before R modules' install() methods. In most cases,
