@@ -41,6 +41,77 @@ class Gdal(CMakePackage):
 
     patch("gdal-3.12-gcc8-complete-rat.patch", when="@3.12: %gcc@:8")
 
+    variant(
+        "armadillo",
+        default=False,
+        description="Speed up computations related to the Thin Plate Spline transformer",
+    )
+    # cmake configure fails if arrow~filesystem is found when variant ~arrow
+    # https://github.com/OSGeo/gdal/issues/12327
+    variant(
+        "arrow", default=True, when="build_system=cmake", description="Required for Arrow driver"
+    )
+    variant("avif", default=True, when="@3.10:", description="Required for AVIF driver")
+    variant("blosc", default=True, description="Required for Zarr driver")
+    variant("curl", default=True, description="Required for network access")
+    variant("deflate", default=True, description="Required for Deflate compression")
+    variant("freexl", default=True, description="Required for XLS driver")
+    variant("geos", default=True, description="Required for geometry processing operations in OGR")
+    variant("gif", default=True, description="Required for GIF driver")
+    variant("heif", default=True, description="Required for HEIF driver")
+    variant("hdf5", default=True, description="Required for HDF5, BAG, and KEA drivers")
+    variant("jpeg", default=True, description="Required for JPEG driver")
+    variant("jxl", default=True, description="Required for JPEGXL driver")
+    variant("libkml", default=True, description="Required for LIBKML driver")
+    variant("liblzma", default=True, description="Required for Zarr driver")
+    variant(
+        "libxml2", default=True, description="Required for XML validation in many OGR drivers"
+    )
+    variant("lz4", default=True, description="Required for Zarr driver")
+    variant(
+        "muparser",
+        default=True,
+        when="@3.11:",
+        description="Required for nominal C++ VRT expressions",
+    )
+    variant("mysql", default=True, description="Required for MySQL driver")
+    variant("netcdf", default=True, description="Required for NetCDF driver")
+    variant("odbc", default=True, description="Required for many OGR drivers")
+    variant(
+        "opencl",
+        default=True,
+        description="Required to accelerate warping computations",
+    )
+    variant("openjpeg", default=True, description="Required for JP2OpenJPEG driver")
+    variant("oracle", default=False, description="Required for OCI and GeoRaster drivers")
+    variant(
+        "parquet",
+        default=True,
+        when="build_system=cmake",
+        description="Required for Parquet driver",
+    )
+    variant(
+        "pcre2", default=True, description="Required for REGEXP operator in drivers using SQLite3"
+    )
+    variant("png", default=True, description="Required for PNG driver")
+    variant("poppler", default=True, description="Possible backend for PDF driver")
+    variant(
+        "postgresql",
+        default=False,
+        description="Required for PostgreSQL and PostGISRaster drivers",
+    )
+    variant(
+        "qhull",
+        default=True,
+        description="Used for linear interpolation of gdal_grid",
+    )
+    variant("sfcgal", default=True, description="Provides 3D geometry operations")
+    variant("spatialite", default=True, description="Required for SQLite and GPKG drivers")
+    variant("sqlite3", default=True, description="Required for SQLite and GPKG drivers")
+    variant("tiledb", default=False, description="Required for TileDB driver")
+    variant("webp", default=True, description="Required for WEBP driver")
+    variant("zstd", default=True, description="Required for Zarr driver")
+
     depends_on("c", type="build")
     depends_on("cxx", type="build")
     depends_on("cmake@3.16:", type="build")
@@ -50,7 +121,6 @@ class Gdal(CMakePackage):
     depends_on("json-c")
 
     # Optional dependencies
-    depends_on("libarchive", when="+archive")
     depends_on("armadillo", when="+armadillo")
     depends_on("blas", when="+armadillo")
     depends_on("lapack", when="+armadillo")
@@ -58,15 +128,15 @@ class Gdal(CMakePackage):
     depends_on("libavif", when="+avif")
     depends_on("c-blosc", when="+blosc")
     depends_on("curl@7.68:")
+    depends_on('freexl', when='+freexl')
     depends_on("geos")
     depends_on("giflib", when="+gif")
     depends_on("libheif@1.1:", when="+heif")
     depends_on("hdf", when="+hdf4")
-    depends_on("hdf5")
+    depends_on("hdf5", when="+hdf5")
     depends_on("jpeg", when="+jpeg")
     depends_on("libjxl", when="+jxl")
-    depends_on("libaec", when="+libaec")
-    depends_on("libdeflate", when="+archive")
+    depends_on("libdeflate", when="+deflate")
     depends_on("libkml@1.3:", when="+libkml")
     depends_on("libxml2", when="+libxml2")
     depends_on("lz4", when="+lz4")
@@ -93,6 +163,7 @@ class Gdal(CMakePackage):
     depends_on("libspatialite@4.1.2:", when="+spatialite")
     depends_on("sqlite@3.31:", when="+sqlite3")
     depends_on("libwebp", when="+webp")
+    depends_on("xz", when="+liblzma")
     depends_on("zstd", when="+zstd")
 
 
@@ -148,11 +219,57 @@ class CMakeBuilder(SpackCMakeBuilder):
             self.define("TIFF_LIBRARY_RELEASE", self._library("libtiff", "libtiff")),
             self.define("SQLite3_INCLUDE_DIR", sqlite.prefix.include),
             self.define("SQLite3_LIBRARY", self._library("sqlite", "libsqlite3", shared=False)),
-            self.define("GDAL_USE_TIFF_INTERNAL", False),
+            self.define("GDAL_USE_INTERNAL_LIBS", False),
             self.define("GDAL_USE_GEOS", True),
             self.define("GDAL_USE_HDF5", True),
             self.define("GDAL_USE_NETCDF", True),
-            self.define("GDAL_USE_POPPLER", False),
+            # Required dependencies
+            self.define("GDAL_USE_GEOTIFF", True),
+            self.define("GDAL_USE_JSONC", True),
+            self.define("GDAL_USE_TIFF", True),
+            self.define("GDAL_USE_ZLIB", True),
+            self.define("GDAL_USE_ICONV", True),
+            # zlib-ng + deflate64 doesn't compile (heavily relies on zlib)
+            # but since zlib-ng is faster than zlib, it deflate shouldn't
+            # be necessary.
+            self.define("ENABLE_DEFLATE64", "zlib-ng" not in self.spec),
+            # Optional dependencies
+            self.define_from_variant("GDAL_USE_ARMADILLO", "armadillo"),
+            self.define_from_variant("GDAL_USE_ARROW", "arrow"),
+            self.define_from_variant("GDAL_USE_AVIF", "avif"),
+            self.define_from_variant("GDAL_USE_BLOSC", "blosc"),
+            self.define_from_variant("GDAL_USE_CURL", "curl"),
+            self.define_from_variant("GDAL_USE_DEFLATE", "deflate"),
+            self.define_from_variant("GDAL_USE_FREEXL", "freexl"),
+            self.define_from_variant("GDAL_USE_GEOS", "geos"),
+            self.define_from_variant("GDAL_USE_GIF", "gif"),
+            self.define_from_variant("GDAL_USE_HEIF", "heif"),
+            self.define_from_variant("GDAL_USE_HDF4", "hdf4"),
+            self.define_from_variant("GDAL_USE_HDF5", "hdf5"),
+            self.define_from_variant("GDAL_USE_JPEG", "jpeg"),
+            self.define_from_variant("GDAL_USE_JXL", "jxl"),
+            self.define_from_variant("GDAL_USE_LIBKML", "libkml"),
+            self.define_from_variant("GDAL_USE_LIBLZMA", "liblzma"),
+            self.define_from_variant("GDAL_USE_LIBXML2", "libxml2"),
+            self.define_from_variant("GDAL_USE_LZ4", "lz4"),
+            self.define_from_variant("GDAL_USE_MUPARSER", "muparser"),
+            self.define_from_variant("GDAL_USE_MYSQL", "mysql"),
+            self.define_from_variant("GDAL_USE_NETCDF", "netcdf"),
+            self.define_from_variant("GDAL_USE_ODBC", "odbc"),
+            self.define_from_variant("GDAL_USE_OPENCL", "opencl"),
+            self.define_from_variant("GDAL_USE_OPENJPEG", "openjpeg"),
+            self.define_from_variant("GDAL_USE_PARQUET", "parquet"),
+            self.define_from_variant("GDAL_USE_PCRE2", "pcre2"),
+            self.define_from_variant("GDAL_USE_PNG", "png"),
+            self.define_from_variant("GDAL_USE_POPPLER", "poppler"),
+            self.define_from_variant("GDAL_USE_POSTGRESQL", "postgresql"),
+            self.define_from_variant("GDAL_USE_QHULL", "qhull"),
+            self.define_from_variant("GDAL_USE_RDB", "rdb"),
+            self.define_from_variant("GDAL_USE_SFCGAL", "sfcgal"),
+            self.define_from_variant("GDAL_USE_SPATIALITE", "spatialite"),
+            self.define_from_variant("GDAL_USE_SQLITE3", "sqlite3"),
+            self.define_from_variant("GDAL_USE_WEBP", "webp"),
+            self.define_from_variant("GDAL_USE_ZSTD", "zstd"),
         ]
 
         if self.spec.satisfies("%clang") or self.spec.satisfies("%apple-clang"):
