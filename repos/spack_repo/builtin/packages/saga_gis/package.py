@@ -67,7 +67,7 @@ class SagaGis(AutotoolsPackage, SourceforgePackage):
     # Set hl variant due to similar issue #7145
     depends_on("hdf5+hl")
 
-    depends_on("gdal@2.3:+hdf5+netcdf")
+    depends_on("gdal@2.3:+netcdf")
 
     # FIXME Saga-Gis uses a wrong include path
     # depends_on('qhull', when='~triangle')
