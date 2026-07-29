@@ -34,7 +34,7 @@ class Sfcgal(CMakePackage):
         sha256="30ea1af26cb2f572c628aae08dd1953d80a69d15e1cac225390904d91fce031b",
         url=old_github_urlbase.format("1.3.7"),
     )
-
+    depends_on("c", type="build")  # Adnan
     depends_on("cxx", type="build")  # generated
 
     depends_on("cmake@2.8.6:", type="build")
@@ -50,7 +50,7 @@ class Sfcgal(CMakePackage):
     depends_on("cgal@5.3", when="@1.4")
     depends_on("cgal@5.6", when="@1.5")
     depends_on(
-        "boost@1.54.0:+chrono+filesystem+program_options+serialization+system+test+thread+timer"
+        "boost@1.54.0:1.88.0+chrono+filesystem+program_options+serialization+system+test+thread+timer"
     )
     depends_on("mpfr@2.2.1:")
     depends_on("gmp@4.2:")

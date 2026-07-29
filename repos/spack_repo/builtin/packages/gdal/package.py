@@ -102,8 +102,8 @@ class Gdal(CMakePackage, AutotoolsPackage, PythonExtension):
     # Optional dependencies
     # https://gdal.org/en/stable/development/building_from_source.html
     # ARC site policy: armadillo, curl, deflate, expat, hdf4, hdf5, blosc, netcdf
-    # hdfs, lerc, libaec, liblzma, muparser, odbc, opencl, png, qhull,
-    # sfcgal, sqlite3, and zstd are always enabled outside the variant DAG.
+    # lerc, libaec, liblzma, muparser, odbc, opencl, png, qhull,
+    # sfcgal, sqlite3, and zstd are always enabled outside the variant DAG.x
     variant("archive", default=False, when="@3.7:", description="Optional for vsi7z VFS driver")
     # cmake configure fails if arrow~filesystem is found when variant ~arrow
     # https://github.com/OSGeo/gdal/issues/12327
@@ -295,7 +295,7 @@ class Gdal(CMakePackage, AutotoolsPackage, PythonExtension):
     depends_on("hdf5@:1.12", when="@:3.4")
     depends_on("hdf5+cxx", when="@3.8:+kea")
     depends_on("hdf5+cxx", when="@:3.7")
-    depends_on("hadoop")
+    #depends_on("hadoop")
     depends_on("iconv", when="+iconv")
     # depends_on('idb', when='+idb')
     # depends_on('ingres', when='+ingres')
@@ -545,7 +545,7 @@ class CMakeBuilder(CMakeBuilder):
             self.define_from_variant("GDAL_USE_HEIF", "heif"),
             self.define("GDAL_USE_HDF4", True),
             self.define("GDAL_USE_HDF5", True),
-            self.define("GDAL_USE_HDFS", True),
+            self.define("GDAL_USE_HDFS", False),
             self.define_from_variant("GDAL_USE_ICONV", "iconv"),
             self.define_from_variant("GDAL_USE_IDB", "idb"),
             self.define_from_variant("GDAL_USE_JPEG", "jpeg"),

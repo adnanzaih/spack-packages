@@ -70,7 +70,7 @@ spack:
     - netlib-lapack@3.12.1
     - libaec@1.1.4
     - proj@9.7.0
-    - hdf5@1.14.6+cxx+fortran+hl~ipo~java~map~mpi+shared+szip~threadsafe+tools ^libaec@1.1.4
+    - hdf5@1.14.6+cxx+fortran+hl~ipo~java~map~mpi+shared+szip+threadsafe+tools ^libaec@1.1.4
     - libjpeg-turbo@3.1.3
     - libtiff@4.7.1
     - netcdf-c@4.7.4~mpi~parallel-netcdf~hdf4 ^hdf5@1.14.6+cxx+fortran+hl~ipo~java~map~mpi+shared+szip~threadsafe+tools ^libaec@1.1.4
