@@ -3,6 +3,11 @@
 # It describes a set of packages to be installed, along with
 # configuration settings.
 spack:
+  upstreams:
+    arc-compiler-stacks:
+      install_tree: /sw/pkgs/arc/staging/spack
+    bioinformatics:
+      install_tree: /sw/pkgs/arc/staging/biospack
   config:
       install_tree:
         root: /sw/pkgs/arc/staging/spack
@@ -11,168 +16,30 @@ spack:
   ##########################################################################################
   #                                       Software                                         #
   ##########################################################################################
-
-  - group: gcc-8
+  - group: gcc-10
     specs:
-    - python@3.13.13
-    - flexiblas@3.4.2
-    - boost@1.78.0
-    - geos@3.14.1
-    - openmpi@5.0.10
-    - openblas@0.3.33
-    - openjdk@18.0.1.1
-    - netlib-lapack@3.12.1
-    - libaec@1.1.4
-    - proj@9.7.0
-    - hdf5@1.14.6+cxx+fortran+hl~ipo~java~map~mpi+shared+szip+threadsafe+tools ^libaec@1.1.4
-    - netcdf-cxx4 ^netcdf-c~mpi~parallel-netcdf ^hdf5+cxx+fortran+hl~mpi
-    - netcdf-fortran ^netcdf-c~mpi~parallel-netcdf ^hdf5+cxx+fortran+hl~mpi
-    # gdal to use non-threadsafe netcdfc family
-    - gdal@3.6.3+armadillo+blosc+hdf5+hdf4+gif ^arpack-ng~mpi ^arrow@18 ^json-c@0.14 ^netcdf-c~mpi~parallel-netcdf ^hdf5+cxx+fortran+hl~mpi ^ninja^python@3.13.13+libxml2
-    - libjpeg-turbo@3.1.3
-    - libtiff@4.7.1
-    - sqlite@3.53.1
-    - archivetar@0.18.2 ^python@3.13.13 ^openmpi@5.0.10
-    - libsodium@1.0.22
-    - libgd@2.3.3
-    #- cuda@12.9.1
-    #- cuda@13.3.0
-    #- cudnn@9.21.0.82-12 ^cuda@12.9.1
-    #- cudnn@9.21.0.82-13 ^cuda@13.3.0
-    - bioinformatics@1.0
+    - r@4.5
+    - r@4.6.0
+    - r@4.6.1
+    - rtidyverse@2.0.0 
+    - rgeospatial@1.5-18 
     override:
       packages:
         c:
-          prefer: [gcc@8.5.0]
+          prefer: [gcc@10.3.0]
         cxx:
-          prefer: [gcc@8.5.0]
+          prefer: [gcc@10.3.0]
         fortran:
-          prefer: [gcc@8.5.0]
+          prefer: [gcc@10.3.0]
         python:
           require:
           - "+arc"
         openmpi:
           require:
           - "+arc"
-  # - group: gcc-10
-  #   specs:
-  #   - python@3.13.3
-  #   - flexiblas@3.4.2
-  #   - boost@1.78.0
-  #   - geos@3.14.1
-  #   - openmpi@5.0.10
-  #   - openblas@0.3.33
-  #   - openjdk@18.0.1.1
-  #   - netlib-lapack@3.12.1
-  #   - libaec@1.1.4
-  #   - proj@9.7.0
-  #   - hdf5@1.14.6+cxx+fortran+hl~ipo~java~map~mpi+shared+szip+threadsafe+tools ^libaec@1.1.4
-  #   - netcdf-cxx4 ^netcdf-c ^hdf5+cxx+fortran+hl
-  #   - netcdf-fortran ^netcdf-c ^hdf5+cxx+fortran+hl
-  #   - gdal@3.6.3+armadillo+blosc+hdf5+hdf4+gif ^arrow@18 ^json-c@0.14 ^hdf5+cxx+fortran+hl
-  #   - libjpeg-turbo@3.1.3
-  #   - libtiff@4.7.1
-  #   - sqlite@3.53.1
-  #   - archivetar@0.18.2 ^python@3.13.3 ^openmpi@5.0.10
-  #   - libsodium@1.0.22
-  #   - libgd@2.3.3
-  #   override:
-  #     packages:
-  #       c:
-  #         prefer: [gcc@10.3.0]
-  #       cxx:
-  #         prefer: [gcc@10.3.0]
-  #       fortran:
-  #         prefer: [gcc@10.3.0]
-  #       python:
-  #         require:
-  #         - "+arc"
-  #       openmpi:
-  #         require:
-  #         - "+arc"
-  # - group: gcc-15
-  #   specs:
-  #   - python@3.13.3
-  #   - flexiblas@3.4.2
-  #   - boost@1.78.0
-  #   - geos@3.14.1
-  #   - openmpi@5.0.10
-  #   - openblas@0.3.33
-  #   - openjdk@18.0.1.1
-  #   - netlib-lapack@3.12.1
-  #   - libaec@1.1.4
-  #   - proj@9.7.0
-  #   - hdf5@1.14.6+cxx+fortran+hl~ipo~java~map~mpi+shared+szip+threadsafe+tools ^libaec@1.1.4
-  #   - netcdf-cxx4 ^netcdf-c ^hdf5+cxx+fortran+hl
-  #   - netcdf-fortran ^netcdf-c ^hdf5+cxx+fortran+hl
-  #   - gdal@3.6.3+armadillo+blosc+hdf5+hdf4+gif ^arrow@18 ^json-c@0.14 ^hdf5+cxx+fortran+hl
-  #   - libjpeg-turbo@3.1.3
-  #   - libtiff@4.7.1
-  #   - sqlite@3.53.1
-  #   - archivetar@0.18.2 ^python@3.13.3 ^openmpi@5.0.10
-  #   - libsodium@1.0.22
-  #   - libgd@2.3.3
-  #   override:
-  #     packages:
-  #       c:
-  #         prefer: [gcc@15.1.0]
-  #       cxx:
-  #         prefer: [gcc@15.1.0]
-  #       fortran:
-  #         prefer: [gcc@15.1.0]
-  #       python:
-  #         require:
-  #         - "+arc"
-  #       openmpi:
-  #         require:
-  #         - "+arc"
-  # - group: llvm-22
-  #   specs:
-  #   - python@3.13.3
-  #   - flexiblas@3.4.2
-  #   - boost@1.90.0
-  #   - geos@3.14.1
-  #   - openmpi@5.0.10
-  #   - openblas@0.3.33
-  #   - openjdk@18.0.1.1
-  #   - netlib-lapack@3.12.1
-  #   - libaec@1.1.4
-  #   - proj@9.7.0
-  #   - hdf5@1.14.6+cxx+fortran+hl~ipo~java~map~mpi+shared+szip+threadsafe+tools ^libaec@1.1.4
-  #   - netcdf-cxx4 ^netcdf-c ^hdf5+cxx+fortran+hl
-  #   - netcdf-fortran ^netcdf-c ^hdf5+cxx+fortran+hl
-  #   - gdal@3.6.3+armadillo+blosc+hdf5+hdf4+gif ^arrow@18 ^json-c@0.14 ^hdf5+cxx+fortran+hl
-  #   - libjpeg-turbo@3.1.3
-  #   - libtiff@4.7.1
-  #   - sqlite@3.53.1
-  #   - archivetar@0.18.2 ^python@3.13.3 ^openmpi@5.0.10
-  #   - libsodium@1.0.22
-  #   - libgd@2.3.3
-  #   override:
-  #     packages:
-  #       c:
-  #         prefer: [llvm@22.1.3]
-  #       cxx:
-  #         prefer: [llvm@22.1.3]
-  #       fortran:
-  #         prefer: [llvm@22.1.3]
-  #       python:
-  #         require:
-  #         - "+arc"
-  #       openmpi:
-  #         require:
-  #         - "+arc"
-  # - group: intel
-  #   specs:
-  #   - openmpi@5.0.10+arc
-  #   override:
-  #     packages:
-  #       c:
-  #         prefer: [intel-oneapi-compilers-classic@2021.5.0]
-  #       cxx:
-  #         prefer: [intel-oneapi-compilers-classic@2021.5.0]
-  #       fortran:
-  #         prefer: [intel-oneapi-compilers-classic@2021.5.0]
+        r:
+          require:
+          - "+arc"
   concretizer:
     unify: false
     reuse: true
@@ -278,9 +145,9 @@ spack:
       - spec: tar@1.30
         prefix: /usr
     curl:
-      buildable: true
+      buildable: false
       externals:
-      - spec: curl@7.61.1
+      - spec: curl@7.68.0
         prefix: /usr
     expat:
       buildable: false
@@ -288,25 +155,10 @@ spack:
       - spec: expat@2.5.0
         prefix: /usr
     json-c:
-      buildable: True
+      buildable: false
       externals:
       - spec: json-c@0.13.1
         prefix: /usr
-    readline:
-      buildable: false
-      externals:
-      - spec: readline@7.0
-        prefix: /usr
-    hwloc:
-      buildable: false
-      externals:
-      - spec: hwloc@2.1.0
-        prefix: /usr
-    pmix:
-      buildable: false
-      externals:
-      - spec: pmix@5.0.10
-        prefix: /opt/pmix/5.0.10
     ##########################################################################################
     #                                         Modules                                        #
     ##########################################################################################
@@ -319,7 +171,6 @@ spack:
       lmod:
         projections:
           r: 'R/{version}'
-          hdf5~threadsafe: 'hdf5/{version}-nonatomic'
           intel-oneapi-compilers-classic: 'intel/{version}'
         hash_length: 0
         hierarchy:
