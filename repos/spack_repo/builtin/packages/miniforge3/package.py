@@ -62,8 +62,18 @@ class Miniforge3(Package):
             version(ver, sha256=pkg[0], expand=False, deprecated=_should_deprecate_version(ver))
 
     variant("mamba", default=True, description="Enable mamba support.")
+    variant("pytorch", default=False, description="Install PyTorch into the base environment.")
+    variant(
+        "pytorch-cuda",
+        default="12",
+        values=str,
+        description="PyTorch CUDA package version to install with +pytorch.",
+    )
+    variant("notebook", default=False, description="Install JupyterLab and notebook.")
 
     conflicts("+mamba", when="@:22.3.1-0")
+    requires("+mamba", when="+pytorch", msg="+pytorch needs mamba to install conda packages")
+    requires("+mamba", when="+notebook", msg="+notebook needs mamba to install conda packages")
 
     def url_for_version(self, version):
         script = f"Miniforge3-{version}-{platform.system()}-{platform.machine()}.sh"
@@ -73,9 +83,14 @@ class Miniforge3(Package):
         dir, script = split(self.stage.archive_file)
         bash = which("bash", required=True)
         bash(script, "-b", "-f", "-p", self.prefix)
+        self._patch_sbang()
+        self._install_base_packages()
 
     @run_after("install")
     def patch_sbang(self):
+        self._patch_sbang()
+
+    def _patch_sbang(self):
         # Conda replaces the full path to the Python executable with `/usr/bin/env python`
         # if the full path exceeds 127 characters. This does however break `conda deactivate`
         # because the wrong Python interpreter is used after activating an environment.
@@ -88,6 +103,34 @@ class Miniforge3(Package):
             filter_file(
                 r"#!/usr/bin/env python", rf"#!{self.prefix.bin.python}", self.prefix.bin.mamba
             )
+
+    def _mamba_install(self, *args):
+        mamba = Executable(self.prefix.bin.mamba)
+        mamba(
+            "install",
+            "-y",
+            "--prefix",
+            str(self.prefix),
+            *args,
+            extra_env={"MAMBA_ROOT_PREFIX": str(self.prefix)},
+        )
+
+    def _install_base_packages(self):
+        if "+pytorch" in self.spec:
+            pytorch_cuda = self.spec.variants["pytorch-cuda"].value
+            self._mamba_install(
+                "pytorch",
+                "torchvision",
+                "torchaudio",
+                f"pytorch-cuda={pytorch_cuda}",
+                "-c",
+                "pytorch",
+                "-c",
+                "nvidia",
+            )
+
+        if "+notebook" in self.spec:
+            self._mamba_install("jupyterlab", "notebook")
 
     def setup_run_environment(self, env: EnvironmentModifications) -> None:
         filename = self.prefix.etc.join("profile.d").join("conda.sh")
