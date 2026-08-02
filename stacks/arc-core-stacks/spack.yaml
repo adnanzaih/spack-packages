@@ -48,6 +48,7 @@ spack:
     - r@4.6.1
     - r@4.6.0
     - r@4.5.3
+    - py-mpi4py
     override:
       packages:
         c:
@@ -220,6 +221,7 @@ spack:
           hdf5~threadsafe: 'hdf5/{version}-nonatomic'
           intel-oneapi-compilers-classic: 'intel/{version}'
           miniforge3: 'mamba/{version}'
+          py-mpi4py: 'mpi4py/{version}' 
         hash_length: 0
         core_compilers:
           - gcc@8.5.0
@@ -239,3 +241,8 @@ spack:
         - autoconf
         - compiler-wrapper
         - util-macros
+        - py-pip
+        - py-setuptools
+        - py-wheel
+        - py-cython
+        - python-venv

@@ -15,8 +15,8 @@ class Rgeospatial(RCollectivePackage):
     configured."""
 
     cran = "geosphere"
-    cran_packages = ["s2", "terra", "sf", "foreign", "stars", "raster", "spatstat", "mapproj", "gdalUtilities", "mapview", "OpenStreetMap", "tigris", "igraph", "tidygraph", "sfnetworks"]
-    cran_mirror = "https://repo.miserver.it.umich.edu/cran/"
+    cran_packages = ["chromote", "leafem", "leaflet", "satellite", "s2", "terra", "sf", "foreign", "stars", "raster", "spatstat", "mapproj", "gdalUtilities", "mapview", "OpenStreetMap", "tigris", "igraph", "tidygraph", "sfnetworks"]
+    #cran_mirror = "https://repo.miserver.it.umich.edu/cran/"
 
     license("MIT")
 

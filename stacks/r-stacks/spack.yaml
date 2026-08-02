@@ -36,7 +36,7 @@ spack:
         gdal:
           prefer:
           - "+blosc+arrow+hdf4+hdf5+liblzma+libxml2+poppler+parquet+libaec+zstd"
-          - spec: "@3.8.5~armadillo"
+          - spec: "@3.8.5~armadillo ^arrow@:18"
             when: "%gcc@8.5.0"
           - spec: "@3.13.2+armadillo"
             when: "%gcc@10.3.0:"
@@ -180,3 +180,4 @@ spack:
         - autoconf
         - compiler-wrapper
         - util-macros
+        - poppler-data
