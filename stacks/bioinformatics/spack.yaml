@@ -216,3 +216,5 @@ spack:
         - glibc
         - autoconf
         - compiler-wrapper
+        gcc-runtime:
+          template: gcc-runtime.lua

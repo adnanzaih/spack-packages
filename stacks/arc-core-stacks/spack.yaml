@@ -246,3 +246,5 @@ spack:
         - py-wheel
         - py-cython
         - python-venv
+        gcc-runtime:
+          template: gcc-runtime.lua

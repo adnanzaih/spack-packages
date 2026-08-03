@@ -183,3 +183,5 @@ spack:
         - autoconf
         - compiler-wrapper
         - util-macros
+        gcc-runtime:
+          template: gcc-runtime.lua
