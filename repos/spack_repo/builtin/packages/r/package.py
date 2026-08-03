@@ -154,10 +154,10 @@ class R(AutotoolsPackage):
             env.set("R_PAPERSIZE", "letter")
             env.set("FLEXIBLAS_ROOT", self.spec["blas"].prefix)
 
-            
+
         if self.spec.satisfies("+java"):
             env.set("JAVA_HOME", self.spec["java"].prefix)
-        
+
 
     @run_after("install")
     def install_rmath(self):
@@ -310,6 +310,10 @@ class R(AutotoolsPackage):
         # determine how many jobs can actually be started.
         env.set("MAKEFLAGS", "-j{0}".format(make_jobs))
         env.set("R_HOME", join_path(self.prefix, "rlib", "R"))
+
+    def setup_build_environment(self, env: EnvironmentModifications) -> None:
+        # Standardize the timezone for the builds
+        env.set("TZ", "UTC")
 
     def setup_dependent_run_environment(
         self, env: EnvironmentModifications, dependent_spec: Spec
