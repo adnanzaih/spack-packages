@@ -196,6 +196,7 @@ spack:
           intel-oneapi-compilers-classic: 'intel/{version}'
           miniforge3: 'mamba/{version}'
           py-mpi4py: 'mpi4py/{version}' 
+          rseurat: "rseurat/{version}-R-{^r.version}"
         hash_length: 0
         core_compilers:
         - gcc@8.5.0
