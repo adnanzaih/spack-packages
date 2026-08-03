@@ -134,7 +134,10 @@ spack:
       lmod:
         projections:
           r: 'R/{version}'
+          hdf5~threadsafe: 'hdf5/{version}-nonatomic'
           intel-oneapi-compilers-classic: 'intel/{version}'
+          miniforge3: 'mamba/{version}'
+          py-mpi4py: 'mpi4py/{version}' 
         hash_length: 0
         hierarchy:
           - r
