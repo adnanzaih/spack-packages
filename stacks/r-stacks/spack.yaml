@@ -184,3 +184,5 @@ spack:
         - compiler-wrapper
         - util-macros
         - poppler-data
+        gcc-runtime:
+          template: gcc-runtime.lua
