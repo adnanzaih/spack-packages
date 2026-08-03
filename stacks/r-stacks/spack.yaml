@@ -14,7 +14,7 @@ spack:
   - group: R stacks for gcc-8, gcc-10 and gcc-15
     specs:
       - matrix:
-        - 
+        -
           - rtidyverse@2.0.0 ^r@4.5.3
           - rgeospatial@1.5-18 ^r@4.5.3 ^rtidyverse@2.0.0 ^gdal ^poppler@21.09.0 ^proj@9.7.0 ^geos@3.14.1 ^netcdf-fortran@4.6.2 ^hdf5@1.14.6 ^openjdk@18.0.1.1
           - rtidyverse@2.0.0 ^r@4.6.0
@@ -35,16 +35,16 @@ spack:
           - "+arc"
         gdal:
           prefer:
-          - "+blosc+arrow+hdf4+hdf5+liblzma+libxml2+poppler+parquet+libaec+zstd"
+          - "+blosc+arrow+hdf4+hdf5+liblzma+libxml2+poppler+parquet+libaec+zstd+lz4+deflate+opencl+avif+freexl+heif+jxl+libkml+pcre2+sfcgal+spatialite+wepb"
           - spec: "@3.8.5~armadillo ^arrow@:18"
             when: "%gcc@8.5.0"
           - spec: "@3.13.2+armadillo"
             when: "%gcc@10.3.0:"
         arrow:
           require:
-          - "+bz2+hdfs+ipc+mimalloc~orc+parquet~python+shared~snappy+zlib+zstd"
+          - "+brotli+bz2+csv+compute+dataset+filesystem+ipc+mimalloc~orc+parquet~python+shared~snappy+zlib+zstd"
         json-c:
-          prefer: 
+          prefer:
           - "@0.14:"
   concretizer:
     unify: false
@@ -163,7 +163,7 @@ spack:
           hdf5~threadsafe: 'hdf5/{version}-nonatomic'
           intel-oneapi-compilers-classic: 'intel/{version}'
           miniforge3: 'mamba/{version}'
-          py-mpi4py: 'mpi4py/{version}' 
+          py-mpi4py: 'mpi4py/{version}'
         hash_length: 0
         core_compilers:
           - gcc@8.5.0
