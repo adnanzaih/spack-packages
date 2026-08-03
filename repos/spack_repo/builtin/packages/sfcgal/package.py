@@ -21,7 +21,11 @@ class Sfcgal(CMakePackage):
     old_github_urlbase = "https://github.com/Oslandia/SFCGAL/archive/v{0}.tar.gz"
 
     license("LGPL-2.0-or-later")
-
+    version("2.3.0", sha256="5f6aa1838e5ae31523ebf410cde0240b7a88d7e062b7ffff945e4fae2aaba0fa")
+    version("2.2.0", sha256="bb6bb77ddb58523d8c229764de23699f99c1a7011d873419afd2a67df85602a2")
+    version("2.1.0", sha256="cb73a0496c61a5c7bf0ccc68c42e4378bfc441b242e9dee894067e24d2e21d0f")
+    version("2.0.0", sha256="11843953f49e7e4432c42fd27d54e1ff7ca55d0cc72507725c2a5d840c2c6535")
+    version("1.5.2", sha256="b946b3c20d53f6e2703046085f0fcfea6c1a4081163f7bedd30b1195801efdd2")
     version("1.5.1", sha256="ea5d1662fada7de715ad564dc810c3059024ed81ae393f5352489f706fdfa3b1")
     version("1.4.1", sha256="1800c8a26241588f11cddcf433049e9b9aea902e923414d2ecef33a3295626c3")
     version(
@@ -35,7 +39,9 @@ class Sfcgal(CMakePackage):
         url=old_github_urlbase.format("1.3.7"),
     )
 
-    depends_on("cxx", type="build")  # generated
+    variant("eigen", default=False, description="Enable Eigen support")
+    depends_on("c", type="build")
+    depends_on("cxx", type="build")
 
     depends_on("cmake@2.8.6:", type="build")
     # Ref: https://oslandia.github.io/SFCGAL/installation.html, but starts to work @4.7:
@@ -47,13 +53,18 @@ class Sfcgal(CMakePackage):
     depends_on("cgal@4.7:4", when="@1.3.8")
     depends_on("cgal@4.7:5.1", when="@1.3.9")
     depends_on("cgal@4.7:5.2", when="@1.3.10")
-    depends_on("cgal@5.3", when="@1.4")
-    depends_on("cgal@5.6", when="@1.5")
+    depends_on("cgal@5.3", when="@1.4:1.5")
+    depends_on("cgal@5.6:6.0", when="@2.0:2.2")
+    depends_on("cgal@5.6:6.2", when="@2.3")
+
     depends_on(
-        "boost@1.54.0:+chrono+filesystem+program_options+serialization+system+test+thread+timer"
+        "boost@1.54.0:+chrono+filesystem+program_options+serialization+system+test+thread+timer", when ="@1.3"
     )
+    depends_on("boost@1.74.0:+chrono+filesystem+program_options+serialization+system+thread+timer", when="@1.4:")
     depends_on("mpfr@2.2.1:")
     depends_on("gmp@4.2:")
+    depends_on("nlohmann-json@3.11")
+    depends_on("eigen", when="+eigen")
 
     @property
     def command(self):
@@ -63,7 +74,13 @@ class Sfcgal(CMakePackage):
         # It seems viewer is discontinued as of v1.3.0
         # https://github.com/Oslandia/SFCGAL/releases/tag/v1.3.0
         # Also, see https://github.com/Oslandia/SFCGAL-viewer
-        return [self.define("BUILD_SHARED_LIBS", True), self.define("SFCGAL_BUILD_VIEWER", False)]
+        args = []
+        if self.spec.satisfies("+eigen"):
+            args.append(self.define("SFCGAL_WITH_EIGEN", "ON"))
+        if self.spec.satisfies("@1.3:1.5"):
+            args.append(self.define("SFCGAL_BUILD_VIEWER", "OFF"))
+        args.append(self.define("BUILD_SHARED_LIBS", "ON"))
+        return args
 
     @property
     def libs(self):
