@@ -20,31 +20,27 @@ class Sfcgal(CMakePackage):
     old_github_urlbase = "https://github.com/Oslandia/SFCGAL/archive/v{0}.tar.gz"  # up to 1.3.8
 
     license("LGPL-2.0-or-later")
-
     version("2.3.0", sha256="5f6aa1838e5ae31523ebf410cde0240b7a88d7e062b7ffff945e4fae2aaba0fa")
     version("2.2.0", sha256="bb6bb77ddb58523d8c229764de23699f99c1a7011d873419afd2a67df85602a2")
-
-    with default_args(deprecated=True):
-        version("1.5.1", sha256="ea5d1662fada7de715ad564dc810c3059024ed81ae393f5352489f706fdfa3b1")
-        version("1.4.1", sha256="1800c8a26241588f11cddcf433049e9b9aea902e923414d2ecef33a3295626c3")
-        version(
-            "1.3.8",
-            sha256="5154bfc67a5e99d95cb653d70d2b9d9293d3deb3c8f18b938a33d68fec488a6d",
-            url=old_github_urlbase.format("1.3.8"),
-        )
-        version(
-            "1.3.7",
-            sha256="30ea1af26cb2f572c628aae08dd1953d80a69d15e1cac225390904d91fce031b",
-            url=old_github_urlbase.format("1.3.7"),
-        )
+    version("2.1.0", sha256="cb73a0496c61a5c7bf0ccc68c42e4378bfc441b242e9dee894067e24d2e21d0f")
+    version("2.0.0", sha256="11843953f49e7e4432c42fd27d54e1ff7ca55d0cc72507725c2a5d840c2c6535")
+    version("1.5.2", sha256="b946b3c20d53f6e2703046085f0fcfea6c1a4081163f7bedd30b1195801efdd2")
+    version("1.5.1", sha256="ea5d1662fada7de715ad564dc810c3059024ed81ae393f5352489f706fdfa3b1")
+    version("1.4.1", sha256="1800c8a26241588f11cddcf433049e9b9aea902e923414d2ecef33a3295626c3")
+    version(
+        "1.3.8",
+        sha256="5154bfc67a5e99d95cb653d70d2b9d9293d3deb3c8f18b938a33d68fec488a6d",
+        url=old_github_urlbase.format("1.3.8"),
+    )
+    version(
+        "1.3.7",
+        sha256="30ea1af26cb2f572c628aae08dd1953d80a69d15e1cac225390904d91fce031b",
+        url=old_github_urlbase.format("1.3.7"),
+    )
 
     variant("eigen", default=False, description="Enable Eigen support")
-
-    with default_args(type="build"):
-        depends_on("c")
-        depends_on("cxx")
-        depends_on("cmake@2.8.6:")
-        depends_on("nlohmann-json@3.11:", when="@2.3:")
+    depends_on("c", type="build")
+    depends_on("cxx", type="build")
 
     # Ref: https://oslandia.github.io/SFCGAL/installation.html, but starts to work @4.7:
     # Ref: https://gitlab.com/sfcgal/SFCGAL/-/blob/v1.5.1/NEWS?ref_type=tags
@@ -55,22 +51,17 @@ class Sfcgal(CMakePackage):
     depends_on("cgal@4.7:4", when="@1.3.8")
     depends_on("cgal@4.7:5.1", when="@1.3.9")
     depends_on("cgal@4.7:5.2", when="@1.3.10")
-    depends_on("cgal@5.6", when="@1.4:1.5")
+    depends_on("cgal@5.3", when="@1.4:1.5")
     depends_on("cgal@5.6:6.0", when="@2.0:2.2")
     depends_on("cgal@5.6:6.2", when="@2.3")
 
-    boost_variants = "boost+program_options+serialization+thread"
-    depends_on(boost_variants, when="@2:")
-    depends_on(boost_variants + "+chrono+filesystem+system+timer", when="@:1")
-
-    depends_on("boost@1.84:1.89", when="@2.3:")
-    depends_on("boost@1.84:1.88", when="@2:2.2")
-    depends_on("boost@1.74:1.88", when="@1.5:1")
-    depends_on("boost@1.54:1.88", when="@:1.4")
-    conflicts("boost@1.81:1.83", msg="redefine errors with std::numeric_limits<__float128>")
-
+    depends_on(
+        "boost@1.54.0:+chrono+filesystem+program_options+serialization+system+test+thread+timer", when ="@1.3"
+    )
+    depends_on("boost@1.74.0:+chrono+filesystem+program_options+serialization+system+thread+timer", when="@1.4:")
     depends_on("mpfr@2.2.1:")
     depends_on("gmp@4.2:")
+    depends_on("nlohmann-json@3.11")
     depends_on("eigen", when="+eigen")
 
     @property
