@@ -40,6 +40,7 @@ spack:
     - r@4.6.1
     - r@4.6.0
     - r@4.5.3
+    - mumps +complex+double+float+metis+parmetis+scotch+mpi
     override:
       packages:
         c:
