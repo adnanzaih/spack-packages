@@ -40,6 +40,9 @@ spack:
             when: "%gcc@8.5.0"
           - spec: "@3.13.2+armadillo"
             when: "%gcc@10.3.0:"
+        sfcgal:
+          prefer:
+          - "+eigen"
         arrow:
           require:
           - "+brotli+bz2+csv+compute+dataset+filesystem+ipc+mimalloc~orc+parquet~python+shared~snappy+zlib+zstd"
