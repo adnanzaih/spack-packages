@@ -14,6 +14,7 @@ spack:
 
   - group: gcc-8
     specs:
+    - argtable
     - gcc@8.5.0
     - gcc@10.3.0
     - gcc@15.1.0
@@ -50,6 +51,8 @@ spack:
     - r@4.5.3
     - py-mpi4py
     - fiji@2026.03.07
+    - cuda@12
+    - cuda@13
     override:
       packages:
         c:
