@@ -24,6 +24,9 @@ spack:
     - blast2go ^blast-plus cxxflags="-fcoroutines"
     - rseurat
     - rseurat ^r@4.6.0
+    - dorado@0.9.6 ~cuda
+    - dorado@1.0.2  ~cuda
+    - elastix@5.2.0
     # - blat
     # - bowtie
     # - bowtie2
@@ -178,6 +181,16 @@ spack:
       buildable: false
       externals:
       - spec: bash@4.4.20
+        prefix: /usr
+    git:
+      buildable: false
+      externals:
+      - spec: git@2.43.7
+        prefix: /usr
+    openssl:
+      buildable: false
+      externals:
+      - spec: openssl@1.1.1
         prefix: /usr
 
     ##########################################################################################
