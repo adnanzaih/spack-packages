@@ -20,6 +20,7 @@ spack:
     - armadillo ^flexiblas
     - flexiblas@3.4.2
     - boost@1.78.0~mpi
+    - boost@1.90.0~mpi
     - geos@3.14.1
     - openmpi@5.0.10
     - openblas@0.3.33

@@ -49,6 +49,7 @@ spack:
     - r@4.6.0
     - r@4.5.3
     - py-mpi4py
+    - fiji@2026.03.07
     override:
       packages:
         c:

@@ -15,6 +15,7 @@ class Highway(CMakePackage):
 
     license("Apache-2.0")
 
+    version("1.4.0", sha256="e72241ac9524bb653ae52ced768b508045d4438726a303f10181a38f764a453c")
     version("1.2.0", sha256="7e0be78b8318e8bdbf6fa545d2ecb4c90f947df03f7aadc42c1967f019e63343")
     version("1.1.0", sha256="354a8b4539b588e70b98ec70844273e3f2741302c4c377bcc4e81b3d1866f7c9")
     version("1.0.7", sha256="5434488108186c170a5e2fca5e3c9b6ef59a1caa4d520b008a9b8be6b8abe6c5")
@@ -33,8 +34,14 @@ class Highway(CMakePackage):
     depends_on("cxx", type="build")
 
     depends_on("cmake@3.10:", type="build")
-
+    depends_on("binutils+gas", type="build")
     depends_on("googletest", type="test")
+
+    def flag_handler(self, name, flags):
+        if name == "cxxflags" and self.spec.satisfies("%gcc@15:"):
+            flags.append(f"-B{self.spec['binutils'].prefix.bin}/")
+
+        return (flags, None, None)
 
     def cmake_args(self):
         define = self.define
@@ -49,3 +56,7 @@ class Highway(CMakePackage):
         ]
 
         return args
+
+    def setup_build_environment(self, env):
+        env.prepend_path("PATH", self.spec["binutils"].prefix.bin)
+    
