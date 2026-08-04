@@ -4,8 +4,8 @@
 # configuration settings.
 spack:
   config:
-      install_tree:
-        root: /sw/pkgs/arc/staging/spack
+    install_tree:
+      root: /sw/pkgs/arc/staging/spack
   view: false
   specs:
   ##########################################################################################
@@ -13,42 +13,50 @@ spack:
   ##########################################################################################
   - group: R stacks for gcc-8, gcc-10 and gcc-15
     specs:
-      - matrix:
-        -
-          - rtidyverse@2.0.0 ^r@4.5.3
-          - rgeospatial@1.5-18 ^r@4.5.3 ^rtidyverse@2.0.0 ^gdal ^poppler@21.09.0 ^proj@9.7.0 ^geos@3.14.1 ^netcdf-fortran@4.6.2 ^hdf5@1.14.6 ^openjdk@18.0.1.1
-          - rtidyverse@2.0.0 ^r@4.6.0
-          - rgeospatial@1.5-18 ^r@4.6.0 ^rtidyverse@2.0.0 ^gdal ^poppler@21.09.0 ^proj@9.7.0 ^geos@3.14.1 ^netcdf-fortran@4.6.2 ^hdf5@1.14.6 ^openjdk@18.0.1.1
-        - - "%gcc@8.5.0"
-          - "%gcc@10.3.0"
-          - "%gcc@15.1.0"
+    - matrix:
+      - - rtidyverse@2.0.0 ^r@4.5.3
+        - rgeospatial@1.5-18 ^r@4.5.3 ^rtidyverse@2.0.0 ^gdal ^poppler@21.09.0 ^proj@9.7.0 ^geos@3.14.1 ^netcdf-fortran@4.6.2 ^hdf5@1.14.6 ^openjdk@18.0.1.1
+        - rtidyverse@2.0.0 ^r@4.6.0
+        - rgeospatial@1.5-18 ^r@4.6.0 ^rtidyverse@2.0.0 ^gdal ^poppler@21.09.0 ^proj@9.7.0 ^geos@3.14.1 ^netcdf-fortran@4.6.2 ^hdf5@1.14.6 ^openjdk@18.0.1.1
+      - - '%gcc@10.3.0'
+        - '%gcc@15.1.0'
     override:
       packages:
         python:
           require:
-          - "+arc"
+          - +arc
         openmpi:
           require:
-          - "+arc"
+          - +arc
         r:
           require:
-          - "+arc"
+          - +arc
         gdal:
-          prefer:
-          - "+blosc+arrow+hdf4+hdf5+liblzma+libxml2+poppler+parquet+libaec+zstd+lz4+deflate+opencl+avif+freexl+heif+jxl+libkml+pcre2+sfcgal+spatialite+wepb"
-          - spec: "@3.8.5~armadillo ^arrow@:18"
-            when: "%gcc@8.5.0"
-          - spec: "@3.13.2+armadillo"
-            when: "%gcc@10.3.0:"
+          require:
+          - +blosc+arrow+hdf4+hdf5+liblzma+libxml2+poppler+parquet+libaec+zstd+webp+spatialite+sfcgal+pcre2+lz4+deflate+avif+freexl+jxl+heif
+          - spec: '@3.8.5~armadillo ^arrow@:18'
+            when: '%gcc@8.5.0'
+          - spec: '@3.13.2+armadillo'
+            when: '%gcc@10.3.0:'
         sfcgal:
           prefer:
-          - "+eigen"
+          - +eigen
         arrow:
           require:
-          - "+brotli+bz2+csv+compute+dataset+filesystem+ipc+mimalloc~orc+parquet~python+shared~snappy+zlib+zstd"
+          - +brotli+bz2+csv+compute+dataset+filesystem+ipc+mimalloc~orc+parquet~python+shared~snappy+zlib+zstd
+        boost:
+          require:
+          - spec: '@1.88:'
+            when: '%gcc@14:'
         json-c:
           prefer:
-          - "@0.14:"
+          - '@0.14:'
+        libheif:
+          prefer:
+          - ~gdk-plugin
+        highway:
+          prefer:
+          - "@1.0.7"
   concretizer:
     unify: false
     reuse: true
@@ -132,7 +140,7 @@ spack:
       - spec: expat@2.5.0
         prefix: /usr
     json-c:
-      buildable: True
+      buildable: true
       externals:
       - spec: json-c@0.13.1
         prefix: /usr
@@ -162,17 +170,17 @@ spack:
         tcl: /sw/pkgs/arc/staging/spack/modules
       lmod:
         projections:
-          r: 'R/{version}'
-          hdf5~threadsafe: 'hdf5/{version}-nonatomic'
-          intel-oneapi-compilers-classic: 'intel/{version}'
-          miniforge3: 'mamba/{version}'
-          py-mpi4py: 'mpi4py/{version}'
+          r: R/{version}
+          hdf5~threadsafe: hdf5/{version}-nonatomic
+          intel-oneapi-compilers-classic: intel/{version}
+          miniforge3: mamba/{version}
+          py-mpi4py: mpi4py/{version}
         hash_length: 0
         core_compilers:
-          - gcc@8.5.0
+        - gcc@8.5.0
         hierarchy:
-          - r
-          - mpi
+        - r
+        - mpi
         core_specs:
         - gcc@8.5.0
         - gcc-runtime@8.5.0
