@@ -24,8 +24,8 @@ spack:
     - blast2go ^blast-plus cxxflags="-fcoroutines"
     - rseurat
     - rseurat ^r@4.6.0
-    - dorado@0.9.6 ~cuda
-    - dorado@1.0.2  ~cuda
+    - dorado@0.9.6
+    - dorado@1.0.2 
     - elastix@5.2.0
     # - blat
     # - bowtie
@@ -74,14 +74,7 @@ spack:
     # - star
     # - stringtie
     # - trimgalore
-    override:
-      packages:
-        c:
-          prefer: [gcc@10.3.0]
-        cxx:
-          prefer: [gcc@10.3.0]
-        fortran:
-          prefer: [gcc@10.3.0]
+    
   concretizer:
     unify: false
     reuse: true

@@ -9,8 +9,6 @@ spack:
   upstreams:
     arc-compiler-stacks:
       install_tree: /sw/pkgs/arc/staging/spack
-    bioinformatics:
-      install_tree: /sw/pkgs/arc/staging/biospack
   view: false
   specs:
   ##########################################################################################
@@ -19,7 +17,7 @@ spack:
 
   - group: qupath
     specs:
-    - qupath@0.7.0+djl+pytorch ^py-torch@2.7.1+cuda+cudnn~rocm cuda_arch=80 ^cairo@1.18.4+X
+    - qupath@0.7.0+djl+pytorch torch_version=2.7.1 ^openjdk@25
     override:
       packages:
         c:
@@ -29,7 +27,7 @@ spack:
         fortran:
           prefer: [gcc@10.3.0]
   concretizer:
-    unify: false
+    unify: true
     reuse: true
   packages:
   ##########################################################################################
@@ -106,11 +104,14 @@ spack:
       - spec: icu4c@60.3
         prefix: /usr
     openjdk:
+      buildable: true
       externals:
       - spec: openjdk@1.8.0
         prefix: /usr/lib/jvm/jre
       - spec: openjdk@18.0.1.1
         prefix: /sw/pkgs/arc/openjdk/jdk-18.0.1.1
+      - spec: openjdk@26.0.1
+        prefix: /sw/pkgs/arc/openjdk/jdk-26.0.1
     autoconf:
       buildable: false
       externals:
@@ -120,6 +121,21 @@ spack:
       buildable: false
       externals:
       - spec: pkgconf@2.5.1
+        prefix: /usr
+    bash:
+      buildable: false
+      externals:
+      - spec: bash@4.4.20
+        prefix: /usr
+    git:
+      buildable: false
+      externals:
+      - spec: git@2.43.7
+        prefix: /usr
+    openssl:
+      buildable: false
+      externals:
+      - spec: openssl@1.1.1
         prefix: /usr
         
     ##########################################################################################
@@ -139,9 +155,7 @@ spack:
           miniforge3: 'mamba/{version}'
           py-mpi4py: 'mpi4py/{version}' 
         hash_length: 0
-        hierarchy:
-          - r
-          - mpi
+        hierarchy: []
         core_specs:
         - gcc@8.5.0
         - gcc-runtime@8.5.0

@@ -1,0 +1,60 @@
+diff --git a/qupath-gui-fx/src/main/java/qupath/lib/gui/UserDirectoryManager.java b/qupath-gui-fx/src/main/java/qupath/lib/gui/UserDirectoryManager.java
+index 42199ad1d..52ef3d9a3 100644
+--- a/qupath-gui-fx/src/main/java/qupath/lib/gui/UserDirectoryManager.java
++++ b/qupath-gui-fx/src/main/java/qupath/lib/gui/UserDirectoryManager.java
+@@ -54,6 +54,13 @@ public class UserDirectoryManager {
+ 	 */
+ 	public static final String DIR_EXTENSIONS = "extensions";
+ 
++	/**
++	 * Name of the environment variable that can be used to override the extensions directory path.
++	 * If set, its value takes priority over the extensions subdirectory of the QuPath user directory.
++	 * Example: {@code export QUPATH_EXTENSIONS_PATH=/data/qupath-extensions}
++	 */
++	public static final String ENV_EXTENSIONS_PATH = "QUPATH_EXTENSIONS_PATH";
++
+ 	/**
+ 	 * Name of subdirectory containing css files for styling.
+ 	 */
+@@ -83,7 +90,7 @@ public class UserDirectoryManager {
+ 
+ 	private ObjectProperty<Path> userDirectoryProperty = new SimpleObjectProperty<>();
+ 
+-	private ReadOnlyObjectProperty<Path> extensionsDirectoryProperty = createRelativePathProperty(userDirectoryProperty, DIR_EXTENSIONS);
++	private ReadOnlyObjectProperty<Path> extensionsDirectoryProperty = createExtensionsPathProperty(userDirectoryProperty);
+ 	private ReadOnlyObjectProperty<Path> colormapsDirectoryProperty = createRelativePathProperty(userDirectoryProperty, DIR_COLORMAPS);
+ 	private ReadOnlyObjectProperty<Path> cssDirectoryProperty = createRelativePathProperty(userDirectoryProperty, DIR_CSS);
+ 	private ReadOnlyObjectProperty<Path> logDirectoryProperty = createRelativePathProperty(userDirectoryProperty, DIR_LOGS);
+@@ -150,6 +157,32 @@ public class UserDirectoryManager {
+ 	public ReadOnlyObjectProperty<Path> createRelativePathProperty(String other) {
+ 		return createRelativePathProperty(userDirectoryProperty(), other);
+ 	}
++
++	private ReadOnlyObjectProperty<Path> createExtensionsPathProperty(ObservableValue<Path> path) {
++		var wrapper = new ReadOnlyObjectWrapper<Path>();
++		var envPath = getEnvExtensionsPath();
++		if (envPath != null) {
++			wrapper.set(envPath);
++		} else {
++			path.addListener((v, o, n) -> wrapper.set(resolvePathOrNull(n, DIR_EXTENSIONS)));
++		}
++		return wrapper.getReadOnlyProperty();
++	}
++
++	private static Path getEnvExtensionsPath() {
++		String envPath = System.getenv(ENV_EXTENSIONS_PATH);
++		if (envPath == null || envPath.isBlank())
++			return null;
++		try {
++			var path = Paths.get(envPath);
++			logger.info("Overriding extensions directory with environment variable {}={}", ENV_EXTENSIONS_PATH, path);
++			return path;
++		} catch (InvalidPathException e) {
++			logger.error("Cannot set extensions path to {} ({})", envPath, e.getLocalizedMessage());
++			logger.debug(e.getLocalizedMessage(), e);
++			return null;
++		}
++	}
+ 	
+ 	private ReadOnlyObjectProperty<Path> createRelativePathProperty(ObservableValue<Path> path, String other) {
+ 		var wrapper = new ReadOnlyObjectWrapper<Path>();
