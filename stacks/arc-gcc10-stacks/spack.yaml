@@ -42,6 +42,8 @@ spack:
     - r@4.6.0
     - r@4.5.3
     - mumps +complex+double+float+metis+parmetis+scotch+mpi
+    - gsl
+    - ffmpeg@8.1 +gpl +version3 +nonfree +shared +libmp3lame +libopus +libvorbis +libvpx +libx264 +openssl
     override:
       packages:
         c:
@@ -153,6 +155,16 @@ spack:
       externals:
       - spec: pmix@5.0.10
         prefix: /opt/pmix/5.0.10
+    fribidi:
+      buildable: false
+      externals:
+      - spec: fribidi@1.0.4
+        prefix: /usr
+    libxcb:
+      buildable: false
+      externals:
+      - spec: libxcb@1.13.1
+        prefix: /usr
     ##########################################################################################
     #                                         Modules                                        #
     ##########################################################################################

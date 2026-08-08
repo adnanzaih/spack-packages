@@ -41,6 +41,8 @@ spack:
     - r@4.6.1
     - r@4.6.0
     - r@4.5.3
+    - ffmpeg@8.1+X+bzlib~doc+drawtext+gpl+libaom+libmp3lame+libopenjpeg~libopus~libsnappy~libspeex~libssh~libvorbis~libvpx+libwebp~libx264+libxml2+libzmq+lzma~nonfree~openssl~sdl2+shared+version3
+
     override:
       packages:
         c:
@@ -152,6 +154,16 @@ spack:
       externals:
       - spec: pmix@5.0.10
         prefix: /opt/pmix/5.0.10
+    fribidi:
+      buildable: false
+      externals:
+      - spec: fribidi@1.0.4
+        prefix: /usr
+    libxcb:
+      buildable: false
+      externals:
+      - spec: libxcb@1.13.1
+        prefix: /usr
     ##########################################################################################
     #                                         Modules                                        #
     ##########################################################################################
