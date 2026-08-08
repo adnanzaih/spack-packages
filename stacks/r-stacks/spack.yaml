@@ -159,6 +159,17 @@ spack:
       externals:
       - spec: pmix@5.0.10
         prefix: /opt/pmix/5.0.10
+    fribidi:
+      buildable: false
+      externals:
+      - spec: fribidi@1.0.4
+        prefix: /usr
+    libxcb:
+      buildable: false
+      externals:
+      - spec: libxcb@1.13.1
+        prefix: /usr
+
     ##########################################################################################
     #                                         Modules                                        #
     ##########################################################################################

@@ -4,8 +4,8 @@
 # configuration settings.
 spack:
   config:
-    install_tree:
-      root: /sw/pkgs/arc/staging/biospack
+      install_tree:
+        root: /sw/pkgs/arc/staging/spack-chem
   upstreams:
     arc-compiler-stacks:
       install_tree: /sw/pkgs/arc/staging/spack
@@ -14,78 +14,21 @@ spack:
   ##########################################################################################
   #                                       Software                                         #
   ##########################################################################################
-  - group: bioinformatics
+
+  - group: gcc-8
     specs:
-    - bamtools
-    - bcftools
-    - beast1 ^libbeagle ^openjdk@18.0.1.1
-    - bedtools2 ^python@3.13.13+arc
-    - diamond ^blast-plus cxxflags="-fcoroutines" ^python@3.13.13+arc 
-    - blast2go ^blast-plus cxxflags="-fcoroutines"
-    - rseurat
-    - rseurat ^r@4.6.0
-    - dorado@0.9.6
-    - dorado@1.0.2 
-    - elastix@5.2.0
-    # - blat
-    # - bowtie
-    # - bowtie2
-    # - bwa
-    # - cairo
-    # - canu
-    # - cap3
-    # - clustal-omega
-    # - cufflinks
-    # - delly2
-    # - fastqc
-    # - figtree
-    # - gatk
-    # - gdk-pixbuf
-    # - gnuplot
-    # - harfbuzz
-    # - hisat2
-    # - hmmer
-    # - homer
-    # - htslib
-    # - igv
-    # - imagemagick
-    # - impute2
-    # - itk
-    # - jellyfish
-    # - libxft
-    # - masurca
-    # - minimap2
-    # - mothur
-    # - ncftp
-    # - neuron
-    # - nextflow
-    # - openslide
-    # - pango
-    # - pdf2svg
-    # - poppler
-    # - raxml
-    # - rmats
-    # - rsem
-    # - salmon
-    # - samtools
-    # - seqkit
-    # - spades
-    # - sratoolkit
-    # - star
-    # - stringtie
-    # - trimgalore
-    
+    - ffmpeg@8.1+X+bzlib~doc+drawtext+gpl+libaom+libmp3lame+libopenjpeg~libopus~libsnappy~libspeex~libssh~libvorbis~libvpx+libwebp~libx264+libxml2+libzmq+lzma~nonfree~openssl~sdl2+shared+version3
+    - lammps+mpi+lib+jpeg+png+ffmpeg+openmp+opencl+kspace~kokkos+h5md+spin
   concretizer:
-    unify: false
+    unify: true
     reuse: true
-    compiler_mixing: true
   packages:
-  ##########################################################################################
-  #                                       Compilers                                        #
-  ##########################################################################################
     all:
       providers:
         java: [openjdk]
+  ##########################################################################################
+  #                                       Compilers                                        #
+  ##########################################################################################
     gcc:
       externals:
       - spec: gcc@8.5.0 languages:='c,c++,fortran'
@@ -121,8 +64,8 @@ spack:
           extra_rpaths:
           - /sw/pkgs/arc/llvm/22.1.3/lib/x86_64-unknown-linux-gnu/
           environment:
-            prepend_path:
-              LD_LIBRARY_PATH: /sw/pkgs/arc/llvm/22.1.3/lib/x86_64-unknown-linux-gnu/
+                  prepend_path:
+                          LD_LIBRARY_PATH: /sw/pkgs/arc/llvm/22.1.3/lib/x86_64-unknown-linux-gnu/
     intel-oneapi-compilers-classic:
       externals:
       - spec: intel-oneapi-compilers-classic@2021.5.0
@@ -170,21 +113,46 @@ spack:
       externals:
       - spec: pkgconf@2.5.1
         prefix: /usr
-    bash:
-      buildable: false
-      externals:
-      - spec: bash@4.4.20
-        prefix: /usr
-    git:
-      buildable: false
-      externals:
-      - spec: git@2.43.7
-        prefix: /usr
     openssl:
       buildable: false
       externals:
       - spec: openssl@1.1.1
         prefix: /usr
+    tar:
+      buildable: false
+      externals:
+      - spec: tar@1.30
+        prefix: /usr
+    curl:
+      buildable: true
+      externals:
+      - spec: curl@7.61.1
+        prefix: /usr
+    expat:
+      buildable: false
+      externals:
+      - spec: expat@2.5.0
+        prefix: /usr
+    json-c:
+      buildable: True
+      externals:
+      - spec: json-c@0.13.1
+        prefix: /usr
+    readline:
+      buildable: false
+      externals:
+      - spec: readline@7.0
+        prefix: /usr
+    hwloc:
+      buildable: false
+      externals:
+      - spec: hwloc@2.1.0
+        prefix: /usr
+    pmix:
+      buildable: false
+      externals:
+      - spec: pmix@5.0.10
+        prefix: /opt/pmix/5.0.10
     fribidi:
       buildable: false
       externals:
@@ -196,7 +164,6 @@ spack:
       - spec: libxcb@1.13.1
         prefix: /usr
 
-
     ##########################################################################################
     #                                         Modules                                        #
     ##########################################################################################
@@ -204,8 +171,8 @@ spack:
   modules:
     default:
       roots:
-        lmod: /sw/pkgs/arc/staging/biospack/biomodules
-        tcl: /sw/pkgs/arc/staging/biospack/biomodules
+        lmod: /sw/pkgs/arc/staging/spack-chem/modules
+        tcl: /sw/pkgs/arc/staging/spack-chem/modules
       lmod:
         projections:
           r: 'R/{version}'
@@ -213,14 +180,9 @@ spack:
           intel-oneapi-compilers-classic: 'intel/{version}'
           miniforge3: 'mamba/{version}'
           py-mpi4py: 'mpi4py/{version}' 
-          rseurat: "rseurat/{version}-R-{^r.version}"
         hash_length: 0
         core_compilers:
-        - gcc@8.5.0
-        - gcc@10.3.0
-        - gcc@15.1.0
-        - llvm@22.1.3
-        - intel-oneapi-compilers-classic@2021.5.0
+          - gcc@8.5.0
         hierarchy: []
         core_specs:
         - gcc@8.5.0
@@ -234,5 +196,11 @@ spack:
         - glibc
         - autoconf
         - compiler-wrapper
+        - util-macros
+        - py-pip
+        - py-setuptools
+        - py-wheel
+        - py-cython
+        - python-venv
         gcc-runtime:
           template: gcc-runtime.lua
