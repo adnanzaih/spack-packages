@@ -5,7 +5,7 @@
 spack:
   config:
     install_tree:
-      root: /sw/pkgs/arc/spack
+      root: /sw/spack/opt/pkgs
   view: false
   specs:
   ##########################################################################################
@@ -65,8 +65,8 @@ spack:
   modules:
     default:
       roots:
-        lmod: /sw/modules/spack
-        tcl: /sw/modules/spack
+        lmod: /sw/spack/opt/modules
+        tcl: /sw/spack/opt/modules
       lmod:
         projections:
           r: R/{version}

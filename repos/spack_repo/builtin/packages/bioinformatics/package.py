@@ -8,7 +8,7 @@ class Bioinformatics(BundlePackage):
     homepage = "https://arc.umich.edu"
     version("1.0")
 
-    modules_root = join_path("/sw", "pkgs", "arc", "staging", "biospack", "biomodules")
+    modules_root = join_path("/sw", "spack", "bioinformatics", "opt", "modules")
 
     @property
     def module_arch(self):
