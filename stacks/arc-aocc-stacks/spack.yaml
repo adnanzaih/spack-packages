@@ -12,14 +12,9 @@ spack:
   #                                       Software                                         #
   ##########################################################################################
 
-  - group: Base-GCC14-Compiler
+  - group: Base-AOCC-Compiler
     specs:
-    - argtable cflags="-Wno-error=implicit-function-declaration"
-    - gcc@14.3.1
     - python@3.13.13
-    - python@3.9.24
-    - python@3.10.19
-    - miniforge3@26.3.2-3+notebook+pytorch pytorch-cuda=13
     - armadillo ^flexiblas
     - flexiblas@3.4.2
     - boost@1.90.0~mpi
@@ -39,31 +34,17 @@ spack:
     - sqlite@3.53.1
     - archivetar@0.18.2 ^python@3.13.13 ^openmpi@5.0.10
     - libsodium@1.0.22
-    - libgd@2.3.3
-    - bioinformatics@1.0
     - r@4.6.1
-    - r@4.6.0
     - r@4.5.3
-    - py-mpi4py ^python@3.13.13 ^openmpi@5.0.10
-    - fiji@2026.03.07
-    - cuda@13
-    - fftw+mpi
-    - ffmpeg@8.1+X+bzlib~doc+drawtext+gpl+libaom+libmp3lame+libopenjpeg~libopus~libsnappy~libspeex~libssh~libvorbis~libvpx+libwebp~libx264+libxml2+libzmq+lzma~nonfree~openssl~sdl2+shared+version3
     - mumps +complex+double+float+metis+parmetis+scotch+mpi
-    - lua-luaposix
-    - lua@5.4.8
-    - aocc@5.2.0 +license-agreed
-    - nvhpc@26.5
-    - intel-oneapi-compilers-classic@2021.13.1
-    - llvm
     override:
       packages:
         c:
-          prefer: [gcc@14.3.1]
+          prefer: [aocc@5.2.0]
         cxx:
-          prefer: [gcc@14.3.1]
+          prefer: [aocc@5.2.0]
         fortran:
-          prefer: [gcc@14.3.1]
+          prefer: [aocc@5.2.0]
         python:
           require:
           - "+arc"
@@ -106,6 +87,7 @@ spack:
         core_specs:
         - gcc@14.3.1
         - gcc-runtime@14.3.1
+        - aocc@5.2.0
         exclude:
         - gcc-runtime@14.3.1
         - glibc
