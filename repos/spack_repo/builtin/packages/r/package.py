@@ -86,6 +86,7 @@ class R(AutotoolsPackage):
         depends_on("fontconfig")
         depends_on("freetype")
         depends_on("libwebp+libwebpmux")
+        depends_on("protobuf")
         #depends_on("fribidi")
         #depends_on("pandoc", type=("build", "run"))
 
@@ -116,8 +117,12 @@ class R(AutotoolsPackage):
     conflicts("@:4.4.2 %gcc@15:")
 
     build_directory = "spack-build"
-    arc_cran_mirror = "https://repo.miserver.it.umich.edu/cran/"
-    arc_r_packages = ("doParallel", "devtools", "flexiblas")
+    arc_cran_mirror = "https://repo.miserver.it.umich.edu/cran"
+    arc_r_packages = (
+        "doParallel", "flexiblas", "stringi", "utf8", "credentials", "zip",
+        "httpuv", "later", "promises", "sourcetools", "systemfonts",
+        "textshaping", "usethis", "miniUI", "pkgdown", "profvis", "roxygen2", "devtools"
+    )
 
     @classmethod
     def determine_version(cls, exe):
@@ -271,16 +276,21 @@ class R(AutotoolsPackage):
         r_library = join_path(self.prefix, self.r_lib_dir)
         mkdirp(r_library)
         rscript = Executable(join_path(self.prefix.bin, "Rscript"))
+        packages = "c(%s)" % ", ".join("'%s'" % x for x in self.arc_r_packages)
 
-        for package in self.arc_r_packages:
-            rscript(
-                "-e",
-                (
-                    "Sys.setenv(R_LIBS_USER=''); "
-                    "install.packages('%s', lib='%s', repos='%s', Ncpus=%d)"
-                    % (package, r_library, self.arc_cran_mirror, make_jobs)
-                ),
-            )
+        rscript(
+            "-e",
+            (
+                "options(timeout=600); Sys.setenv(R_LIBS_USER=''); "
+                "packages <- %s; "
+                "install.packages(packages, lib='%s', repos='%s', Ncpus=1, "
+                "dependencies=c('Depends', 'Imports', 'LinkingTo')); "
+                "missing <- setdiff(packages, rownames(installed.packages(lib.loc='%s'))); "
+                "if (length(missing)) stop("
+                "'failed to install requested CRAN packages: ', paste(missing, collapse=', '))"
+                % (packages, r_library, self.arc_cran_mirror, r_library)
+            ),
+        )
 
     # ========================================================================
     # Set up environment to make install easy for R extensions.
