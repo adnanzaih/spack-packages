@@ -118,16 +118,30 @@ class Miniforge3(Package):
     def _install_base_packages(self):
         if "+pytorch" in self.spec:
             pytorch_cuda = self.spec.variants["pytorch-cuda"].value
-            self._mamba_install(
-                "pytorch",
-                "torchvision",
-                "torchaudio",
-                f"pytorch-cuda={pytorch_cuda}",
-                "-c",
-                "pytorch",
-                "-c",
-                "nvidia",
-            )
+
+            if pytorch_cuda.startswith("13"):
+                pip = Executable(self.prefix.bin.pip)
+
+                pip(
+                    "install",
+                    "torch",
+                    "torchvision",
+                    "torchaudio",
+                    "--index-url",
+                    "https://download.pytorch.org/whl/cu130",
+                )
+
+            else:
+                self._mamba_install(
+                    "pytorch",
+                    "torchvision",
+                    "torchaudio",
+                    f"pytorch-cuda={pytorch_cuda}",
+                    "-c",
+                    "pytorch",
+                    "-c",
+                    "nvidia",
+                )
 
         if "+notebook" in self.spec:
             self._mamba_install("jupyterlab", "notebook")
