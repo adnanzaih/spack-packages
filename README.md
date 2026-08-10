@@ -1,4 +1,3 @@
-
 <h2>
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/spack/spack-packages/refs/heads/develop/logo/spack-packages-logo-white-text.svg" width="368">
