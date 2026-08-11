@@ -19,3 +19,5 @@ class Rseurat(RCollectivePackage):
     depends_on("c", type="build")
     depends_on("cxx", type="build")
     depends_on("r@3.3:", type=("build", "run"))
+    depends_on("gdal")
+    depends_on("proj")

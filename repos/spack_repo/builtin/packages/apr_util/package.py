@@ -32,7 +32,7 @@ class AprUtil(AutotoolsPackage):
     depends_on("expat")
     depends_on("iconv")
 
-    #depends_on("openssl", when="+crypto")
+    depends_on("openssl", when="+crypto")
     depends_on("gdbm", when="+gdbm")
     depends_on("postgresql", when="+pgsql")
     depends_on("sqlite", when="+sqlite")

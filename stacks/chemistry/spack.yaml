@@ -17,7 +17,6 @@ spack:
 
   - group: gcc-8
     specs:
-    - ffmpeg@8.1+X+bzlib~doc+drawtext+gpl+libaom+libmp3lame+libopenjpeg~libopus~libsnappy~libspeex~libssh~libvorbis~libvpx+libwebp~libx264+libxml2+libzmq+lzma~nonfree~openssl~sdl2+shared+version3
     - lammps+mpi+lib+jpeg+png+ffmpeg+openmp+opencl+kspace~kokkos+h5md+spin
   concretizer:
     unify: true
