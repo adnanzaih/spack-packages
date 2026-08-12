@@ -114,6 +114,8 @@ class R(AutotoolsPackage):
         when="@:4.3.3",
     )
 
+    conflicts("@:4.4.2 %gcc@15:")
+
     build_directory = "spack-build"
     arc_cran_mirror = "https://repo.miserver.it.umich.edu/cran"
     arc_r_packages = (
