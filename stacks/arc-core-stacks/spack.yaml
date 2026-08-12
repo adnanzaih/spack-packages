@@ -54,6 +54,7 @@ spack:
     - nvhpc@26.5
     - intel-oneapi-compilers-classic@2021.13.1
     - llvm
+    - gcc@10.3.0+binutils
     override:
       packages:
         c:
@@ -118,3 +119,8 @@ spack:
         - python-venv
         gcc-runtime:
           template: gcc-runtime.lua
+        miniforge3:
+          environment:
+            set:
+              CONDA_ENVS_PATH: "~/.conda/envs"
+              CONDA_PKGS_DIRS: "~/.conda/pkgs"
