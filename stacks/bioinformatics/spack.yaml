@@ -20,12 +20,11 @@ spack:
     - bcftools
     - beast1 ^libbeagle ^openjdk
     - bedtools2 ^python@3.13.13+arc
-    - diamond ^blast-plus cxxflags="-fcoroutines" ^python@3.13.13+arc 
+    - diamond ^blast-plus cxxflags="-fcoroutines" ^python@3.13.13+arc
     - blast2go ^blast-plus cxxflags="-fcoroutines"
     - rseurat
     - rseurat ^r@4.6.0
-    #- dorado@0.9.6 %llvm ^cuda
-    #- dorado@1.0.2 %llvm ^cuda
+    - dorado@2.1
     - elastix@5.2.0
     # - blat
     # - bowtie
@@ -79,8 +78,15 @@ spack:
         apr-util:
           prefer:
           - '~crypto'
+        c:
+          prefer: [gcc@14]
+        cxx:
+          prefer: [gcc@14]
+        fortran:
+          prefer: [gcc@14]
+  - openjdk@17
   concretizer:
-    unify: false
+    unify: when_possible
     reuse: true
     compiler_mixing: true
     ##########################################################################################
@@ -97,7 +103,7 @@ spack:
           hdf5~threadsafe: 'hdf5/{version}-nonatomic'
           intel-oneapi-compilers-classic: 'intel/{version}'
           miniforge3: 'mamba/{version}'
-          py-mpi4py: 'mpi4py/{version}' 
+          py-mpi4py: 'mpi4py/{version}'
           rseurat: "rseurat/{version}-R-{^r.version}"
         hash_length: 0
         core_compilers:
