@@ -20,11 +20,14 @@ spack:
     - bcftools
     - beast1 ^libbeagle ^openjdk
     - bedtools2 ^python@3.13.13+arc
+    - blast-plus
+    - scons
     - diamond ^blast-plus cxxflags="-fcoroutines" ^python@3.13.13+arc
     - blast2go ^blast-plus cxxflags="-fcoroutines"
-    - rseurat
+    #- rseurat
     - rseurat ^r@4.6.0
     - dorado@2.1
+    - rseurat@5.5.1 ^r@4.6.0
     - elastix@5.2.0
     # - blat
     # - bowtie
@@ -98,6 +101,7 @@ spack:
         lmod: /sw/spack/bioinformatics/opt/modules
         tcl: /sw/spack/bioinformatics/opt/modules
       lmod:
+        hide_implicits: true
         projections:
           r: 'R/{version}'
           hdf5~threadsafe: 'hdf5/{version}-nonatomic'
@@ -108,11 +112,15 @@ spack:
         hash_length: 0
         core_compilers:
         - gcc@14.3.1
+        - gcc@10.3.0
         - oneapi
-        hierarchy: []
+        - llvm
+        hierarchy:: []
         core_specs:
         - gcc@14.3.1
         - gcc-runtime@14.3.1
+        - gcc@10.3.0
+        - gcc-runtime@10.3.0
         exclude:
         - gcc-runtime@14.3.1
         - glibc
@@ -120,3 +128,9 @@ spack:
         - compiler-wrapper
         gcc-runtime:
           template: gcc-runtime.lua
+  mirrors:
+    spack-public:
+      url: https://binaries.spack.io/v2026.06.0
+      binary: true
+      source: true
+      signed: true
