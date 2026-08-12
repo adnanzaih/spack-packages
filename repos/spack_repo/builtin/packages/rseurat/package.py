@@ -13,11 +13,10 @@ class Rseurat(RCollectivePackage):
 
     license("MIT")
 
+    version("5.5.1", sha256="9614ef02d3e1010c40be5916a309103a76c4221a667cbc4b312e5126459a5821")
     version("5.1.0", sha256="adcfb43d7a8cc55eaa7a0954a082ac95e14059a82901913379bfec115e224d59")
 
 
     depends_on("c", type="build")
     depends_on("cxx", type="build")
     depends_on("r@3.3:", type=("build", "run"))
-    depends_on("gdal")
-    depends_on("proj")

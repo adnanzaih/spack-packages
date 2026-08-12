@@ -229,6 +229,7 @@ class Gcc(AutotoolsPackage, GNUMirrorPackage, CompilerPackage):
 
     depends_on("zlib-api", when="@6:")
     depends_on("zstd", when="@10:")
+    depends_on("binutils")
     
     # Already released GCC versions do not support any newer version of ISL
     #   GCC 5.4 https://github.com/spack/spack/issues/6902#issuecomment-433072097
