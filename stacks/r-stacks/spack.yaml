@@ -16,11 +16,17 @@ spack:
     - matrix:
       - - rtidyverse@2.0.0 ^r@4.5.3
         - rgeospatial@1.5-18 ^r@4.5.3 ^libtiff@4.7.1 ^rtidyverse@2.0.0 ^gdal ^poppler@21.09.0 ^proj@9.7.0 ^geos@3.14.1 ^netcdf-fortran@4.6.2 ^hdf5@1.14.6 ^openjdk
-        - rtidyverse@2.0.0 ^r@4.6.0
-        - rgeospatial@1.5-18 ^r@4.6.0 ^libtiff@4.7.1 ^rtidyverse@2.0.0 ^gdal ^poppler@21.09.0 ^proj@9.7.0 ^geos@3.14.1 ^netcdf-fortran@4.6.2 ^hdf5@1.14.6 ^openjdk
-      - - '%gcc@14.3.1'
+        - rtidyverse@2.0.0 ^r@4.6.1
+        - rgeospatial@1.5-18 ^r@4.6.1 ^libtiff@4.7.1 ^rtidyverse@2.0.0 ^gdal ^poppler@21.09.0 ^proj@9.7.0 ^geos@3.14.1 ^netcdf-fortran@4.6.2 ^hdf5@1.14.6 ^openjdk
+      - - '%c,cxx=gcc@14.3.1'
     override:
       packages:
+        c:
+          prefer: [gcc@14.3.1]
+        cxx:
+          prefer: [gcc@14.3.1]
+        fortran:
+          prefer: [gcc@14.3.1]
         python:
           require:
           - +arc
@@ -33,8 +39,6 @@ spack:
         gdal:
           require:
           - +blosc+arrow+hdf4+hdf5+liblzma+libxml2+poppler+parquet+libaec+zstd+webp+sfcgal+pcre2+lz4+deflate+avif+freexl+jxl+heif
-          - spec: '@3.8.5~armadillo ^arrow@:18'
-            when: '%gcc@8.5.0'
           - spec: '@3.13.2+armadillo'
             when: '%gcc@10.3.0:'
         sfcgal:
@@ -43,10 +47,6 @@ spack:
         arrow:
           require:
           - +brotli+bz2+csv+compute+dataset+filesystem+ipc+mimalloc~orc+parquet~python+shared~snappy+zlib+zstd
-        boost:
-          require:
-          - spec: '@1.88:'
-            when: '%gcc@14:'
         json-c:
           prefer:
           - '@0.16'
