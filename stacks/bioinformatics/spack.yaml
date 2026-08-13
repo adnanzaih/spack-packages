@@ -27,6 +27,7 @@ spack:
     - dorado@2.1
     - rseurat@5.5.1 ^r@4.6.1
     - elastix@5.2.0
+    - plink2
     # - blat
     # - bowtie
     # - bowtie2
