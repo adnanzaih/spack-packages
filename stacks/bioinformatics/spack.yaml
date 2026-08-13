@@ -18,16 +18,14 @@ spack:
     specs:
     - bamtools
     - bcftools
-    - beast1 ^libbeagle ^openjdk
+    - beast1
     - bedtools2 ^python@3.13.13+arc
-    - blast-plus
+    - blast-plus@2.17.0+sqlite
     - scons
-    - diamond ^blast-plus cxxflags="-fcoroutines" ^python@3.13.13+arc
-    - blast2go ^blast-plus cxxflags="-fcoroutines"
-    #- rseurat
-    - rseurat ^r@4.6.0
+    - diamond ^blast-plus@2.17.0+sqlite cxxflags="-fcoroutines" ^python@3.13.13+arc
+    - blast2go ^blast-plus@2.17.0+sqlite cxxflags="-fcoroutines"
     - dorado@2.1
-    - rseurat@5.5.1 ^r@4.6.0
+    - rseurat@5.5.1 ^r@4.6.1
     - elastix@5.2.0
     # - blat
     # - bowtie
@@ -87,7 +85,6 @@ spack:
           prefer: [gcc@14]
         fortran:
           prefer: [gcc@14]
-  - openjdk@17
   concretizer:
     unify: when_possible
     reuse: true
