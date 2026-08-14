@@ -80,12 +80,15 @@ spack:
         apr-util:
           prefer:
           - '~crypto'
+<<<<<<< HEAD
         c:
           prefer: [gcc@14]
         cxx:
           prefer: [gcc@14]
         fortran:
           prefer: [gcc@14]
+=======
+>>>>>>> 19917bf129 (updates)
   concretizer:
     unify: when_possible
     reuse: true
@@ -110,6 +113,7 @@ spack:
         hash_length: 0
         core_compilers:
         - gcc@14.3.1
+<<<<<<< HEAD
         - gcc@10.3.0
         - oneapi
         - llvm
@@ -119,6 +123,13 @@ spack:
         - gcc-runtime@14.3.1
         - gcc@10.3.0
         - gcc-runtime@10.3.0
+=======
+        - oneapi
+        hierarchy: []
+        core_specs:
+        - gcc@14.3.1
+        - gcc-runtime@14.3.1
+>>>>>>> 19917bf129 (updates)
         exclude:
         - gcc-runtime@14.3.1
         - glibc
