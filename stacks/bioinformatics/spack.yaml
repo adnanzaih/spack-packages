@@ -25,9 +25,11 @@ spack:
     - diamond ^blast-plus@2.17.0+sqlite cxxflags="-fcoroutines" ^python@3.13.13+arc
     - blast2go ^blast-plus@2.17.0+sqlite cxxflags="-fcoroutines"
     - dorado@2.1
-    - rseurat@5.5.1 ^r@4.6.1
+    - rseurat@5.5.1 ^r@4.6.1/hsmq64i
     - elastix@5.2.0
     - plink2
+    - gatk@4.5.0.0+r ^r/hsmq64i
+    - mothur@1.48.0+boost+gsl+hdf5 ^usearch@12 ^boost@1.80
     # - blat
     # - bowtie
     # - bowtie2
@@ -90,7 +92,7 @@ spack:
 =======
 >>>>>>> 19917bf129 (updates)
   concretizer:
-    unify: when_possible
+    unify: false
     reuse: true
     compiler_mixing: true
     ##########################################################################################
