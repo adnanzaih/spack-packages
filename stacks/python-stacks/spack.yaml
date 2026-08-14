@@ -1,0 +1,81 @@
+# This is a Spack Environment file.
+#
+# It describes a set of packages to be installed, along with
+# configuration settings.
+spack:
+  config:
+    install_tree:
+      root: /sw/spack/opt/pkgs
+  view:
+    3_14:
+      root: /sw/spack/opt/view/3.14
+      group: 314native
+      link: run
+    3_13:
+      root: /sw/spack/opt/view/3.13
+      group: 313native
+      link: run
+
+  specs:
+  ##########################################################################################
+  #                                       Software                                         #
+  ##########################################################################################
+  - group: 314native
+    specs:
+    - py-scikit-learn@1.8 ^py-scipy@1.17 ^py-numpy@2.4 ^flexiblas
+    - py-matplotlib@3.10
+    override:
+      packages:
+        c:
+          prefer: [gcc@14.3.1]
+        cxx:
+          prefer: [gcc@14.3.1]
+        fortran:
+          prefer: [gcc@14.3.1]
+        python:
+          require:
+          - "@3.14.7"
+          - +arc
+  - group: 313native
+    specs:
+    - py-scikit-learn@1.7 ^py-scipy@1.15 ^py-numpy@2.3 ^flexiblas
+    - py-matplotlib@3.10
+    override:
+      packages:
+        c:
+          prefer: [gcc@14.3.1]
+        cxx:
+          prefer: [gcc@14.3.1]
+        fortran:
+          prefer: [gcc@14.3.1]
+        python:
+          require:
+          - "@3.13.13"
+          - +arc
+  concretizer:
+    unify: when_possible
+    reuse: true
+    ##########################################################################################
+    #                                         Modules                                        #
+    ##########################################################################################
+  modules:
+    default:
+      roots:
+        lmod: /sw/spack/opt/modules
+        tcl: /sw/spack/opt/modules
+      lmod:
+        projections:
+          r: R/{version}
+          hdf5~threadsafe: hdf5/{version}-nonatomic
+          intel-oneapi-compilers-classic: intel/{version}
+          miniforge3: mamba/{version}
+          py-mpi4py: mpi4py/{version}
+        hash_length: 0
+        core_compilers:
+        - gcc@14.3.1
+        core_specs:
+        - gcc@14.3.1
+        - gcc-runtime@14.3.1
+        exclude: [all]
+        gcc-runtime:
+          template: gcc-runtime.lua
