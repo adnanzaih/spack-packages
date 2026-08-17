@@ -30,6 +30,12 @@ spack:
     - plink2
     - gatk@4.5.0.0+r ^r/hsmq64i
     - mothur@1.48.0+boost+gsl+hdf5 ^usearch@12 ^boost@1.80
+    #- py-multiqc@1.28^python@3.13.13+arc
+    - rdeseq2@1.52
+    - rsem ^zlib
+    - bowtie
+    - bowtie2
+    - star
     # - blat
     # - bowtie
     # - bowtie2
@@ -82,15 +88,12 @@ spack:
         apr-util:
           prefer:
           - '~crypto'
-<<<<<<< HEAD
         c:
           prefer: [gcc@14]
         cxx:
           prefer: [gcc@14]
         fortran:
-          prefer: [gcc@14]
-=======
->>>>>>> 19917bf129 (updates)
+          prefer: [gcc@14]        
   concretizer:
     unify: false
     reuse: true
@@ -115,7 +118,6 @@ spack:
         hash_length: 0
         core_compilers:
         - gcc@14.3.1
-<<<<<<< HEAD
         - gcc@10.3.0
         - oneapi
         - llvm
@@ -125,13 +127,6 @@ spack:
         - gcc-runtime@14.3.1
         - gcc@10.3.0
         - gcc-runtime@10.3.0
-=======
-        - oneapi
-        hierarchy: []
-        core_specs:
-        - gcc@14.3.1
-        - gcc-runtime@14.3.1
->>>>>>> 19917bf129 (updates)
         exclude:
         - gcc-runtime@14.3.1
         - glibc
