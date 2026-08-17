@@ -117,11 +117,11 @@ class RPackage(Package):
 class RCollectiveBuilder(RBuilder):
     """Builder for RCollectivePackage.
 
-    Installs the primary CRAN package and all packages listed in
-    ``cran_packages`` via ``install.packages()`` from the configured mirror.
-    Using ``install.packages()`` (rather than ``R CMD INSTALL``) lets CRAN
-    resolve and fetch R-level dependencies automatically, which is necessary
-    when those dependencies are not individually packaged in Spack.
+    Installs CRAN packages via ``install.packages()`` and Bioconductor packages
+    via ``BiocManager::install()``.  Installing from the repositories (rather
+    than using ``R CMD INSTALL``) lets R resolve and fetch R-level dependencies
+    automatically, which is necessary when those dependencies are not
+    individually packaged in Spack.
 
     Each ``install.packages()`` invocation inherits Spack's normal dependency
     build environment, so pkg-config, CMake, R extension paths, and dependency
@@ -137,21 +137,42 @@ class RCollectiveBuilder(RBuilder):
 
         return json.dumps(str(value))
 
+    def _verify(self, package, r_lib_dir, expected_version=None):
+        package_expr = self._r_string(package)
+        library_expr = self._r_string(r_lib_dir)
+        failed_expr = self._r_string("installation failed for {0}".format(package))
+        expression = (
+            "if (!requireNamespace({0}, lib.loc={1}, quietly=TRUE)) stop({2})".format(
+                package_expr, library_expr, failed_expr
+            )
+        )
+        if expected_version is not None:
+            version_expr = self._r_string(expected_version)
+            mismatch_expr = self._r_string(
+                "installed {0} version does not match Spack version {1}".format(
+                    package, expected_version
+                )
+            )
+            expression += (
+                "; if (as.character(packageVersion({0}, lib.loc={1})) != {2}) "
+                "stop({3})"
+            ).format(package_expr, library_expr, version_expr, mismatch_expr)
+        return expression
+
     def install(self, pkg, spec, prefix):
         mkdirp(pkg.module.r_lib_dir)
 
         r = pkg.module.R
         r_lib_dir = pkg.module.r_lib_dir
 
-        all_packages = ([pkg.cran] if pkg.cran else []) + list(pkg.cran_packages)
+        all_cran_packages = ([pkg.cran] if pkg.cran else []) + list(pkg.cran_packages)
+        all_bioc_packages = ([pkg.bioc] if pkg.bioc else []) + list(pkg.bioc_packages)
 
-        for cran_pkg in all_packages:
+        for cran_pkg in all_cran_packages:
             cran_pkg_expr = self._r_string(cran_pkg)
             r_lib_dir_expr = self._r_string(r_lib_dir)
             cran_mirror_expr = self._r_string(pkg.cran_mirror)
-            failed_msg_expr = self._r_string(
-                "install.packages failed for {0}".format(cran_pkg)
-            )
+            expected_version = str(pkg.version) if cran_pkg == pkg.cran else None
 
             r(
                 "--vanilla",
@@ -160,10 +181,46 @@ class RCollectiveBuilder(RBuilder):
                     "install.packages({0}, lib={1}, repos={2}, dependencies=TRUE); ".format(
                         cran_pkg_expr, r_lib_dir_expr, cran_mirror_expr
                     )
-                    + "if (!requireNamespace({0}, lib.loc={1}, quietly=TRUE)) ".format(
-                        cran_pkg_expr, r_lib_dir_expr
+                    + self._verify(cran_pkg, r_lib_dir, expected_version)
+                ),
+                extra_env={"R_LIBS_USER": ""},
+            )
+
+        if all_bioc_packages:
+            r_lib_dir_expr = self._r_string(r_lib_dir)
+            cran_mirror_expr = self._r_string(pkg.cran_mirror)
+            r(
+                "--vanilla",
+                "-e",
+                (
+                    ".libPaths(c({0}, .libPaths())); ".format(r_lib_dir_expr)
+                    + "if (!requireNamespace(\"BiocManager\", quietly=TRUE)) "
+                    + "install.packages(\"BiocManager\", lib={0}, repos={1})".format(
+                        r_lib_dir_expr, cran_mirror_expr
                     )
-                    + "stop({0})".format(failed_msg_expr)
+                ),
+                extra_env={"R_LIBS_USER": ""},
+            )
+
+        for bioc_pkg in all_bioc_packages:
+            bioc_pkg_expr = self._r_string(bioc_pkg)
+            r_lib_dir_expr = self._r_string(r_lib_dir)
+            expected_version = str(pkg.version) if bioc_pkg == pkg.bioc else None
+            version_arg = (
+                ", version={0}".format(self._r_string(pkg.bioc_version))
+                if pkg.bioc_version
+                else ""
+            )
+            r(
+                "--vanilla",
+                "-e",
+                (
+                    ".libPaths(c({0}, .libPaths())); ".format(r_lib_dir_expr)
+                    + "BiocManager::install({0}, lib={1}, dependencies=TRUE, "
+                    "ask=FALSE, update=FALSE{2}); ".format(
+                        bioc_pkg_expr, r_lib_dir_expr, version_arg
+                    )
+                    + self._verify(bioc_pkg, r_lib_dir, expected_version)
                 ),
                 extra_env={"R_LIBS_USER": ""},
             )
@@ -171,10 +228,11 @@ class RCollectiveBuilder(RBuilder):
 
 class RCollectivePackage(RPackage):
     """Specialized class for a primary R package that also installs a
-    collection of additional CRAN packages into the same R library prefix.
+    collection of additional R packages into the same R library prefix.
 
-    Subclasses must set :attr:`cran` (the primary package) and may populate
-    :attr:`cran_packages` with the names of extra CRAN packages to install.
+    Subclasses set either :attr:`cran` or :attr:`bioc` for the primary package
+    and may populate :attr:`cran_packages` and :attr:`bioc_packages` with
+    additional packages to install.
 
     Example::
 
@@ -186,8 +244,14 @@ class RCollectivePackage(RPackage):
     #: Additional CRAN package names to install alongside the primary package.
     cran_packages: List[str] = []
 
+    #: Additional Bioconductor package names to install alongside the primary package.
+    bioc_packages: List[str] = []
+
     #: CRAN mirror used for the additional ``install.packages()`` calls.
     cran_mirror: str = "https://cloud.r-project.org"
+
+    #: Optional Bioconductor release passed to ``BiocManager::install``.
+    bioc_version: Optional[str] = None
 
     GenericBuilder = RCollectiveBuilder
     build_system_class = "RCollectivePackage"
