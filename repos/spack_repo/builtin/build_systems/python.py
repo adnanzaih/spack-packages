@@ -473,7 +473,6 @@ class PythonCollectiveBuilder(BuilderWithDefaults):
                 )
             )
 
-            self._merge_spec(extension, prefix)
 
         self._write_manifest(spec, prefix, python_spec, extensions)
 
