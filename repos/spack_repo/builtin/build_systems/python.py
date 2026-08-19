@@ -535,51 +535,6 @@ class PythonCollectiveBuilder(BuilderWithDefaults):
             ),
         )
 
-    def _merge_spec(self, dep_spec: Spec, prefix: Prefix) -> None:
-        """Merge one installed package prefix into the collective."""
-
-        source = str(dep_spec.prefix)
-        destination = str(prefix)
-
-        for root, dirs, files in os.walk(source):
-
-            relative = os.path.relpath(root, source)
-
-            if relative == ".":
-                dest_root = destination
-            else:
-                dest_root = os.path.join(destination, relative)
-
-            mkdirp(dest_root)
-
-            for directory in dirs:
-                mkdirp(join_path(dest_root, directory))
-
-            for filename in files:
-                src = join_path(root, filename)
-                dst = join_path(dest_root, filename)
-
-                self._link_file(src, dst, dep_spec)
-
-    def _link_file(self, src: str, dst: str, owner: Spec) -> None:
-        """Add a file to the collective and detect collisions."""
-
-        if not os.path.lexists(dst):
-            symlink(src, dst)
-            return
-
-        #
-        # Same underlying file: harmless.
-        #
-        if os.path.islink(dst):
-            if os.path.realpath(dst) == os.path.realpath(src):
-                return
-
-        raise InstallError(
-            "Python collective file collision:\n"
-            f"  destination: {dst}\n"
-            f"  existing:    {os.path.realpath(dst)}\n"
-            f"  incoming:    {src}\n"
             f"  package:     {owner.format('{name}@{version}/{hash:7}')}"
         )
 
