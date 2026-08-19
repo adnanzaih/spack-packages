@@ -397,3 +397,222 @@ class PythonPipBuilder(BuilderWithDefaults):
             pip(*args)
 
     run_after("install")(execute_install_time_tests)
+
+
+class PythonCollectivePackage(PythonExtension):
+    """A Python software collection composed of existing Spack packages.
+
+    PythonCollectivePackage does not build Python modules itself. Instead,
+    it depends on normal Spack Python packages and creates a unified prefix
+    containing Python and all Python extensions in its dependency DAG.
+
+    Each dependency remains an independently installed Spack package.
+    """
+
+    build_system_class = "PythonCollectivePackage"
+
+    default_buildsystem = "python_collective"
+
+    build_system("python_collective")
+
+    variant(
+        "transitive",
+        default=True,
+        description="Include transitive Python extension dependencies",
+    )
+
+    with when("build_system=python_collective"):
+        extends("python")
+
+    @property
+    def python_spec(self) -> Spec:
+        """Python interpreter used by this collective."""
+        python, *_ = self.spec.dependencies("python-venv") or self.spec.dependencies("python")
+        return python
+
+    @property
+    def headers(self) -> HeaderList:
+        return HeaderList([])
+
+    @property
+    def libs(self) -> LibraryList:
+        return LibraryList([])
+        
+
+@register_builder("python_collective")
+class PythonCollectiveBuilder(BuilderWithDefaults):
+    """Create a unified Python prefix from installed Spack packages."""
+
+    phases = ("install",)
+
+    def install(self, pkg, spec, prefix):
+        python_spec = pkg.python_spec
+
+        tty.info(
+            "Creating Python collective with {0}".format(
+                python_spec.format("{name}@{version}/{hash:7}")
+            )
+        )
+
+        mkdirp(prefix)
+
+        #
+        # Add Python itself.
+        #
+        self._merge_spec(python_spec, prefix)
+
+        #
+        # Add Python packages belonging to this Python interpreter.
+        #
+        extensions = self._python_extensions(spec, python_spec)
+
+        for extension in extensions:
+            tty.info(
+                "Adding {0}".format(
+                    extension.format("{name}@{version}/{hash:7}")
+                )
+            )
+
+            self._merge_spec(extension, prefix)
+
+        self._write_manifest(spec, prefix, python_spec, extensions)
+
+    def _python_extensions(self, root_spec: Spec, python_spec: Spec) -> List[Spec]:
+        """Return Python extensions belonging to this collective's Python."""
+
+        extensions = []
+
+        #
+        # traverse() includes transitive dependencies.
+        #
+        for dep in root_spec.traverse(root=False):
+
+            if dep.name == "python":
+                continue
+
+            #
+            # Only consider installed packages.
+            #
+            try:
+                dep_pkg = dep.package
+            except Exception:
+                continue
+
+            #
+            # Python packages are extensions. Determine whether this package
+            # extends Python.
+            #
+            try:
+                extendee_spec = dep_pkg.extendee_spec
+            except Exception:
+                extendee_spec = None
+
+            if extendee_spec is None:
+                continue
+
+            if extendee_spec.name not in ("python", "python-venv"):
+                continue
+
+            #
+            # Make sure the extension belongs to the exact Python instance
+            # used by this collective.
+            #
+            try:
+                extendee_python = dep["python"]
+            except KeyError:
+                continue
+
+            if extendee_python.dag_hash() != python_spec.dag_hash():
+                continue
+
+            extensions.append(dep)
+
+        return sorted(
+            extensions,
+            key=lambda x: (
+                x.name,
+                str(x.version),
+                x.dag_hash(),
+            ),
+        )
+
+    def _merge_spec(self, dep_spec: Spec, prefix: Prefix) -> None:
+        """Merge one installed package prefix into the collective."""
+
+        source = str(dep_spec.prefix)
+        destination = str(prefix)
+
+        for root, dirs, files in os.walk(source):
+
+            relative = os.path.relpath(root, source)
+
+            if relative == ".":
+                dest_root = destination
+            else:
+                dest_root = os.path.join(destination, relative)
+
+            mkdirp(dest_root)
+
+            for directory in dirs:
+                mkdirp(join_path(dest_root, directory))
+
+            for filename in files:
+                src = join_path(root, filename)
+                dst = join_path(dest_root, filename)
+
+                self._link_file(src, dst, dep_spec)
+
+    def _link_file(self, src: str, dst: str, owner: Spec) -> None:
+        """Add a file to the collective and detect collisions."""
+
+        if not os.path.lexists(dst):
+            symlink(src, dst)
+            return
+
+        #
+        # Same underlying file: harmless.
+        #
+        if os.path.islink(dst):
+            if os.path.realpath(dst) == os.path.realpath(src):
+                return
+
+        raise InstallError(
+            "Python collective file collision:\n"
+            f"  destination: {dst}\n"
+            f"  existing:    {os.path.realpath(dst)}\n"
+            f"  incoming:    {src}\n"
+            f"  package:     {owner.format('{name}@{version}/{hash:7}')}"
+        )
+
+    def _write_manifest(
+        self,
+        root_spec: Spec,
+        prefix: Prefix,
+        python_spec: Spec,
+        extensions: List[Spec],
+    ) -> None:
+        """Record the exact contents of the collective."""
+
+        metadata = join_path(prefix, ".spack-python-collective")
+        mkdirp(metadata)
+
+        manifest = join_path(metadata, "packages.txt")
+
+        with open(manifest, "w", encoding="utf-8") as f:
+            f.write("# Generated by PythonCollectiveBuilder\n")
+            f.write(
+                "# collective: "
+                + root_spec.format("{name}@{version}/{hash}")
+                + "\n\n"
+            )
+
+            f.write(
+                python_spec.format("{name}@{version} /{hash} {prefix}")
+                + "\n"
+            )
+
+            for dep in extensions:
+                f.write(
+                    dep.format("{name}@{version} /{hash} {prefix}")
+                    + "\n"
+                )
