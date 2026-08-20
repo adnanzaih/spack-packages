@@ -33,6 +33,7 @@ from spack.package import (
     symlink,
     test_part,
     tty,
+    variant,
     when,
     working_dir,
 )
