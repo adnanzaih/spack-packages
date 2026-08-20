@@ -535,8 +535,6 @@ class PythonCollectiveBuilder(BuilderWithDefaults):
             ),
         )
 
-            f"  package:     {owner.format('{name}@{version}/{hash:7}')}"
-        )
 
     def _write_manifest(
         self,
