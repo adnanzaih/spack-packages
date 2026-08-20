@@ -8,6 +8,8 @@ import shutil
 import stat
 from typing import Dict, Iterable, List, Mapping, Optional, Tuple
 
+from spack.llnl.util.filesystem import mkdirp
+
 from spack.package import (
     BuilderWithDefaults,
     ClassProperty,
@@ -456,11 +458,6 @@ class PythonCollectiveBuilder(BuilderWithDefaults):
         )
 
         mkdirp(prefix)
-
-        #
-        # Add Python itself.
-        #
-        self._merge_spec(python_spec, prefix)
 
         #
         # Add Python packages belonging to this Python interpreter.
