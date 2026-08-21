@@ -84,6 +84,11 @@ spack:
         hierarchy:
           - r
           - mpi
+        filter_hierarchy_specs:
+          archivetar:
+            - mpi
+        archivetar:
+          autoload: none
         core_specs:
         - gcc@14.3.1
         - gcc-runtime@14.3.1
@@ -101,3 +106,7 @@ spack:
         - python-venv
         gcc-runtime:
           template: gcc-runtime.lua
+        openmpi@5.0.10+arc:
+          environment:
+            set:
+              UCX_LOG_LEVEL: error

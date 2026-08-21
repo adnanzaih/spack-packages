@@ -9,6 +9,8 @@ spack:
   upstreams:
     arc-compiler-stacks:
       install_tree: /sw/spack/opt/pkgs
+      modules:
+        lmod: /sw/spack/opt/modules
   view: false
   specs:
   ##########################################################################################
