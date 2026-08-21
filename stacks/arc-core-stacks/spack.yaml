@@ -14,7 +14,6 @@ spack:
 
   - group: Base-GCC14-Compiler
     specs:
-    - bioinformatics
     - argtable cflags="-Wno-error=implicit-function-declaration"
     - gcc@14.3.1
     - python@3.14.7
@@ -53,7 +52,7 @@ spack:
     - ffmpeg@8.1+X+bzlib~doc+drawtext+gpl+libaom+libmp3lame+libopenjpeg~libopus~libsnappy~libspeex~libssh~libvorbis~libvpx+libwebp~libx264+libxml2+libzmq+lzma~nonfree~openssl~sdl2+shared+version3
     - mumps +complex+double+float+metis+parmetis+scotch+mpi
     - ruby
-    #- julia
+    - julia cpu_target=znver5
     override:
       packages:
         c:
@@ -118,6 +117,7 @@ spack:
           intel-oneapi-compilers-classic: 'intel/{version}'
           miniforge3: 'mamba/{version}'
           py-mpi4py: 'mpi4py/{version}'
+          intel-oneapi-mpi: 'impi/{version}'
         hash_length: 0
         core_compilers:
           - gcc@14.3.1
@@ -145,3 +145,13 @@ spack:
             set:
               CONDA_ENVS_PATH: "~/.conda/envs"
               CONDA_PKGS_DIRS: "~/.conda/pkgs"
+        openmpi@5.0.10+arc:
+          environment:
+            set:
+              UCX_LOG_LEVEL: error
+        intel-oneapi-mpi@2021.18.0:
+          environment:
+            set:
+              SLURM_MPI_TYPE: pmi2
+              I_MPI_HYDRA_BOOSTRAP: slurm
+              I_MPI_PMI_LIBRARY: /usr/lib64/libpmi2.so
