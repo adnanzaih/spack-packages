@@ -230,6 +230,8 @@ class Fsl(Package, CudaPackage):
     def setup_run_environment(self, env: EnvironmentModifications) -> None:
         # Set the environment variables after copying tree
         env.set("FSLDIR", self.prefix)
+        env.set("FSLWISH", self.prefix.bin.fslwish)
+        env.set("FSLTCLSH", self.prefix.bin.fsltclsh)
         fslsetup = join_path(self.prefix, "etc", "fslconf", "fsl.sh")
 
         if os.path.isfile(fslsetup):
