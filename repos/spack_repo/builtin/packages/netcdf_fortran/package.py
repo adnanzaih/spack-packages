@@ -35,68 +35,6 @@ class NetcdfFortran(AutotoolsPackage):
     depends_on("c", type="build")
     depends_on("fortran", type="build")
     depends_on("netcdf-c")
-    depends_on("netcdf-c@4.7.4:", when="@4.5.3:")  # nc_def_var_szip required
-    depends_on("doxygen", when="+doc", type="build")
-
-    # We need to use MPI wrappers when building against static MPI-enabled NetCDF and/or HDF5:
-    with when("^netcdf-c~shared"):
-        depends_on("mpi", when="^netcdf-c+mpi")
-        depends_on("mpi", when="^netcdf-c+parallel-netcdf")
-        depends_on("mpi", when="^hdf5+mpi~shared")
-
-    # Enable 'make check' for NAG, which is too strict.
-    patch("nag_testing.patch", when="@4.4.5%nag")
-
-    # File fortran/nf_logging.F90 is compiled without -DLOGGING, which leads
-    # to missing symbols in the library. Additionally, the patch enables
-    # building with NAG, which refuses to compile empty source files (see also
-    # comments in the patch):
-    patch("logging.patch", when="@:4.4.5")
-
-    # Prevent excessive linking to system libraries. Without this patch the
-    # library might get linked to the system installation of libcurl. See
-    # https://github.com/Unidata/netcdf-fortran/commit/0a11f580faebbc1c4dce68bf5135709d1c7c7cc1#diff-67e997bcfdac55191033d57a16d1408a
-    patch("excessive_linking.patch", when="@4.4.5")
-
-    # Parallel builds do not work in the fortran directory. This patch is
-    # derived from https://github.com/Unidata/netcdf-fortran/pull/211
-    patch("no_parallel_build.patch", when="@4.5.2")
-
-    filter_compiler_wrappers("nf-config", relative_root="bin")
-
-    def flag_handler(self, name, flags):
-        if name == "cflags":
-            if "+pic" in self.spec:
-                flags.append(self["c"].pic_flag)
-        elif name == "fflags":
-            if "+pic" in self.spec:
-                flags.append(self["fortran"].pic_flag)
-            if self.spec.satisfies("@:4.5.2"):
-                if self.spec.satisfies("%fortran=gcc@10:"):
-                    # https://github.com/Unidata/netcdf-fortran/issues/212
-                    flags.append("-fallow-argument-mismatch")
-                elif self.spec.satisfies("%fortran=nag"):
-                    # https://github.com/Unidata/netcdf-fortran/issues/218
-                    flags.append("-mismatch_all")
-            if self.spec.satisfies("%fortran=cce"):
-                # Cray compiler generates module files with uppercase names by
-                # default, which is not handled by the makefiles of
-                # NetCDF-Fortran:
-                # https://github.com/Unidata/netcdf-fortran/pull/221.
-                # The following flag forces the compiler to produce module
-                # files with lowercase names.
-                flags.append("-ef")
-            elif self.spec.satisfies("%fortran=nag platform=darwin"):
-                # The MacOS file system is case-insensitive. NAG therefore treats .F90
-                # files as .f90 files, and so doesn't run them through its
-                # preprocessor. So add -fpp to force NAG to run the preprocessor on
-                # all Fortran files.
-                flags.append("-fpp")
-
-        # Note that cflags and fflags should be added by the compiler wrapper
-        # and not on the command line to avoid overriding the default
-        # compilation flags set by the configure script:
-        return flags, None, None
 
     @property
     def libs(self):

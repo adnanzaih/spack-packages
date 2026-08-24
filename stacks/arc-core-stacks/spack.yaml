@@ -84,7 +84,7 @@ spack:
     - intel-oneapi-mpi@2021.18.0
     - aocc@5.2.0 +license-agreed
     - nvhpc@26.5
-    - llvm ^python@3.10.19
+    - llvm/ganxupa ^python@3.10.19 
     - gcc@10.3.0+binutils
     override:
       packages:
