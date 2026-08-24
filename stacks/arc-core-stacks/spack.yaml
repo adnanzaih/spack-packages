@@ -30,6 +30,7 @@ spack:
     - openblas@0.3.33
     - netlib-lapack@3.12.1
     - libaec@1.1.4
+    - libxcrypt+obsolete_api
     - proj@9.7.0 ^libtiff@4.7.1
     - hdf5@1.14.6+cxx+fortran+hl+threadsafe~mpi ^libaec@1.1.4
     - hdf5@1.14.6+cxx+fortran+hl+threadsafe+mpi ^libaec@1.1.4
@@ -99,6 +100,11 @@ spack:
         openmpi:
           require:
           - "+arc"
+  - group: imaging
+    specs:
+    - freesurfer
+    - vtk
+    - fsl@6.0.5.2+cuda cuda_arch=80 ^openblas@0.3.33
   concretizer:
     unify: false
     reuse: true

@@ -203,7 +203,7 @@ class Vtk(CMakePackage):
     depends_on("libogg")
     depends_on("libtheora")
     depends_on("utf8cpp", when="@9:")
-    depends_on("gl2ps@1.4.1:", when="@9:")
+    depends_on("gl2ps@1.4.1:", when="@8:")
     depends_on("proj@4:7", when="@9:9.1")
     depends_on("proj@8:", when="@9.2:")
     depends_on("cgns@4.1.1:+mpi", when="@9.1: io=cgns +mpi")

@@ -15,9 +15,10 @@ spack:
   #                                       Software                                         #
   ##########################################################################################
 
-  - group: gcc-8
+  - group: Chemistry
     specs:
     - lammps+mpi+lib+jpeg+png+ffmpeg+openmp+opencl+kspace~kokkos+h5md+spin
+    - gromacs+cuda+mpi
   concretizer:
     unify: true
     reuse: true

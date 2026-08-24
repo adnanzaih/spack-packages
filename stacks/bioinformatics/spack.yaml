@@ -43,6 +43,7 @@ spack:
     - sratoolkit@3.4.1
     - stringtie@3.0.3
     - stringtie@2.2.1
+    - itk@5.4.4
     # - blat
     # - bowtie
     # - bowtie2

@@ -1,0 +1,22 @@
+--- a/src/ptx2/CUDA/tractography_gpu.cu
++++ b/src/ptx2/CUDA/tractography_gpu.cu
+@@ -71,7 +71,7 @@
+ #include <CUDA/memManager_gpu.cu>
+ #include <CUDA/tractography_CallKernels.cu>
+ #include <sys/time.h>
+-#include "nvToolsExt.h"	  // host profiling
++#include <nvtx3/nvToolsExt.h>	  // host profiling
+ 
+ void tractography_gpu(	
+   tractographyData&	data_host,
+--- a/src/ptx2/Makefile
++++ b/src/ptx2/Makefile
+@@ -106,7 +106,7 @@
+ 	${CXX} ${CXXFLAGS} ${LDFLAGS} -o $@ ${SMOBJS} ${DLIBS}
+ 
+ probtrackx2_gpu: ${PTX_GPUOBJS}
+-	${CXX} ${CXXFLAGS} ${LDFLAGS} -o probtrackx2_gpu ${PTX_GPUOBJS} tractography_gpu.o ${DLIBS} -I${INC_CUDA} -lcudart -lcudadevrt -lcuda -lnvToolsExt -L${LIB_CUDA} -L${LIB_CUDA}/stubs
++	${CXX} ${CXXFLAGS} ${LDFLAGS} -o probtrackx2_gpu ${PTX_GPUOBJS} tractography_gpu.o ${DLIBS} -I${INC_CUDA} -lcudart -lcudadevrt -lcuda -L${LIB_CUDA} -L${LIB_CUDA}/stubs
+ 
+ link_gpu.o:	tractography_gpu.o
+ 	$(NVCC) ${GENCODE_FLAGS} -dlink tractography_gpu.o -o link_gpu.o -L${LIB_CUDA}

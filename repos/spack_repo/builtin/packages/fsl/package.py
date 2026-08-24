@@ -23,6 +23,7 @@ class Fsl(Package, CudaPackage):
     url = "file://{0}/fsl-5.0.10-sources.tar.gz".format(os.getcwd())
     manual_download = True
 
+    version("6.0.5.2", sha256="dd41fcc3f457617d750394e9872b1a87c34838003b9929808dea280cd9d7a0d2")
     version("6.0.5", sha256="df12b0b1161a26470ddf04e4c5d5d81580a04493890226207667ed8fd2b4b83f")
     version("6.0.4", sha256="58b88f38e080b05d70724d57342f58e1baf56e2bd3b98506a72b4446cad5033e")
     version("5.0.10", sha256="ca183e489320de0e502a7ba63230a7f55098917a519e8c738b005d526e700842")
@@ -31,6 +32,7 @@ class Fsl(Package, CudaPackage):
     depends_on("cxx", type="build")
 
     depends_on("python", type=("build", "run"))
+    depends_on("py-setuptools", type="build", when="@6.0.5.2")
     depends_on("expat")
     depends_on("libx11")
     depends_on("glu")
@@ -39,6 +41,8 @@ class Fsl(Package, CudaPackage):
     depends_on("vtk")
 
     conflicts("cuda_arch=none", when="+cuda", msg="must select a CUDA architecture")
+    # FSL 6.0.5.2 uses CUDA texture references, removed from CUDA 13.
+    conflicts("^cuda@13:", when="@6.0.5.2 +cuda", msg="FSL 6.0.5.2 requires CUDA 12.x or older")
     conflicts("platform=darwin", msg="currently only packaged for linux")
 
     patch("build_log.patch")
@@ -48,15 +52,22 @@ class Fsl(Package, CudaPackage):
     patch("fslpython_install_v604.patch", when="@6.0.4")
     patch("fslpython_install_v605.patch", when="@6.0.5")
 
+    # CUDA 12.9 removed the legacy NVTX include and library. NVTX 3 provides
+    # the same C API through its header-only compatibility interface.
+    patch("cuda_12_9_nvtx3.patch", when="@6.0.5.2 +cuda ^cuda@12.9:")
+    patch("cuda_12_9_cpp17_v6.patch", when="@6.0.5.2 +cuda ^cuda@12.9:")
+
     # Allow fsl to use newer versions of cuda
     patch(
         "https://aur.archlinux.org/cgit/aur.git/plain/005-fix_cuda_thrust_include.patch?h=fsl",
         sha256="9471addfc2f880350eedadcb99cb8b350abf42be1c0652ccddf49e34e5e48734",
         level=2,
+        when="@:6.0.5.1",
     )
 
     # allow newer compilers
     patch("libxmlpp_bool.patch")
+    patch("gcc14_v2.patch", when="@6.0.5.2 %gcc@14:")
 
     # These patches disable FSL's attempts to try to submit a subset of FSL
     # computations to an SGE queue system. That auto-submit mechanism only
@@ -67,9 +78,18 @@ class Fsl(Package, CudaPackage):
     # a "local" system, like a workstation, or as a batch job to a cluster
     # queueing system, regardless of queue system type.
     patch("fsl_sub_v5.patch", when="@:5")
-    patch("fsl_sub_v6.patch", when="@6:")
+    # fsl_sub is no longer shipped in the monolithic source archive as of
+    # 6.0.5.2.
+    patch("fsl_sub_v6.patch", when="@6:6.0.5.1")
 
     def patch(self):
+        # The 6.0.5.2 archive contains CUDA objects built with an older GCC
+        # ABI. Their preserved timestamps can prevent make from rebuilding
+        # them, which then produces misleading undefined references.
+        if self.spec.satisfies("@6.0.5.2 +cuda"):
+            for obj in glob.glob(join_path(self.stage.source_path, "src", "fdt", "CUDA", "*.o")):
+                os.remove(obj)
+
         # Uncomment lines in source file to allow building from source
         with working_dir(join_path(self.stage.source_path, "etc", "fslconf")):
             sourced = FileFilter("fsl.sh")
@@ -139,7 +159,13 @@ class Fsl(Package, CudaPackage):
             if self.spec.satisfies("@6:"):
                 build_settings.filter(r"(^EDDYBUILDPARAMETERS)\s*=.*", r'\1 = "cuda=1" "cpu=1"')
                 build_settings.filter(r"(^fdt_MASTERBUILD)\s*=.*", r"\1 = COMPILE_GPU=1")
-                build_settings.filter(r"(^ptx2_MASTERBUILD)\s*=.*", r"\1 = COMPILE_GPU=1")
+                if self.spec.satisfies("^cuda@12.9:"):
+                    # CUDA 12.9 removed the texture-reference API used by the
+                    # legacy probtrackx2 GPU implementation. Keep the CPU
+                    # implementation while retaining eddy/fdt GPU support.
+                    build_settings.filter(r"(^ptx2_MASTERBUILD)\s*=.*", r"\1 = COMPILE_GPU=0")
+                else:
+                    build_settings.filter(r"(^ptx2_MASTERBUILD)\s*=.*", r"\1 = COMPILE_GPU=1")
             else:
                 with open(settings_file, "a") as f:
                     f.write("COMPILE_GPU=1\n")

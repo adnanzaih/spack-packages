@@ -1,0 +1,70 @@
+--- a/extras/src/tcl/unix/configure
++++ b/extras/src/tcl/unix/configure
+@@ -778,5 +778,5 @@
+ #line 778 "configure"
+ #include "confdefs.h"
+ 
+-main(){return(0);}
++int main(){return(0);}
+ EOF
+--- a/extras/src/tk/unix/configure
++++ b/extras/src/tk/unix/configure
+@@ -1018,5 +1018,5 @@
+ #line 1018 "configure"
+ #include "confdefs.h"
+ 
+-main(){return(0);}
++int main(){return(0);}
+ EOF
+--- a/extras/src/tcl/unix/fslconfigure
++++ b/extras/src/tcl/unix/fslconfigure
+@@ -1,3 +1,4 @@
+ #!/bin/sh
+ cppflags="-I${FSLEXTINC}"
++cflags="${cflags} -Wno-error=implicit-function-declaration"
+ ldflags="-L${FSLEXTLIB}"
+--- a/extras/src/tk/unix/fslconfigure
++++ b/extras/src/tk/unix/fslconfigure
+@@ -1,3 +1,4 @@
+ #!/bin/sh
+ cppflags="-I${FSLEXTINC}"
++cflags="${cflags} -Wno-error=implicit-function-declaration"
+ ldflags="-L${FSLEXTLIB}"
+--- a/extras/include/boost/fslconfigure
++++ b/extras/include/boost/fslconfigure
+@@ -1,3 +1,4 @@
++rm -f project-config.jam
+-./bootstrap.sh --with-libraries=system,filesystem,regex,chrono,serialization,date_time,thread,log --libdir=${FSLEXTLIB} --includedir=. --prefix=${FSLDEVDIR}
++CFLAGS="-Wno-error=implicit-function-declaration" ./bootstrap.sh --with-libraries=system,filesystem,regex,chrono,serialization,date_time,thread,log --libdir=${FSLEXTLIB} --includedir=. --prefix=${FSLDEVDIR}
+ 
+ if [ `$FSLDIR/etc/fslconf/fslmachtype.sh | grep llvm` ] 
+--- a/extras/include/boost/tools/build/src/engine/modules/path.c
++++ b/extras/include/boost/tools/build/src/engine/modules/path.c
+@@ -7,4 +7,5 @@
+ #include "../constants.h"
++#include "../filesys.h"
+ #include "../frames.h"
+ #include "../lists.h"
+ #include "../native.h"
+--- a/src/giftiio/gifti_tool.c
++++ b/src/giftiio/gifti_tool.c
+@@ -4,6 +4,8 @@
+ #include "gifti_io.h"
+ #include "gifti_tool.h"
+ 
++int * nifti_get_intlist(int nvals, const char * str);
++
+ static char * g_history[] = 
+ {
+   "----------------------------------------------------------------------\n"
+--- a/src/oxford_asl/Makefile
++++ b/src/oxford_asl/Makefile
+@@ -52,7 +52,7 @@
+ 	cd ..
+ 
+ clean:
+-	rm -f ${VERSIONED} asl_file *.o
++	rm -f ${VERSIONED} asl_file *.o depend.mk
+ 
+ FORCE:
+ 	python python/setup.py build
