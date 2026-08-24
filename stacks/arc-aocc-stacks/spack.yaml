@@ -15,12 +15,13 @@ spack:
   - group: Base-AOCC-Compiler
     specs:
     - python@3.13.13
+    - python@3.14.7 %aocc@5.2.0
     - armadillo ^flexiblas
     - flexiblas@3.4.2
     - boost@1.90.0~mpi
     - geos@3.14.1
     - openmpi@5.0.10
-    - openblas@0.3.33
+    - openblas@0.3.33 %aocc@5.2.0
     - netlib-lapack@3.12.1
     - libaec@1.1.4
     - proj@9.7.0 ^libtiff@4.7.1
