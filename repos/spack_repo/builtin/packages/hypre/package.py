@@ -8,12 +8,11 @@ from itertools import product
 from spack_repo.builtin.build_systems.autotools import AutotoolsBuilder, AutotoolsPackage
 from spack_repo.builtin.build_systems.cmake import CMakeBuilder, CMakePackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class Hypre(CMakePackage, AutotoolsPackage, CudaPackage, ROCmPackage):
+class Hypre(CMakePackage, AutotoolsPackage, CudaPackage):
     """Hypre is a library of high performance preconditioners that
     features parallel multigrid methods for both structured and
     unstructured grid problems."""
@@ -145,11 +144,11 @@ class Hypre(CMakePackage, AutotoolsPackage, CudaPackage, ROCmPackage):
     )
 
     # Patch to fix hip build (+rocm) via CMake for hypre v3.0.0
-    patch(
-        "https://github.com/hypre-space/hypre/pull/1394.patch?full_index=1",
-        sha256="c9a98fb6aa6469c830fa7c12548c3be532d54bee5b7841e1550370ef497c5490",
-        when="@3.0.0 +rocm",
-    )
+    #patch(
+    #    "https://github.com/hypre-space/hypre/pull/1394.patch?full_index=1",
+    #    sha256="c9a98fb6aa6469c830fa7c12548c3be532d54bee5b7841e1550370ef497c5490",
+    #    when="@3.0.0 +rocm",
+    #)
 
     # Patch to fix build with TPLs and mixed precision
     patch("hypre30000-tpls+mixedprec.patch", when="@3.0.0")
@@ -179,7 +178,7 @@ class Hypre(CMakePackage, AutotoolsPackage, CudaPackage, ROCmPackage):
 
     # Compiler dependencies
     depends_on("c", type="build")
-    for dep in ("cuda", "rocm", "sycl", "caliper"):
+    for dep in ("cuda", "sycl", "caliper"):
         depends_on("cxx", type="build", when=f"+{dep}")
     depends_on("fortran", type="build", when="+fortran")
 
@@ -205,9 +204,9 @@ class Hypre(CMakePackage, AutotoolsPackage, CudaPackage, ROCmPackage):
 
     # GPU-related dependencies and conflicts
     gpu_pkgs = ["magma", "umpire", "superlu-dist"]
-    conflicts("+unified-memory", when="~cuda~rocm~sycl")
-    conflicts("+gpu-profiling", when="~cuda~rocm~sycl")
-    conflicts("+gpu-aware-mpi", when="~cuda~rocm~sycl")
+    conflicts("+unified-memory", when="~cuda~sycl")
+    conflicts("+gpu-profiling", when="~cuda~sycl")
+    conflicts("+gpu-aware-mpi", when="~cuda~sycl")
     with when("+cuda"):
         depends_on("umpire+c+cuda", when="@3:")
         requires("+umpire", when="@3:")
@@ -218,7 +217,7 @@ class Hypre(CMakePackage, AutotoolsPackage, CudaPackage, ROCmPackage):
         conflicts("precision=mixed")
         conflicts("+shared +umpire", when="@:2")
         conflicts("+int64", msg="Use +mixedint for 64-bit integer support for GPUs!")
-        conflicts("+rocm", msg="CUDA and ROCm are mutually exclusive")
+        #conflicts("+rocm", msg="CUDA and ROCm are mutually exclusive")
         conflicts("+sycl", msg="CUDA and SYCL are mutually exclusive")
         conflicts("cxxstd=11", when="^cuda@13:")
         conflicts("cxxstd=14", when="^cuda@13:")
@@ -229,29 +228,29 @@ class Hypre(CMakePackage, AutotoolsPackage, CudaPackage, ROCmPackage):
         for pkg, sm_ in product(gpu_pkgs, CudaPackage.cuda_arch_values):
             requires(f"^{pkg} cuda_arch={sm_}", when=f"+{pkg} cuda_arch={sm_}")
 
-    with when("+rocm"):
-        depends_on("umpire+c+rocm", when="@3:")
-        requires("+umpire", when="@3:")
+    #with when("+rocm"):
+    #    depends_on("umpire+c+rocm", when="@3:")
+    #    requires("+umpire", when="@3:")
 
-        depends_on("rocsparse")
-        depends_on("rocthrust")
-        depends_on("rocrand")
-        depends_on("rocprim")
-        depends_on("rocsolver", when="@2.29.0:")
-        depends_on("rocblas", when="@2.29.0:")
-        depends_on("hipblas", when="+superlu-dist")
-        depends_on("hip@:6", when="@:3.0.0")
+    #    depends_on("rocsparse")
+    #    depends_on("rocthrust")
+    #    depends_on("rocrand")
+    #    depends_on("rocprim")
+    #    depends_on("rocsolver", when="@2.29.0:")
+    #    depends_on("rocblas", when="@2.29.0:")
+    #    depends_on("hipblas", when="+superlu-dist")
+    #    depends_on("hip@:6", when="@:3.0.0")
 
-        conflicts("@:2.20")
-        conflicts("amdgpu_target=none")
-        conflicts("precision=longdouble")
-        conflicts("precision=mixed")
-        conflicts("+int64", msg="Use +mixedint for 64-bit integer support for GPUs!")
-        conflicts("+sycl", msg="ROCm and SYCL are mutually exclusive")
-        conflicts("cxxstd=11", when="^hip@7:")
-        conflicts("cxxstd=14", when="^hip@7:")
-        for pkg, gfx in product(gpu_pkgs, ROCmPackage.amdgpu_targets):
-            requires(f"^{pkg} amdgpu_target={gfx}", when=f"+{pkg} amdgpu_target={gfx}")
+    #    conflicts("@:2.20")
+    #    conflicts("amdgpu_target=none")
+    #    conflicts("precision=longdouble")
+    #    conflicts("precision=mixed")
+    #    conflicts("+int64", msg="Use +mixedint for 64-bit integer support for GPUs!")
+    #    conflicts("+sycl", msg="ROCm and SYCL are mutually exclusive")
+    #    conflicts("cxxstd=11", when="^hip@7:")
+    #    conflicts("cxxstd=14", when="^hip@7:")
+    #    for pkg, gfx in product(gpu_pkgs, ROCmPackage.amdgpu_targets):
+    #        requires(f"^{pkg} amdgpu_target={gfx}", when=f"+{pkg} amdgpu_target={gfx}")
 
     with when("+sycl"):
         requires("%c,cxx=oneapi", msg="SYCL backend must be compiled with oneapi compilers")
@@ -374,14 +373,14 @@ class CMakeBuilder(CMakeBuilder):
 
         # GPU backends
         args.append(self.define_from_variant("HYPRE_ENABLE_CUDA", "cuda"))
-        args.append(self.define_from_variant("HYPRE_ENABLE_HIP", "rocm"))
+        #args.append(self.define_from_variant("HYPRE_ENABLE_HIP", "rocm"))
         args.append(self.define_from_variant("HYPRE_ENABLE_SYCL", "sycl"))
         if spec.satisfies("+cuda"):
             args.append(self.define("CUDAToolkit_ROOT", self.spec["cuda"].prefix))
-        if spec.satisfies("+rocm"):
-            args.append(
-                self.define("CMAKE_HIP_COMPILER", f"{self.spec['llvm-amdgpu'].prefix}/bin/clang++")
-            )
+        #if spec.satisfies("+rocm"):
+        #    args.append(
+        #        self.define("CMAKE_HIP_COMPILER", f"{self.spec['llvm-amdgpu'].prefix}/bin/clang++")
+        #    )
 
         # GPU auxiliary options
         args.append(self.define_from_variant("HYPRE_ENABLE_GPU_AWARE_MPI", "gpu-aware-mpi"))
@@ -395,8 +394,8 @@ class CMakeBuilder(CMakeBuilder):
         args.append(self.define_from_variant("HYPRE_ENABLE_MAGMA", "magma"))
         if spec.satisfies("+superlu-dist"):
             inc_list = [self.spec["superlu-dist"].prefix.include]
-            if spec.satisfies("+rocm"):
-                inc_list.append(self.spec["hipblas"].prefix.include)
+            #if spec.satisfies("+rocm"):
+            #    inc_list.append(self.spec["hipblas"].prefix.include)
             args.append(self.define("TPL_DSUPERLU_INCLUDE_DIRS", ";".join(inc_list)))
             args.append(self.define("TPL_DSUPERLU_LIBRARIES", self.spec["superlu-dist"].libs))
         if spec.satisfies("+magma"):
@@ -409,10 +408,10 @@ class CMakeBuilder(CMakeBuilder):
             arch_list = sorted(list(cuda_arch_vals.value))
             args.append(self.define("CMAKE_CUDA_ARCHITECTURES", ";".join(arch_list)))
 
-        amdgpu_vals = spec.variants.get("amdgpu_target", None)
-        if amdgpu_vals and amdgpu_vals.value:
-            gfx_list = sorted(list(amdgpu_vals.value))
-            args.append(self.define("CMAKE_HIP_ARCHITECTURES", ";".join(gfx_list)))
+        #amdgpu_vals = spec.variants.get("amdgpu_target", None)
+        #if amdgpu_vals and amdgpu_vals.value:
+        #    gfx_list = sorted(list(amdgpu_vals.value))
+        #    args.append(self.define("CMAKE_HIP_ARCHITECTURES", ";".join(gfx_list)))
 
         return args
 
@@ -471,7 +470,7 @@ class AutotoolsBuilder(AutotoolsBuilder):
         if spec.satisfies("+complex %gcc@14:"):
             configure_args.append("--with-extra-CFLAGS=-Wno-error=incompatible-pointer-types")
 
-        if spec.satisfies("+cuda") or spec.satisfies("+rocm") or spec.satisfies("+sycl"):
+        if spec.satisfies("+cuda") or spec.satisfies("+sycl"):
             configure_args.append(f"--with-cxxstandard={self.spec.variants['cxxstd'].value}")
             if spec.satisfies("+pic"):
                 configure_args.append("--with-extra-CXXFLAGS=-fPIC")
@@ -502,7 +501,7 @@ class AutotoolsBuilder(AutotoolsBuilder):
             configure_args.append("--with-umpire-include=%s" % spec["umpire"].prefix.include)
             configure_args.append("--with-umpire-lib-dirs=%s" % spec["umpire"].prefix.lib)
             configure_args.append("--with-umpire-libs=umpire camp")
-            if spec.satisfies("~cuda~rocm"):
+            if spec.satisfies("~cuda"):
                 configure_args.append("--with-umpire-host")
             else:
                 configure_args.append("--with-umpire")
@@ -536,27 +535,27 @@ class AutotoolsBuilder(AutotoolsBuilder):
             if spec.satisfies("@2.29:"):
                 configure_args.append("--disable-cusolver")
 
-        if spec.satisfies("+rocm"):
-            configure_args.append("--with-hip")
-            rocm_pkgs = ["rocthrust", "rocprim", "rocrand", "rocsparse"]
-            if spec.satisfies("+superlu-dist"):
-                rocm_pkgs.append("hipblas")
-            if spec.satisfies("@2.29.0:"):
-                rocm_pkgs.extend(["rocblas", "rocsolver"])
-                configure_args.extend(["--enable-rocblas", "--enable-rocsolver"])
-            rocm_inc = " ".join(set(spec[pkg_].headers.include_flags for pkg_ in rocm_pkgs))
-            configure_args.extend(
-                ["--enable-rocrand", "--enable-rocsparse", f"--with-extra-CUFLAGS={rocm_inc}"]
-            )
-            rocm_arch_vals = spec.variants["amdgpu_target"].value
-            if rocm_arch_vals:
-                rocm_arch_sorted = list(sorted(rocm_arch_vals, reverse=True))
-                rocm_arch = rocm_arch_sorted[0]
-                configure_args.append(f"--with-gpu-arch={rocm_arch}")
-        else:
-            configure_args.extend(["--without-hip", "--disable-rocrand", "--disable-rocsparse"])
-            if spec.satisfies("@2.29.0:"):
-                configure_args.extend(["--disable-rocblas", "--disable-rocsolver"])
+        #if spec.satisfies("+rocm"):
+        #    configure_args.append("--with-hip")
+        #    rocm_pkgs = ["rocthrust", "rocprim", "rocrand", "rocsparse"]
+        #    if spec.satisfies("+superlu-dist"):
+        #        rocm_pkgs.append("hipblas")
+        #    if spec.satisfies("@2.29.0:"):
+        #        rocm_pkgs.extend(["rocblas", "rocsolver"])
+        #        configure_args.extend(["--enable-rocblas", "--enable-rocsolver"])
+        #    rocm_inc = " ".join(set(spec[pkg_].headers.include_flags for pkg_ in rocm_pkgs))
+        #    configure_args.extend(
+        #        ["--enable-rocrand", "--enable-rocsparse", f"--with-extra-CUFLAGS={rocm_inc}"]
+        #    )
+        #    rocm_arch_vals = spec.variants["amdgpu_target"].value
+        #    if rocm_arch_vals:
+        #        rocm_arch_sorted = list(sorted(rocm_arch_vals, reverse=True))
+        #        rocm_arch = rocm_arch_sorted[0]
+        #        configure_args.append(f"--with-gpu-arch={rocm_arch}")
+        #else:
+        configure_args.extend(["--without-hip", "--disable-rocrand", "--disable-rocsparse"])
+        if spec.satisfies("@2.29.0:"):
+            configure_args.extend(["--disable-rocblas", "--disable-rocsolver"])
 
         if spec.satisfies("+sycl"):
             configure_args.append("--with-sycl")
@@ -603,8 +602,8 @@ class AutotoolsBuilder(AutotoolsBuilder):
             # In CUDA builds hypre currently doesn't handle flags correctly
             env.append_flags("CXXFLAGS", "-O2" if spec.satisfies("~debug") else "-g")
 
-        if spec.satisfies("build_system=autotools +rocm"):
-            # As of 2022/04/05, the following are set by 'llvm-amdgpu' and
-            # override hypre's default flags, so we unset them.
-            env.unset("CFLAGS")
-            env.unset("CXXFLAGS")
+        #if spec.satisfies("build_system=autotools +rocm"):
+        #    # As of 2022/04/05, the following are set by 'llvm-amdgpu' and
+        #    # override hypre's default flags, so we unset them.
+        #    env.unset("CFLAGS")
+        #    env.unset("CXXFLAGS")

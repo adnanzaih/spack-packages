@@ -4,12 +4,11 @@
 
 from spack_repo.builtin.build_systems.cuda import CudaPackage
 from spack_repo.builtin.build_systems.makefile import MakefilePackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class Libceed(MakefilePackage, CudaPackage, ROCmPackage):
+class Libceed(MakefilePackage, CudaPackage):
     """The CEED API Library: Code for Efficient Extensible Discretizations."""
 
     homepage = "https://github.com/CEED/libCEED"
@@ -43,15 +42,15 @@ class Libceed(MakefilePackage, CudaPackage, ROCmPackage):
 
     variant("shared", default=True, description="Build shared libraries")
 
-    conflicts("+rocm", when="@:0.7")
+    #conflicts("+rocm", when="@:0.7")
 
     depends_on("c", type="build")  # generated
     depends_on("cxx", type="build")  # generated
     depends_on("fortran", type="build")  # generated
 
-    with when("+rocm"):
-        depends_on("hip@3.8.0:", when="@0.8:")
-        depends_on("hipblas@3.8.0:", when="@0.8:")
+    #with when("+rocm"):
+    #    depends_on("hip@3.8.0:", when="@0.8:")
+    #    depends_on("hipblas@3.8.0:", when="@0.8:")
 
     conflicts("+occa", when="@0.9:")
 
@@ -69,7 +68,7 @@ class Libceed(MakefilePackage, CudaPackage, ROCmPackage):
     depends_on("magma~shared", when="+magma~shared")
     depends_on("magma+shared", when="+magma+shared")
 
-    patch("libceed-v0.8-hip.patch", when="@0.8+rocm")
+    #patch("libceed-v0.8-hip.patch", when="@0.8+rocm")
     patch("pkgconfig-version-0.4.diff", when="@0.4")
 
     # occa: do not occaFree kernels
@@ -149,12 +148,12 @@ class Libceed(MakefilePackage, CudaPackage, ROCmPackage):
                 # Disable CUDA auto-detection:
                 makeopts += ["CUDA_DIR=/disable-cuda"]
 
-            if spec.satisfies("+rocm"):
-                makeopts += ["HIP_DIR=%s" % spec["hip"].prefix]
-                amdgpu_target = ",".join(spec.variants["amdgpu_target"].value)
-                makeopts += ["HIP_ARCH=%s" % amdgpu_target]
-                if spec.satisfies("@0.8"):
-                    makeopts += ["HIPBLAS_DIR=%s" % spec["hipblas"].prefix]
+            #if spec.satisfies("+rocm"):
+            #    makeopts += ["HIP_DIR=%s" % spec["hip"].prefix]
+            #    amdgpu_target = ",".join(spec.variants["amdgpu_target"].value)
+            #    makeopts += ["HIP_ARCH=%s" % amdgpu_target]
+            #    if spec.satisfies("@0.8"):
+            #        makeopts += ["HIPBLAS_DIR=%s" % spec["hipblas"].prefix]
 
             if spec.satisfies("+libxsmm"):
                 makeopts += ["XSMM_DIR=%s" % spec["libxsmm"].prefix]

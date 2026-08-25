@@ -7,12 +7,11 @@ import sys
 
 from spack_repo.builtin.build_systems.cmake import CMakePackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class Ginkgo(CMakePackage, CudaPackage, ROCmPackage):
+class Ginkgo(CMakePackage, CudaPackage):
     """High-performance linear algebra library for manycore systems,
     with a focus on sparse solution of linear systems."""
 
@@ -71,25 +70,25 @@ class Ginkgo(CMakePackage, CudaPackage, ROCmPackage):
     depends_on("cmake@3.13:", type="build", when="@1.4.0:1.6.0")
     depends_on("cmake@3.16:", type="build", when="@1.7.0:")
     depends_on("cmake@3.18:", type="build", when="+cuda@1.7.0:")
-    depends_on("cmake@3.21:", type="build", when="+rocm@1.8.0:")
+    #depends_on("cmake@3.21:", type="build", when="+rocm@1.8.0:")
     depends_on("cuda@9:", when="+cuda @:1.4.0")
     depends_on("cuda@9.2:", when="+cuda @1.5.0:")
     depends_on("cuda@10.1:", when="+cuda @1.7.0:")
     depends_on("cuda@11:", when="+cuda @1.9.0:")
     depends_on("mpi@3.1:", when="+mpi")
 
-    depends_on("rocthrust", when="+rocm")
+    #depends_on("rocthrust", when="+rocm")
     # https://github.com/ginkgo-project/ginkgo/issues/1983
-    depends_on("rocthrust@:7.1", when="@:1.11 +rocm")
-    depends_on("hipsparse", when="+rocm")
-    depends_on("hipblas", when="+rocm")
-    depends_on("rocrand", when="+rocm")
-    depends_on("hiprand", when="+rocm")
-    depends_on("hipfft", when="+rocm")
+    #depends_on("rocthrust@:7.1", when="@:1.11 +rocm")
+    #depends_on("hipsparse", when="+rocm")
+    #depends_on("hipblas", when="+rocm")
+    #depends_on("rocrand", when="+rocm")
+    #depends_on("hiprand", when="+rocm")
+    #depends_on("hipfft", when="+rocm")
     # ROCPRIM is not a direct dependency, but until we have reviewed our CMake
     # setup for rocthrust, this needs to also be added here.
-    depends_on("rocprim", when="+rocm")
-    depends_on("hip", when="+rocm")
+    #depends_on("rocprim", when="+rocm")
+    #depends_on("hip", when="+rocm")
     depends_on("hwloc@2.1:", when="+hwloc")
     depends_on("papi@7.1.0: +sde", when="+sde")
 
@@ -103,21 +102,21 @@ class Ginkgo(CMakePackage, CudaPackage, ROCmPackage):
     depends_on("intel-oneapi-tbb", when="+sycl")
 
     conflicts("%gcc@:5.2.9")
-    conflicts("+rocm", when="@:1.1.1")
+    #conflicts("+rocm", when="@:1.1.1")
 
     # ROCm 4.1.0 breaks platform settings which breaks Ginkgo's HIP support.
-    conflicts("^hip@4.1.0:", when="@:1.3.0")
-    conflicts("^hipblas@4.1.0:", when="@:1.3.0")
-    conflicts("^hipsparse@4.1.0:", when="@:1.3.0")
-    conflicts("^rocthrust@4.1.0:", when="@:1.3.0")
-    conflicts("^rocprim@4.1.0:", when="@:1.3.0")
+    #conflicts("^hip@4.1.0:", when="@:1.3.0")
+    #conflicts("^hipblas@4.1.0:", when="@:1.3.0")
+    #conflicts("^hipsparse@4.1.0:", when="@:1.3.0")
+    #conflicts("^rocthrust@4.1.0:", when="@:1.3.0")
+    #conflicts("^rocprim@4.1.0:", when="@:1.3.0")
 
     # Ginkgo 1.6.0 start relying on ROCm 4.5.0
-    conflicts("^hip@:4.3.1", when="@1.6.0:")
-    conflicts("^hipblas@:4.3.1", when="@1.6.0:")
-    conflicts("^hipsparse@:4.3.1", when="@1.6.0:")
-    conflicts("^rocthrust@:4.3.1", when="@1.6.0:")
-    conflicts("^rocprim@:4.3.1", when="@1.6.0:")
+    #conflicts("^hip@:4.3.1", when="@1.6.0:")
+    #conflicts("^hipblas@:4.3.1", when="@1.6.0:")
+    #conflicts("^hipsparse@:4.3.1", when="@1.6.0:")
+    #conflicts("^rocthrust@:4.3.1", when="@1.6.0:")
+    #conflicts("^rocprim@:4.3.1", when="@1.6.0:")
 
     conflicts(
         "+sycl", when="@:1.4.0", msg="For SYCL support, please use Ginkgo version 1.4.0 and newer."
@@ -134,7 +133,7 @@ class Ginkgo(CMakePackage, CudaPackage, ROCmPackage):
 
     # error due to change in warpSize constant definition in ROCm 7.0 prior to v.1.11.0
     # https://github.com/ginkgo-project/ginkgo/pull/1954
-    conflicts("^hip@7:", when="@:1.10.0 +rocm")
+    #conflicts("^hip@7:", when="@:1.10.0 +rocm")
 
     # https://github.com/ginkgo-project/ginkgo/pull/1524
     patch("ginkgo-sycl-pr1524.patch", when="@1.7.0 +sycl %oneapi@2024:")
@@ -146,18 +145,18 @@ class Ginkgo(CMakePackage, CudaPackage, ROCmPackage):
     patch("1.4.0_skip_invalid_smoke_tests.patch", when="@1.4.0")
 
     # Add missing include statement
-    patch("thrust-count-header.patch", when="+rocm @1.5.0")
+    #patch("thrust-count-header.patch", when="+rocm @1.5.0")
 
     # Revert the fix from github.com/ginkgo-project/ginkgo/pull/1954/changes
     # This only affects the benchmark part of Ginkgo, which is not built by spack anyway
     patch("remove_finding_thrust.patch", when="@1.11.0 +cuda")
 
     # Correctly find rocthrust through CMake
-    patch(
-        "https://github.com/ginkgo-project/ginkgo/commit/369b12a5f4431577d60a61e67f2b0537b428abca.patch?full_index=1",
-        sha256="27d6ae6c87bec15464d20a963c336e89eac92625d07e3f9548e33cd7b952a496",
-        when="+rocm @1.8.0",
-    )
+    #patch(
+    #    "https://github.com/ginkgo-project/ginkgo/commit/369b12a5f4431577d60a61e67f2b0537b428abca.patch?full_index=1",
+    #    sha256="27d6ae6c87bec15464d20a963c336e89eac92625d07e3f9548e33cd7b952a496",
+    #    when="+rocm @1.8.0",
+    #)
 
     # Removes undefined behavior in MPI call
     patch(
@@ -193,7 +192,7 @@ class Ginkgo(CMakePackage, CudaPackage, ROCmPackage):
         from_variant = self.define_from_variant
         args = [
             from_variant("GINKGO_BUILD_CUDA", "cuda"),
-            from_variant("GINKGO_BUILD_HIP", "rocm"),
+            #from_variant("GINKGO_BUILD_HIP", "rocm"),
             from_variant("GINKGO_BUILD_SYCL", "sycl"),
             from_variant("GINKGO_BUILD_OMP", "openmp"),
             from_variant("GINKGO_BUILD_MPI", "mpi"),
@@ -224,24 +223,24 @@ class Ginkgo(CMakePackage, CudaPackage, ROCmPackage):
                 arch_str = ";".join(archs)
                 args.append("-DGINKGO_CUDA_ARCHITECTURES={0}".format(arch_str))
 
-        if spec.satisfies("+rocm"):
-            args.append("-DHIP_PATH={0}".format(spec["hip"].prefix))
-            args.append("-DHIP_CLANG_PATH={0}/bin".format(spec["llvm-amdgpu"].prefix))
-            args.append("-DHIP_CLANG_INCLUDE_PATH={0}/include".format(spec["llvm-amdgpu"].prefix))
-            args.append("-DHIPSPARSE_PATH={0}".format(spec["hipsparse"].prefix))
-            args.append("-DHIPBLAS_PATH={0}".format(spec["hipblas"].prefix))
-            args.append("-DHIPRAND_PATH={0}/hiprand".format(spec["rocrand"].prefix))
-            args.append("-DROCRAND_PATH={0}/rocrand".format(spec["rocrand"].prefix))
-            args.append("-DROCPRIM_INCLUDE_DIRS={0}".format(spec["rocprim"].prefix.include))
-            archs = self.spec.variants["amdgpu_target"].value
-            if archs != "none":
-                arch_str = ";".join(archs)
-                args.append("-DGINKGO_HIP_AMDGPU={0}".format(arch_str))
-                args.append(self.define("CMAKE_HIP_ARCHITECTURES", arch_str))
-            if spec.satisfies("^hip@5.2.0:"):
-                args.append(
-                    self.define("CMAKE_MODULE_PATH", self.spec["hip"].prefix.lib.cmake.hip)
-                )
+        #if spec.satisfies("+rocm"):
+        #    args.append("-DHIP_PATH={0}".format(spec["hip"].prefix))
+        #    args.append("-DHIP_CLANG_PATH={0}/bin".format(spec["llvm-amdgpu"].prefix))
+        #    args.append("-DHIP_CLANG_INCLUDE_PATH={0}/include".format(spec["llvm-amdgpu"].prefix))
+        #    args.append("-DHIPSPARSE_PATH={0}".format(spec["hipsparse"].prefix))
+        #    args.append("-DHIPBLAS_PATH={0}".format(spec["hipblas"].prefix))
+        #    args.append("-DHIPRAND_PATH={0}/hiprand".format(spec["rocrand"].prefix))
+        #    args.append("-DROCRAND_PATH={0}/rocrand".format(spec["rocrand"].prefix))
+        #    args.append("-DROCPRIM_INCLUDE_DIRS={0}".format(spec["rocprim"].prefix.include))
+        #    archs = self.spec.variants["amdgpu_target"].value
+        #    if archs != "none":
+        #        arch_str = ";".join(archs)
+        #        args.append("-DGINKGO_HIP_AMDGPU={0}".format(arch_str))
+        #        args.append(self.define("CMAKE_HIP_ARCHITECTURES", arch_str))
+        #    if spec.satisfies("^hip@5.2.0:"):
+        #        args.append(
+        #            self.define("CMAKE_MODULE_PATH", self.spec["hip"].prefix.lib.cmake.hip)
+        #        )
 
         if self.spec.satisfies("+sycl"):
             sycl_compatible_compilers = ["icpx"]
@@ -273,18 +272,18 @@ class Ginkgo(CMakePackage, CudaPackage, ROCmPackage):
         ]
 
         # Fix: For HIP tests, add the ARCH compilation flags when not present
-        if self.spec.satisfies("+rocm"):
-            src_path = join_path(src_dir, "CMakeLists.txt")
-            cmakelists = open(src_path, "rt")
-            data = cmakelists.read()
-            data = data.replace(
-                'CLANG_OPTIONS "${GINKGO_PIC_OPTION}"',
-                'CLANG_OPTIONS "${GINKGO_AMD_ARCH_FLAGS}" "${GINKGO_PIC_OPTION}"',
-            )
-            cmakelists.close()
-            cmakelists = open(src_path, "wt")
-            cmakelists.write(data)
-            cmakelists.close()
+        #if self.spec.satisfies("+rocm"):
+        #    src_path = join_path(src_dir, "CMakeLists.txt")
+        #    cmakelists = open(src_path, "rt")
+        #    data = cmakelists.read()
+        #    data = data.replace(
+        #        'CLANG_OPTIONS "${GINKGO_PIC_OPTION}"',
+        #        'CLANG_OPTIONS "${GINKGO_AMD_ARCH_FLAGS}" "${GINKGO_PIC_OPTION}"',
+        #    )
+        #    cmakelists.close()
+        #    cmakelists = open(src_path, "wt")
+        #    cmakelists.write(data)
+        #    cmakelists.close()
 
         cmake = which(self.spec["cmake"].prefix.bin.cmake, required=True)
         make = which("make", required=True)
@@ -309,12 +308,12 @@ class Ginkgo(CMakePackage, CudaPackage, ROCmPackage):
 
         self._build_and_run_test("test_install_cuda")
 
-    def test_install_hip(self):
+    #def test_install_hip(self):
         """build, run and check results of test_install_hip"""
-        if not self.spec.satisfies("@1.4.0: +rocm"):
-            raise SkipTest("Test is only available for v1.4.0: +rocm")
+        #if not self.spec.satisfies("@1.4.0: +rocm"):
+        #    raise SkipTest("Test is only available for v1.4.0: +rocm")
 
-        self._build_and_run_test("test_install_hip")
+        #self._build_and_run_test("test_install_hip")
 
     def test_exportbuild(self):
         """build, run and check results of test_exportbuild"""

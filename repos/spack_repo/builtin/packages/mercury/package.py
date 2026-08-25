@@ -82,9 +82,9 @@ class Mercury(CMakePackage):
     patch("fix-cmake-3.15-check_symbol_exists.patch", when="@1.0.0:1.0.1")
 
     def flag_handler(self, name, flags):
-        if self.spec.satisfies("%cce"):
-            if name == "ldflags":
-                flags.append("-Wl,-z,muldefs")
+        #if self.spec.satisfies("%cce"):
+        #    if name == "ldflags":
+        #        flags.append("-Wl,-z,muldefs")
         return (None, None, flags)
 
     def cmake_args(self):
@@ -157,7 +157,7 @@ class Mercury(CMakePackage):
             if "gni" in ofi_fabrics:
                 cmake_args.append(define_from_variant("NA_OFI_GNI_USE_UDREG", "udreg"))
             if self.run_tests:
-                supported = ["tcp", "verbs", "gni", "cxi"]
+                supported = ["tcp", "verbs", "gni"]
                 ofi_test_fabrics = list(filter(lambda x: x in supported, ofi_fabrics))
                 cmake_args.append(
                     define("NA_OFI_TESTING_PROTOCOL", format(";".join(ofi_test_fabrics)))

@@ -26,13 +26,13 @@ class VtkM(CMakePackage):
         when="+cuda",
     )
 
-    variant("rocm", default=False, description="Enable ROCm support")
-    variant(
-        "amdgpu_target",
-        default="none",
-        description="AMD GPU architecture",
-        values=("gfx900", "none"),
-        multi=False,
-        when="+rocm",
-    )
+    #variant("rocm", default=False, description="Enable ROCm support")
+    #variant(
+    #    "amdgpu_target",
+    #    default="none",
+    #    description="AMD GPU architecture",
+    #    values=("gfx900", "none"),
+    #    multi=False,
+    #    when="+rocm",
+    #)
     depends_on("cmake@3.18:")

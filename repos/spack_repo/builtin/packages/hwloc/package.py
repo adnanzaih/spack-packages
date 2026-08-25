@@ -7,12 +7,11 @@ import sys
 
 from spack_repo.builtin.build_systems.autotools import AutotoolsPackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class Hwloc(AutotoolsPackage, CudaPackage, ROCmPackage):
+class Hwloc(AutotoolsPackage, CudaPackage):
     """The Hardware Locality (hwloc) software project.
 
     The Portable Hardware Locality (hwloc) software package
@@ -100,7 +99,7 @@ class Hwloc(AutotoolsPackage, CudaPackage, ROCmPackage):
         "netloc", default=False, when="@2.0.0:2.9.3", description="Enable netloc [requires MPI]"
     )
     variant("opencl", default=False, description="Support an OpenCL library at run time")
-    variant("rocm", default=False, description="Support ROCm devices")
+    #variant("rocm", default=False, description="Support ROCm devices")
     variant("level_zero", default=False, description="Support Intel OneAPI Level Zero devices")
 
     depends_on("c", type="build")
@@ -142,12 +141,12 @@ class Hwloc(AutotoolsPackage, CudaPackage, ROCmPackage):
     # See https://github.com/spack/spack/issues/15836 for details
     depends_on("mpi", when="+netloc")
 
-    with when("+rocm"):
-        depends_on("rocm-smi-lib")
-        depends_on("rocm-opencl", when="+opencl")
-        # Avoid a circular dependency since the openmp
-        # variant of llvm-amdgpu depends on hwloc.
-        depends_on("llvm-amdgpu", when="+opencl")
+    #with when("+rocm"):
+    #    depends_on("rocm-smi-lib")
+    #    depends_on("rocm-opencl", when="+opencl")
+    #    # Avoid a circular dependency since the openmp
+    #    # variant of llvm-amdgpu depends on hwloc.
+    #    depends_on("llvm-amdgpu", when="+opencl")
 
     with when("+level_zero"):
         depends_on("oneapi-level-zero")
@@ -196,12 +195,12 @@ class Hwloc(AutotoolsPackage, CudaPackage, ROCmPackage):
         # librocm_smi support.
         # This can fail the config tests while building
         # OpenMPI due to lack of rpath to librocm_smi
-        if "+rocm" not in self.spec:
-            args.append("--disable-rsmi")
+        #if "+rocm" not in self.spec:
+        #    args.append("--disable-rsmi")
 
-        if self.spec.satisfies("+rocm"):
-            args.append(f"--with-rocm={self.spec['hip'].prefix}")
-            args.append(f"--with-rocm-version={self.spec['hip'].version}")
+        #if self.spec.satisfies("+rocm"):
+        #    args.append(f"--with-rocm={self.spec['hip'].prefix}")
+        #    args.append(f"--with-rocm-version={self.spec['hip'].version}")
 
         if self.spec.satisfies("+cuda"):
             args.append(f"--with-cuda={self.spec['cuda'].prefix}")

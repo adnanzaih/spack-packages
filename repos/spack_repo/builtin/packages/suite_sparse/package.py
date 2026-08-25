@@ -280,17 +280,17 @@ class SuiteSparse(Package):
         if spec.satisfies("platform=darwin %gcc"):
             make_args += ["LDLIBS=-lm"]
 
-        if "%cce" in spec:
-            # Assume the proper Cray CCE module (cce) is loaded:
-            craylibs_var = "CRAYLIBS_" + str(spec.target.family).upper()
-            craylibs_path = env.get(craylibs_var, None)
-            if not craylibs_path:
-                raise InstallError(
-                    f"The environment variable {craylibs_var} is not defined.\n"
-                    "\tMake sure the 'cce' module is in the compiler spec."
-                )
-            env.setdefault("LDFLAGS", "")
-            env["LDFLAGS"] += " -Wl,-rpath," + craylibs_path
+        #if "%cce" in spec:
+        #    # Assume the proper Cray CCE module (cce) is loaded:
+        #    craylibs_var = "CRAYLIBS_" + str(spec.target.family).upper()
+        #    craylibs_path = env.get(craylibs_var, None)
+        #    if not craylibs_path:
+        #        raise InstallError(
+        #            f"The environment variable {craylibs_var} is not defined.\n"
+        #            "\tMake sure the 'cce' module is in the compiler spec."
+        #        )
+        #    env.setdefault("LDFLAGS", "")
+        #    env["LDFLAGS"] += " -Wl,-rpath," + craylibs_path
 
         make_args.append(f"INSTALL={prefix}")
 

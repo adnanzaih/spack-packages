@@ -9,7 +9,6 @@ import sys
 
 from spack_repo.builtin.build_systems.cmake import CMakePackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 from spack_repo.builtin.packages.kokkos.package import Kokkos
 
 from spack.package import *
@@ -24,7 +23,7 @@ from spack.package import *
 # https://github.com/trilinos/Trilinos/issues/175
 
 
-class Trilinos(CMakePackage, CudaPackage, ROCmPackage):
+class Trilinos(CMakePackage, CudaPackage):
     """The Trilinos Project is an effort to develop algorithms and enabling
     technologies within an object-oriented software framework for the solution
     of large-scale, complex multi-physics engineering and scientific problems.
@@ -136,7 +135,7 @@ class Trilinos(CMakePackage, CudaPackage, ROCmPackage):
         description="Enable relaxed constexpr functions for CUDA build",
     )
     variant("cuda_rdc", default=False, description="Turn on RDC for CUDA build")
-    variant("rocm_rdc", default=False, description="Turn on RDC for ROCm build")
+    #variant("rocm_rdc", default=False, description="Turn on RDC for ROCm build")
     variant(
         "cxxstd",
         default="20",
@@ -340,7 +339,7 @@ class Trilinos(CMakePackage, CudaPackage, ROCmPackage):
     # Tpetra stack
     with when("~kokkos"):
         conflicts("+cuda")
-        conflicts("+rocm")
+        #conflicts("+rocm")
         conflicts("+tpetra")
         conflicts("+intrepid2")
         conflicts("+phalanx")
@@ -410,12 +409,12 @@ class Trilinos(CMakePackage, CudaPackage, ROCmPackage):
     conflicts("+stokhos", when="~kokkos")
     conflicts("+muelu", when="@17: ~ifpack2")
 
-    conflicts("+rocm~rocm_rdc", when="@:16 +stk")
-    conflicts("+rocm~rocm_rdc", when="@17: +stk ^hip@:6.2")
+    #conflicts("+rocm~rocm_rdc", when="@:16 +stk")
+    #conflicts("+rocm~rocm_rdc", when="@17: +stk ^hip@:6.2")
     # rocm@7 conflicts with cxxstd=20 per https://github.com/llvm/llvm-project/issues/184856
     # this conflict can be updated once https://github.com/llvm/llvm-project/pull/184894
     # makes it into hip
-    conflicts("cxxstd=20", when="+rocm ^hip@7:")
+    #conflicts("cxxstd=20", when="+rocm ^hip@7:")
 
     # TRIbits dependencies only relied on by testing are invoked regardless,
     # whether +test or ~test. see https://github.com/TriBITSPub/TriBITS/issues/56
@@ -473,7 +472,7 @@ class Trilinos(CMakePackage, CudaPackage, ROCmPackage):
     )
     conflicts("+cuda_rdc", when="~cuda")
     conflicts("+cusparse", when="~cuda")
-    conflicts("+rocm_rdc", when="~rocm")
+    #conflicts("+rocm_rdc", when="~rocm")
     conflicts("+wrapper", when="~cuda")
     conflicts("+wrapper", when="%clang")
 
@@ -512,12 +511,12 @@ class Trilinos(CMakePackage, CudaPackage, ROCmPackage):
     # External Kokkos
     with when("@14.4: +kokkos"):
         depends_on("kokkos~cuda", when="~cuda")
-        depends_on("kokkos~rocm", when="~rocm")
+        #depends_on("kokkos~rocm", when="~rocm")
         depends_on("kokkos+wrapper", when="+wrapper")
         depends_on("kokkos~wrapper", when="~wrapper")
         depends_on("kokkos+pic", when="+shared")
         depends_on("kokkos+cuda_relocatable_device_code", when="+cuda_rdc")
-        depends_on("kokkos+hip_relocatable_device_code", when="+rocm_rdc")
+        #depends_on("kokkos+hip_relocatable_device_code", when="+rocm_rdc")
         depends_on("kokkos-kernels+cusparse", when="+cusparse")
         depends_on("kokkos~complex_align")
         depends_on("kokkos@=5.2.1", when="@master:")
@@ -550,9 +549,9 @@ class Trilinos(CMakePackage, CudaPackage, ROCmPackage):
         for a in CudaPackage.cuda_arch_values:
             arch_str = f"+cuda cuda_arch={a}"
             depends_on(f"kokkos{arch_str}", when=arch_str)
-        for a in ROCmPackage.amdgpu_targets:
-            arch_str = f"+rocm amdgpu_target={a}"
-            depends_on(f"kokkos{arch_str}", when=arch_str)
+        #for a in ROCmPackage.amdgpu_targets:
+        #    arch_str = f"+rocm amdgpu_target={a}"
+        #    depends_on(f"kokkos{arch_str}", when=arch_str)
 
     depends_on("adios2", when="+adios2")
     depends_on("binder@1.3:", when="@15: +python", type="build")
@@ -628,8 +627,8 @@ class Trilinos(CMakePackage, CudaPackage, ROCmPackage):
         patch("xlf_seacas.patch", when="@12.10.1:12.12.1 %" + _compiler)
         patch("xlf_tpetra.patch", when="@12.12.1 %" + _compiler)
     patch("fix_clang_errors_12_18_1.patch", when="@12.18.1%clang")
-    patch("cray_secas_12_12_1.patch", when="@12.12.1%cce")
-    patch("cray_secas.patch", when="@12.14.1:12%cce")
+    #patch("cray_secas_12_12_1.patch", when="@12.12.1%cce")
+    #patch("cray_secas.patch", when="@12.14.1:12%cce")
     patch(
         "https://github.com/trilinos/Trilinos/commit/c8b788d7e6e213a2828201ebdc00cde181e3b71b.patch?full_index=1",
         sha256="62272054f7cc644583c269e692c69f0a26af19e5a5bd262db3ea3de3447b3358",
@@ -639,11 +638,11 @@ class Trilinos(CMakePackage, CudaPackage, ROCmPackage):
     # workaround an NVCC bug with c++14 (https://github.com/trilinos/Trilinos/issues/6954)
     # avoid calling deprecated functions with CUDA-11
     patch("fix_cxx14_cuda11.patch", when="@13.0.0:13.0.1 cxxstd=14 ^cuda@11:")
-    patch(
-        "0001-use-the-gcnArchName-inplace-of-gcnArch-as-gcnArch-is.patch",
-        when="@15.0.0 ^hip@6.0 +rocm",
-    )
-    patch("cstdint_gcc13.patch", when="@13.4.0:13.4.1 %gcc@13.0.0:")
+    #patch(
+    #    "0001-use-the-gcnArchName-inplace-of-gcnArch-as-gcnArch-is.patch",
+    #    when="@15.0.0 ^hip@6.0 +rocm",
+    #)
+    #patch("cstdint_gcc13.patch", when="@13.4.0:13.4.1 %gcc@13.0.0:")
 
     # Allow building with +teko gotype=long
     patch(
@@ -688,7 +687,7 @@ class Trilinos(CMakePackage, CudaPackage, ROCmPackage):
 
     def flag_handler(self, name, flags):
         spec = self.spec
-        is_cce = spec.satisfies("%cce")
+        #is_cce = spec.satisfies("%cce")
 
         if name == "cxxflags":
             if "+mumps" in spec:
@@ -707,8 +706,8 @@ class Trilinos(CMakePackage, CudaPackage, ROCmPackage):
                     "-Wno-missing-template-arg-list-after-template-kw"
                 )
         elif name == "ldflags":
-            if spec.satisfies("%cce@:14"):
-                flags.append("-fuse-ld=gold")
+            #if spec.satisfies("%cce@:14"):
+            #    flags.append("-fuse-ld=gold")
             if spec.satisfies("platform=linux ~cuda"):
                 # TriBITS explicitly links libraries against all transitive
                 # dependencies, leading to O(N^2) library resolution. When
@@ -734,8 +733,8 @@ class Trilinos(CMakePackage, CudaPackage, ROCmPackage):
                 # https://github.com/spack/spack/pull/25823#issuecomment-917231118
                 flags.append("-L{0} -lgfortran".format(os.path.dirname(libgfortran)))
 
-        if is_cce:
-            return (None, None, flags)
+        #if is_cce:
+        #    return (None, None, flags)
         return (flags, None, None)
 
     def url_for_version(self, version):
@@ -768,16 +767,16 @@ class Trilinos(CMakePackage, CudaPackage, ROCmPackage):
             else:
                 env.set("CXX", self["kokkos-nvcc-wrapper"].kokkos_cxx)
 
-        if "+rocm" in spec:
-            if "+mpi" in spec:
-                env.set("OMPI_CXX", self.spec["hip"].hipcc)
-                env.set("MPICH_CXX", self.spec["hip"].hipcc)
-                env.set("MPICXX_CXX", self.spec["hip"].hipcc)
-            else:
-                env.set("CXX", self.spec["hip"].hipcc)
-            if "+stk" in spec:
-                # Using CXXFLAGS for hipcc which doesn't use flags in the spack wrappers
-                env.set("CXXFLAGS", "-DSTK_NO_BOOST_STACKTRACE")
+        #if "+rocm" in spec:
+        #    if "+mpi" in spec:
+        #        env.set("OMPI_CXX", self.spec["hip"].hipcc)
+        #        env.set("MPICH_CXX", self.spec["hip"].hipcc)
+        #        env.set("MPICXX_CXX", self.spec["hip"].hipcc)
+        #    else:
+        #        env.set("CXX", self.spec["hip"].hipcc)
+        #    if "+stk" in spec:
+        #        # Using CXXFLAGS for hipcc which doesn't use flags in the spack wrappers
+        #        env.set("CXXFLAGS", "-DSTK_NO_BOOST_STACKTRACE")
 
     def cmake_args(self):
         options = []
@@ -1207,24 +1206,24 @@ class Trilinos(CMakePackage, CudaPackage, ROCmPackage):
                     for arch in spec.variants["cuda_arch"].value
                 )
 
-            if "+rocm" in spec:
-                options.extend(
-                    [
-                        define_kok_enable("ROCM", False),
-                        define_kok_enable("HIP", True),
-                        define_kok_enable("HIP_RELOCATABLE_DEVICE_CODE", "rocm_rdc"),
-                    ]
-                )
-                if "+tpetra" in spec:
-                    options.append(define("Tpetra_INST_HIP", True))
-                amdgpu_arch_map = Kokkos.amdgpu_arch_map
-                for amd_target in spec.variants["amdgpu_target"].value:
-                    try:
-                        arch = amdgpu_arch_map[amd_target][0]
-                    except KeyError:
-                        pass
-                    else:
-                        options.append(define("Kokkos_ARCH_" + arch.upper(), True))
+            #if "+rocm" in spec:
+            #    options.extend(
+            #        [
+            #            define_kok_enable("ROCM", False),
+            #            define_kok_enable("HIP", True),
+            #            define_kok_enable("HIP_RELOCATABLE_DEVICE_CODE", "rocm_rdc"),
+            #        ]
+            #    )
+            #    if "+tpetra" in spec:
+            #        options.append(define("Tpetra_INST_HIP", True))
+            #    amdgpu_arch_map = Kokkos.amdgpu_arch_map
+            #    for amd_target in spec.variants["amdgpu_target"].value:
+            #        try:
+            #            arch = amdgpu_arch_map[amd_target][0]
+            #        except KeyError:
+            #            pass
+            #        else:
+            #            options.append(define("Kokkos_ARCH_" + arch.upper(), True))
 
         # ################# System-specific ######################
 

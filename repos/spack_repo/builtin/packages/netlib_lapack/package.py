@@ -111,7 +111,7 @@ class NetlibLapack(CMakePackage):
     #   Correct path to mangling config
     patch("ibm-xl.patch", when="@3.7:3.8 %xl")
     patch("ibm-xl.patch", when="@3.7:3.8 %xl_r")
-    patch("ibm-xl.patch", when="@3.7:3.8 %cce@9:")
+    #patch("ibm-xl.patch", when="@3.7:3.8 %cce@9:")
 
     # https://github.com/Reference-LAPACK/lapack/pull/621
     # Fixes for IBM XL and Cray CCE builds:
@@ -119,7 +119,7 @@ class NetlibLapack(CMakePackage):
     #   Fix logic for detecting recursive Fortran flags
     patch("ibm-xl-3.9.1.patch", when="@3.9.1 %xl")
     patch("ibm-xl-3.9.1.patch", when="@3.9.1 %xl_r")
-    patch("ibm-xl-3.9.1.patch", when="@3.9.1 %cce@13:")
+    #patch("ibm-xl-3.9.1.patch", when="@3.9.1 %cce@13:")
 
     # https://github.com/Reference-LAPACK/lapack/issues/228
     patch("undefined_declarations.patch", when="@3.8.0:3.8")

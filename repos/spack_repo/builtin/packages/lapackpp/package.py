@@ -6,7 +6,6 @@ import os
 
 from spack_repo.builtin.build_systems.cmake import CMakePackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
@@ -29,7 +28,7 @@ _versions = [
 ]
 
 
-class Lapackpp(CMakePackage, CudaPackage, ROCmPackage):
+class Lapackpp(CMakePackage, CudaPackage):
     """LAPACK++: C++ API for the LAPACK Linear Algebra Package. Developed
     by the Innovative Computing Laboratory at the University of Tennessee,
     Knoxville."""
@@ -92,19 +91,19 @@ class Lapackpp(CMakePackage, CudaPackage, ROCmPackage):
     depends_on("blaspp +cuda", when="+cuda")
     depends_on("blaspp ~sycl", when="~sycl")
     depends_on("blaspp +sycl", when="+sycl")
-    depends_on("blaspp ~rocm", when="~rocm")
-    for val in ROCmPackage.amdgpu_targets:
-        depends_on("blaspp +rocm amdgpu_target=%s" % val, when="amdgpu_target=%s" % val)
+    #depends_on("blaspp ~rocm", when="~rocm")
+    #for val in ROCmPackage.amdgpu_targets:
+    #    depends_on("blaspp +rocm amdgpu_target=%s" % val, when="amdgpu_target=%s" % val)
 
     depends_on("blas")
     depends_on("lapack")
-    depends_on("rocblas", when="+rocm")
-    depends_on("rocsolver", when="+rocm")
+    #depends_on("rocblas", when="+rocm")
+    #depends_on("rocsolver", when="+rocm")
     depends_on("intel-oneapi-mkl threads=openmp", when="+sycl")
 
     backend_msg = "LAPACK++ supports only one GPU backend at a time"
-    conflicts("+rocm", when="+cuda", msg=backend_msg)
-    conflicts("+rocm", when="+sycl", msg=backend_msg)
+    #conflicts("+rocm", when="+cuda", msg=backend_msg)
+    #conflicts("+rocm", when="+sycl", msg=backend_msg)
     conflicts("+cuda", when="+sycl", msg=backend_msg)
     conflicts("+sycl", when="@:2023.06.00", msg="+sycl requires LAPACK++ version 2023.08.25")
 
@@ -117,8 +116,8 @@ class Lapackpp(CMakePackage, CudaPackage, ROCmPackage):
         if self.version >= Version("2022.07.00"):
             if spec.satisfies("+cuda"):
                 backend = "cuda"
-            if spec.satisfies("+rocm"):
-                backend = "hip"
+            #if spec.satisfies("+rocm"):
+            #    backend = "hip"
             if spec.satisfies("+sycl"):
                 backend = "sycl"
 

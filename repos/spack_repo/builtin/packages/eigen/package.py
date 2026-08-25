@@ -4,12 +4,11 @@
 
 
 from spack_repo.builtin.build_systems.cmake import CMakePackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class Eigen(CMakePackage, ROCmPackage):
+class Eigen(CMakePackage):
     """Eigen is a C++ template library for linear algebra matrices,
     vectors, numerical solvers, and related algorithms.
     """
@@ -54,7 +53,7 @@ class Eigen(CMakePackage, ROCmPackage):
     # TODO: https://eigen.tuxfamily.org/dox/TopicUsingBlasLapack.html
 
     # Older eigen releases haven't been tested with ROCm
-    conflicts("+rocm @:3.4.0")
+    #conflicts("+rocm @:3.4.0")
 
     # there is a bug that provokes bad parsing of nvhpc version
     patch(
@@ -120,14 +119,14 @@ class Eigen(CMakePackage, ROCmPackage):
             # https://gitlab.com/libeigen/eigen/-/issues/1656
             args.extend([self.define("BUILD_TESTING", "ON")])
 
-        if self.spec.satisfies("+rocm"):
-            args.extend(
-                [
-                    self.define("ROCM_PATH", self.spec["hip"].prefix),
-                    self.define("HIP_PATH", self.spec["hip"].prefix),
-                    self.define("EIGEN_TEST_HIP", "ON"),
-                ]
-            )
+        #if self.spec.satisfies("+rocm"):
+        #    args.extend(
+        #        [
+        #            self.define("ROCM_PATH", self.spec["hip"].prefix),
+        #            self.define("HIP_PATH", self.spec["hip"].prefix),
+        #            self.define("EIGEN_TEST_HIP", "ON"),
+        #        ]
+        #    )
 
         if self.spec.satisfies("@master") and self.run_tests:
             args.append(self.define("Boost_INCLUDE_DIR", self.spec["boost"].prefix.include))

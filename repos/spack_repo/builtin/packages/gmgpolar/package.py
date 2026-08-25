@@ -41,11 +41,11 @@ class Gmgpolar(CMakePackage):
         when="^kokkos +cuda",
         msg="GMGPolar relies on relocatable device code",
     )
-    requires(
-        "^kokkos +hip_relocatable_device_code",
-        when="^kokkos +rocm",
-        msg="GMGPolar relies on relocatable device code",
-    )
+    #requires(
+    #    "^kokkos +hip_relocatable_device_code",
+    #    when="^kokkos +rocm",
+    #    msg="GMGPolar relies on relocatable device code",
+    #)
     requires(
         "^kokkos +sycl_relocatable_device_code",
         when="^kokkos +sycl",
@@ -73,9 +73,9 @@ class Gmgpolar(CMakePackage):
             self.define("GMGPOLAR_USE_MUMPS", False),
         ]
 
-        if self.spec.satisfies("^kokkos+rocm"):
-            args.append(self.define("CMAKE_CXX_COMPILER", self.spec["hip"].hipcc))
-        else:
-            args.append(self.define("CMAKE_CXX_COMPILER", self["kokkos"].kokkos_cxx))
+        #if self.spec.satisfies("^kokkos+rocm"):
+        #    args.append(self.define("CMAKE_CXX_COMPILER", self.spec["hip"].hipcc))
+        #else:
+        args.append(self.define("CMAKE_CXX_COMPILER", self["kokkos"].kokkos_cxx))
 
         return args

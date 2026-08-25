@@ -110,7 +110,7 @@ class Elfutils(AutotoolsPackage, SourcewarePackage):
     # https://sourceware.org/bugzilla/show_bug.cgi?id=24964
     conflicts("%apple-clang")
     conflicts("%clang", when="@:0.185")
-    conflicts("%cce")
+    #conflicts("%cce")
 
     # Elfutils uses -Wall and we don't want to fail the build over a
     # stray warning.

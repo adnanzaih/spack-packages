@@ -5,12 +5,11 @@ import os
 
 from spack_repo.builtin.build_systems.cuda import CudaPackage
 from spack_repo.builtin.build_systems.generic import Package
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class Petsc(Package, CudaPackage, ROCmPackage):
+class Petsc(Package, CudaPackage):
     """PETSc is a suite of data structures and routines for the scalable
     (parallel) solution of scientific applications modeled by partial
     differential equations.
@@ -202,33 +201,33 @@ class Petsc(Package, CudaPackage, ROCmPackage):
         "fortran-bindings", default=True, when="+fortran", description="Activates fortran bindings"
     )
 
-    with when("+rocm"):
-        # hipsparse@5.6.0 broke hipsparseSpSV_solve() API, reverted in 5.6.1.
-        patch(
-            "https://gitlab.com/petsc/petsc/-/commit/ef7140cce45367033b48bbd2624dfd2b6aa4b997.diff",
-            when="@3.20.0",
-            sha256="ba327f8b2a0fa45209dfb7a4278f3e9a323965b5a668be204c1c77c17a963a7f",
-        )
-        patch(
-            "https://gitlab.com/petsc/petsc/-/commit/20d5ecbf88175ced320006c488dcefa2efb1e67f.diff",
-            when="@3.21 ^hip@6:",
-            sha256="2904ea20c71e2f21b8475513c3e5de7465e328e2485ae706b003aa79314e3e7c",
-        )
-        patch(
-            "https://gitlab.com/petsc/petsc/-/commit/bdb83d9f3e3c55b3bd4c8732bfe2066c23f10f61.diff",
-            when="@3.21 ^hip@6:",
-            sha256="89cf2c9a01d4a3233c889dd98496a29bf43db1bc69195892f9e5405c537b87e3",
-        )
-        patch("hip-5.6.0-for-3.18.diff", when="@3.18:3.19 ^hipsparse@5.6.0")
-        patch("hip-5.7-plus-for-3.18.diff", when="@3.18:3.19 ^hipsparse@5.7:")
-        patch(
-            "0001-Handle-the-hipsparse-api-changes-for-rocm-6.0.patch",
-            when="@3.20.2:3.20.4 ^hipsparse@6.0",
-        )
+    #with when("+rocm"):
+    #    # hipsparse@5.6.0 broke hipsparseSpSV_solve() API, reverted in 5.6.1.
+    #    patch(
+    #        "https://gitlab.com/petsc/petsc/-/commit/ef7140cce45367033b48bbd2624dfd2b6aa4b997.diff",
+    #        when="@3.20.0",
+    #        sha256="ba327f8b2a0fa45209dfb7a4278f3e9a323965b5a668be204c1c77c17a963a7f",
+    #    )
+    #    patch(
+    #        "https://gitlab.com/petsc/petsc/-/commit/20d5ecbf88175ced320006c488dcefa2efb1e67f.diff",
+    #        when="@3.21 ^hip@6:",
+    #        sha256="2904ea20c71e2f21b8475513c3e5de7465e328e2485ae706b003aa79314e3e7c",
+    #    )
+    #    patch(
+    #        "https://gitlab.com/petsc/petsc/-/commit/bdb83d9f3e3c55b3bd4c8732bfe2066c23f10f61.diff",
+    #        when="@3.21 ^hip@6:",
+    #        sha256="89cf2c9a01d4a3233c889dd98496a29bf43db1bc69195892f9e5405c537b87e3",
+    #    )
+    #    patch("hip-5.6.0-for-3.18.diff", when="@3.18:3.19 ^hipsparse@5.6.0")
+    #    patch("hip-5.7-plus-for-3.18.diff", when="@3.18:3.19 ^hipsparse@5.7:")
+    #    patch(
+    #        "0001-Handle-the-hipsparse-api-changes-for-rocm-6.0.patch",
+    #        when="@3.20.2:3.20.4 ^hipsparse@6.0",
+    #    )
 
     # segmentedmempool.hpp(178): error: expression must be a modifiable lvalue
     # https://gitlab.com/petsc/petsc/-/merge_requests/8152
-    patch("petsc_modifiable_lvalue.patch", when="@3.21.6:3.22.4+rocm")
+    #patch("petsc_modifiable_lvalue.patch", when="@3.21.6:3.22.4+rocm")
     patch("petsc_modifiable_lvalue.patch", when="@3.21.6:3.22.4+cuda")
 
     # These require +mpi
@@ -280,20 +279,20 @@ class Petsc(Package, CudaPackage, ROCmPackage):
     conflicts(
         "^cuda@12.4:", when="@:3.20.5 +cuda", msg="Deprecation in CCCL 2.3 causes build failure."
     )
-    depends_on("hip", when="+rocm")
+    #depends_on("hip", when="+rocm")
 
-    with when("+rocm"):
-        depends_on("rocm-core")
-        depends_on("hipblas")
-        depends_on("hipblas-common", when="^hipblas@6.3.0:")
-        depends_on("hipsparse")
-        depends_on("hipsolver")
-        depends_on("rocsparse")
-        depends_on("rocsolver")
-        depends_on("rocblas")
-        depends_on("rocrand")
-        depends_on("rocthrust")
-        depends_on("rocprim")
+    #with when("+rocm"):
+    #    depends_on("rocm-core")
+    #    depends_on("hipblas")
+    #    depends_on("hipblas-common", when="^hipblas@6.3.0:")
+    #    depends_on("hipsparse")
+    #    depends_on("hipsolver")
+    #    depends_on("rocsparse")
+    #    depends_on("rocsolver")
+    #    depends_on("rocblas")
+    #    depends_on("rocrand")
+    #    depends_on("rocthrust")
+    #    depends_on("rocprim")
 
     with default_args(type="build"):
         depends_on("python@2.6:2.8,3.4:")
@@ -333,7 +332,7 @@ class Petsc(Package, CudaPackage, ROCmPackage):
     depends_on("hypre+complex", when="+hypre+complex")
     depends_on("hypre~complex", when="+hypre~complex")
     depends_on("hypre+mixedint+cuda", when="+hypre+int64+cuda")
-    depends_on("hypre+mixedint+rocm", when="+hypre+int64+rocm")
+    #depends_on("hypre+mixedint+rocm", when="+hypre+int64+rocm")
     depends_on("hypre+mixedint", when="+hypre+int64")
     depends_on("hypre~int64", when="+hypre~int64")
     depends_on("hypre+mpi", when="+hypre")
@@ -389,11 +388,11 @@ class Petsc(Package, CudaPackage, ROCmPackage):
             "kokkos-kernels+cuda cuda_arch=%s" % cuda_arch,
             when="+kokkos +cuda cuda_arch=%s" % cuda_arch,
         )
-    for rocm_arch in ROCmPackage.amdgpu_targets:
-        depends_on(
-            "kokkos+rocm amdgpu_target=%s" % rocm_arch,
-            when="+kokkos +rocm amdgpu_target=%s" % rocm_arch,
-        )
+    #for rocm_arch in ROCmPackage.amdgpu_targets:
+    #    depends_on(
+    #        "kokkos+rocm amdgpu_target=%s" % rocm_arch,
+    #        when="+kokkos +rocm amdgpu_target=%s" % rocm_arch,
+    #    )
 
     conflicts("~kokkos", when="+sycl", msg="+sycl requires +kokkos")
     depends_on("kokkos+sycl", when="+sycl +kokkos")
@@ -627,35 +626,35 @@ class Petsc(Package, CudaPackage, ROCmPackage):
                     options.append("--with-cuda-gencodearch={0}".format(cuda_arch[0]))
         else:
             options.append("--with-cudac=0")
-        if "+rocm" in spec:
-            if not spec.satisfies("amdgpu_target=none"):
-                hip_arch = spec.variants["amdgpu_target"].value
-                options.append("--with-hip-arch={0}".format(hip_arch[0]))
-            hip_pkgs = ["hipsparse", "hipblas", "hipsolver", "rocsparse", "rocsolver", "rocblas"]
-            hip_ipkgs = hip_pkgs + ["rocthrust", "rocprim", "rocm-core"]
-            hip_lpkgs = hip_pkgs + ["rocrand"]
-            if spec.satisfies("^rocrand@5.1:"):
-                hip_ipkgs.extend(["rocrand"])
-            if spec.satisfies("^hipblas-common"):
-                hip_ipkgs.extend(["hipblas-common"])
-            hip_inc = ""
-            hip_lib = ""
-            for pkg in hip_ipkgs:
-                hip_inc += spec[pkg].headers.include_flags + " "
-            for pkg in hip_lpkgs:
-                hip_lib += spec[pkg].libs.joined() + " "
-            options.append("HIPPPFLAGS=%s" % hip_inc)
-            options.append("--with-hip-lib=%s -L%s -lamdhip64" % (hip_lib, spec["hip"].prefix.lib))
-        else:
-            options.append("--with-hipc=0")
+        #if "+rocm" in spec:
+        #    if not spec.satisfies("amdgpu_target=none"):
+        #        hip_arch = spec.variants["amdgpu_target"].value
+        #        options.append("--with-hip-arch={0}".format(hip_arch[0]))
+        #    hip_pkgs = ["hipsparse", "hipblas", "hipsolver", "rocsparse", "rocsolver", "rocblas"]
+        #    hip_ipkgs = hip_pkgs + ["rocthrust", "rocprim", "rocm-core"]
+        #    hip_lpkgs = hip_pkgs + ["rocrand"]
+        #    if spec.satisfies("^rocrand@5.1:"):
+        #        hip_ipkgs.extend(["rocrand"])
+        #    if spec.satisfies("^hipblas-common"):
+        #        hip_ipkgs.extend(["hipblas-common"])
+        #    hip_inc = ""
+        #    hip_lib = ""
+        #    for pkg in hip_ipkgs:
+        #        hip_inc += spec[pkg].headers.include_flags + " "
+        #    for pkg in hip_lpkgs:
+        #        hip_lib += spec[pkg].libs.joined() + " "
+        #    options.append("HIPPPFLAGS=%s" % hip_inc)
+        #    options.append("--with-hip-lib=%s -L%s -lamdhip64" % (hip_lib, spec["hip"].prefix.lib))
+        #else:
+        options.append("--with-hipc=0")
 
         if "superlu-dist" in spec:
             if spec.satisfies("@3.10.3:3.15"):
                 options.append("--with-cxx-dialect=C++11")
-            if spec["superlu-dist"].satisfies("+rocm"):
-                # Suppress HIP header warning message, otherwise the PETSc
-                # configuration fails:
-                options.append("CXXPPFLAGS=-DROCM_NO_WRAPPER_HEADER_WARNING")
+            #if spec["superlu-dist"].satisfies("+rocm"):
+            #    # Suppress HIP header warning message, otherwise the PETSc
+            #    # configuration fails:
+            #    options.append("CXXPPFLAGS=-DROCM_NO_WRAPPER_HEADER_WARNING")
 
         if "+mkl-pardiso" in spec:
             options.append("--with-mkl_pardiso-dir=%s" % spec["mkl"].prefix)

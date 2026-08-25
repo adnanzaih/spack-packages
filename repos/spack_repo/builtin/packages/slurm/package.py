@@ -72,7 +72,7 @@ class Slurm(AutotoolsPackage):
     variant("nvml", default=False, description="Enable NVML autodetection")
     variant("cgroup", default=False, description="Enable cgroup plugin")
     variant("pam", default=False, description="Enable PAM support")
-    variant("rsmi", default=False, description="Enable ROCm SMI support")
+    #variant("rsmi", default=False, description="Enable ROCm SMI support")
     variant(
         "multiple_slurmd",
         default=False,
@@ -115,7 +115,7 @@ class Slurm(AutotoolsPackage):
     depends_on("cuda", when="+nvml")
     depends_on("dbus", when="+cgroup")
     depends_on("linux-pam", when="+pam")
-    depends_on("rocm-smi-lib", when="+rsmi")
+    #depends_on("rocm-smi-lib", when="+rsmi")
 
     executables = ["^srun$", "^salloc$"]
 
@@ -171,8 +171,8 @@ class Slurm(AutotoolsPackage):
         if spec.satisfies("+pam"):
             args.append(f"--with-pam_dir={spec['linux-pam'].prefix}")
 
-        if spec.satisfies("+rsmi"):
-            args.append(f"--with-rsmi={spec['rocm-smi-lib'].prefix}")
+        #if spec.satisfies("+rsmi"):
+        #    args.append(f"--with-rsmi={spec['rocm-smi-lib'].prefix}")
 
         if spec.satisfies("+multiple_slurmd"):
             args.append("--enable-multiple-slurmd")

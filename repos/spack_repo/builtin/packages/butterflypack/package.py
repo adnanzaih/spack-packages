@@ -97,16 +97,16 @@ class Butterflypack(CMakePackage):
             self.define_from_variant("BUILD_SHARED_LIBS", "shared"),
         ]
         args.append("-Denable_openmp=%s" % ("ON" if "+openmp" in spec else "OFF"))
-        if spec.satisfies("%cce"):
-            # Assume the proper Cray CCE module (cce) is loaded:
-            craylibs_var = "CRAYLIBS_" + str(spec.target.family).upper()
-            craylibs_path = env.get(craylibs_var, None)
-            if not craylibs_path:
-                raise InstallError(
-                    f"The environment variable {craylibs_var} is not defined.\n"
-                    "\tMake sure the 'cce' module is in the compiler spec."
-                )
-            env.setdefault("LDFLAGS", "")
-            env["LDFLAGS"] += " -Wl,-rpath," + craylibs_path
+        #if spec.satisfies("%cce"):
+        #    # Assume the proper Cray CCE module (cce) is loaded:
+        #    craylibs_var = "CRAYLIBS_" + str(spec.target.family).upper()
+        #    craylibs_path = env.get(craylibs_var, None)
+        #    if not craylibs_path:
+        #        raise InstallError(
+        #            f"The environment variable {craylibs_var} is not defined.\n"
+        #            "\tMake sure the 'cce' module is in the compiler spec."
+        #        )
+        #    env.setdefault("LDFLAGS", "")
+        #    env["LDFLAGS"] += " -Wl,-rpath," + craylibs_path
 
         return args

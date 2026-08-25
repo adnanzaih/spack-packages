@@ -4,12 +4,11 @@
 
 from spack_repo.builtin.build_systems.cmake import CMakePackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class SuperluDist(CMakePackage, CudaPackage, ROCmPackage):
+class SuperluDist(CMakePackage, CudaPackage):
     """A general purpose library for the direct solution of large, sparse,
     nonsymmetric systems of linear equations on high performance machines."""
 
@@ -22,7 +21,7 @@ class SuperluDist(CMakePackage, CudaPackage, ROCmPackage):
     maintainers("xiaoyeli", "gchavez2", "balay", "pghysels", "liuyangzhuan")
 
     version("develop", branch="master")
-    version("amd", branch="amd")
+    #version("amd", branch="amd")
     version("9.2.1", sha256="c80a1c2edaaa451ee9a54e005e5f3f56dc55cabe2b0a8d7acf5a1447a648157a")
     version("9.2.0", sha256="d1df0e53d269cfc17379bb358e1b2b566d2807cb4a680b2ec1e4f35a77f707d1")
     version("9.1.0", sha256="1cb2c6dc7e8231b2ec30c1266e55e440ffca9f55527771d8df28f900dd179f9d")
@@ -77,11 +76,11 @@ class SuperluDist(CMakePackage, CudaPackage, ROCmPackage):
         depends_on("metis@5: ~int64", when="~int64")
         depends_on("parmetis ~int64", when="~int64")
     depends_on("cmake@3.18.1:", type="build", when="@7.1.0:")
-    depends_on("hipblas", when="+rocm")
-    depends_on("hipblas@:6", when="@:9.1.0 +rocm")
-    depends_on("rocsolver", when="+rocm")
+    #depends_on("hipblas", when="+rocm")
+    #depends_on("hipblas@:6", when="@:9.1.0 +rocm")
+    #depends_on("rocsolver", when="+rocm")
 
-    conflicts("+rocm", when="+cuda")
+    #conflicts("+rocm", when="+cuda")
     conflicts("+cuda", when="@:6.3")
     # See https://github.com/xiaoyeli/superlu_dist/issues/87
     conflicts("^cuda@11.5.0:", when="@7.1.0:7.1 +cuda")
@@ -90,7 +89,7 @@ class SuperluDist(CMakePackage, CudaPackage, ROCmPackage):
 
     patch("xl-611.patch", when="@:6.1.1 %xl")
     patch("xl-611.patch", when="@:6.1.1 %xl_r")
-    patch("superlu-cray-ftn-case.patch", when="@7.1.1 %cce")
+    #patch("superlu-cray-ftn-case.patch", when="@7.1.1 %cce")
     patch("CMAKE_INSTALL_LIBDIR.patch", when="@7.0.0:7.2.0")
     patch(
         "https://github.com/xiaoyeli/superlu_dist/commit/5a1946f347e6d813a250af874dee0942f4fdfc44.patch?full_index=1",
@@ -142,15 +141,15 @@ class SuperluDist(CMakePackage, CudaPackage, ROCmPackage):
             if spec.satisfies("^cuda@13:"):
                 append_define("CMAKE_CXX_STANDARD", "17")
 
-        if "+rocm" in spec and (spec.satisfies("@amd") or spec.satisfies("@8:")):
-            append_define("TPL_ENABLE_HIPLIB", True)
-            append_define("HIP_ROOT_DIR", spec["hip"].prefix)
-            rocm_archs = spec.variants["amdgpu_target"].value
-            mpiinc = spec["mpi"].prefix.include
-            if "none" not in rocm_archs:
-                append_define(
-                    "HIP_HIPCC_FLAGS", "--amdgpu-target=" + ",".join(rocm_archs) + " -I/" + mpiinc
-                )
+        #if "+rocm" in spec and (spec.satisfies("@amd") or spec.satisfies("@8:")):
+        #    append_define("TPL_ENABLE_HIPLIB", True)
+        #    append_define("HIP_ROOT_DIR", spec["hip"].prefix)
+        #    rocm_archs = spec.variants["amdgpu_target"].value
+        #    mpiinc = spec["mpi"].prefix.include
+        #    if "none" not in rocm_archs:
+        #        append_define(
+        #            "HIP_HIPCC_FLAGS", "--amdgpu-target=" + ",".join(rocm_archs) + " -I/" + mpiinc
+        #        )
 
         # Workaround for linking issue on Mac:
         if spec.satisfies("%apple-clang"):

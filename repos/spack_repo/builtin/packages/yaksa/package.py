@@ -4,12 +4,11 @@
 
 from spack_repo.builtin.build_systems.autotools import AutotoolsPackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class Yaksa(AutotoolsPackage, CudaPackage, ROCmPackage):
+class Yaksa(AutotoolsPackage, CudaPackage):
     """Yaksa is a high-performance datatype engine for expressing,
     managing and manipulating data present in noncontiguous memory
     regions. It provides portable abstractions for structured
@@ -44,11 +43,11 @@ class Yaksa(AutotoolsPackage, CudaPackage, ROCmPackage):
     depends_on("python@3:", type="build")
 
     # fix for error: no member named 'memoryType' in 'struct hipPointerAttribute_t'
-    patch(
-        "https://github.com/pmodels/yaksa/commit/5ebbadb7771d194f3819e3dd1ac8b5b467024afb.patch?full_index=1",
-        sha256="0ae3ab6f932c1b31dde38babc181c1507e70d87e435d8fc6c82e0911fb55d560",
-        when="@0.3 +rocm ^hip@6:",
-    )
+    #patch(
+    #    "https://github.com/pmodels/yaksa/commit/5ebbadb7771d194f3819e3dd1ac8b5b467024afb.patch?full_index=1",
+    #    sha256="0ae3ab6f932c1b31dde38babc181c1507e70d87e435d8fc6c82e0911fb55d560",
+    #    when="@0.3 +rocm ^hip@6:",
+    #)
 
     def autoreconf(self, spec, prefix):
         sh = which("sh", required=True)
@@ -68,12 +67,12 @@ class Yaksa(AutotoolsPackage, CudaPackage, ROCmPackage):
             if "^cuda+allow-unsupported-compilers" in self.spec:
                 config_args.append("NVCC_FLAGS=-allow-unsupported-compiler")
 
-        if "+rocm" in spec:
-            config_args.append("--with-hip={0}".format(spec["hip"].prefix))
-            rocm_archs = spec.variants["amdgpu_target"].value
-            if "none" not in rocm_archs:
-                config_args.append("--with-hip-sm={0}".format(",".join(rocm_archs)))
-        else:
-            config_args.append("--without-hip")
+        #if "+rocm" in spec:
+        #    config_args.append("--with-hip={0}".format(spec["hip"].prefix))
+        #    rocm_archs = spec.variants["amdgpu_target"].value
+        #    if "none" not in rocm_archs:
+        #        config_args.append("--with-hip-sm={0}".format(",".join(rocm_archs)))
+        #else:
+        config_args.append("--without-hip")
 
         return config_args

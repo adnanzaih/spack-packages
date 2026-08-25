@@ -8,12 +8,11 @@ import sys
 from glob import glob
 
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class MvapichPlus(Package, CudaPackage, ROCmPackage):
+class MvapichPlus(Package, CudaPackage):
     """Mvapich is a High-Performance MPI Library for clusters with diverse
     networks (InfiniBand, Omni-Path, Ethernet/iWARP, and RoCE) and computing
     platforms (x86 (Intel and AMD), ARM and OpenPOWER)"""
@@ -48,7 +47,7 @@ class MvapichPlus(Package, CudaPackage, ROCmPackage):
 
     variant("wrapperrpath", default=True, description="Enable wrapper rpath")
     variant("debug", default=False, description="Enable debug info and error messages at run-time")
-    variant("apu", default=False, description="Enable APU enhancements")
+    #variant("apu", default=False, description="Enable APU enhancements")
 
     variant("regcache", default=True, description="Enable memory registration cache")
 
@@ -142,11 +141,11 @@ class MvapichPlus(Package, CudaPackage, ROCmPackage):
         if spec.satisfies("^cuda"):
             gpu = "cuda"
             gpu_ver = str(spec["cuda"].version)[:4]
-        elif spec.satisfies("+rocm") or spec.satisfies("^hip"):
-            gpu = "rocm"
-            gpu_ver = spec["hip"].version
-            if spec.satisfies("+apu"):
-                apu = ".mi300a"
+        #elif spec.satisfies("+rocm") or spec.satisfies("^hip"):
+        #    gpu = "rocm"
+        #    gpu_ver = spec["hip"].version
+        #    if spec.satisfies("+apu"):
+        #        apu = ".mi300a"
 
         netmod = "ucx" if spec.satisfies("netmod=ucx") else "ofi"
         comp = spec["c"].format("{name}{version}")

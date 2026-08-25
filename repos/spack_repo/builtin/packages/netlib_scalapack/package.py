@@ -44,14 +44,14 @@ class ScalapackBase(CMakePackage):
 
     def flag_handler(self, name, flags):
         if name == "cflags":
-            if self.spec.satisfies("%cce"):
-                flags.append("-Wno-error=implicit-function-declaration")
+            #if self.spec.satisfies("%cce"):
+            #    flags.append("-Wno-error=implicit-function-declaration")
             if self.spec.satisfies("%gcc@14:"):
                 # https://bugzilla.redhat.com/show_bug.cgi?id=2178710
                 flags.append("-std=gnu89")
-        elif name == "fflags":
-            if self.spec.satisfies("%cce"):
-                flags.append("-hnopattern")
+        #elif name == "fflags":
+        #    if self.spec.satisfies("%cce"):
+        #        flags.append("-hnopattern")
         return (flags, None, None)
 
     @property
@@ -94,8 +94,8 @@ class ScalapackBase(CMakePackage):
             or spec.satisfies("%apple-clang")
             or spec.satisfies("%oneapi")
             or spec.satisfies("%arm")
-            or spec.satisfies("%cce")
-            or spec.satisfies("%rocmcc")
+            #or spec.satisfies("%cce")
+            #or spec.satisfies("%rocmcc")
         ):
             c_flags.append("-Wno-error=implicit-function-declaration")
 

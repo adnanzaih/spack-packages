@@ -66,7 +66,7 @@ class PkgConfig(AutotoolsPackage):
 
         for strict_compiler in (
             "%oneapi",
-            "%cce",
+            #"%cce",
             "%apple-clang@15:",
             "%clang@15:",
             "%llvm-amdgpu",

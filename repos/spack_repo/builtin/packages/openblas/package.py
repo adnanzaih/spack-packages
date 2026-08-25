@@ -188,7 +188,7 @@ class Openblas(CMakePackage, MakefilePackage):
     patch("blas_normalize_test_symbols.patch", when="%msvc")
 
     # https://github.com/OpenMathLib/OpenBLAS/pull/3712
-    patch("cce.patch", when="@0.3.20 %cce")
+    #patch("cce.patch", when="@0.3.20 %cce")
 
     # https://github.com/OpenMathLib/OpenBLAS/pull/3778
     patch("fix-cray-fortran-detection-pr3778.patch", when="@0.3.21")
