@@ -1,0 +1,79 @@
+# This is a Spack Environment file.
+#
+# It describes a set of packages to be installed, along with
+# configuration settings.
+spack:
+  config:
+    install_tree:
+      root: /sw/test/opt
+  mirrors:
+      buildcache: file:///sw/spack/buildcache
+  upstreams:
+    arc-compiler-stacks:
+      install_tree: /sw/spack/opt/pkgs
+      modules:
+        lmod: /sw/spack/opt/moduless
+  view: false
+  specs:
+  ##########################################################################################
+  #                                       Software                                         #
+  ##########################################################################################
+  - group: bioinformatics
+    specs:
+    - spades cxxflags="-mno-avx512f" ^python+arc ^aocc +license-agreed
+    override:
+      packages:
+        c:
+          prefer: [gcc@14.3.1]
+        cxx:
+          prefer: [gcc@14.3.1]
+        fortran:
+          prefer: [gcc@14.3.1]
+        apr-util:
+          prefer:
+          - '~crypto'    
+  concretizer:
+    unify: false
+    reuse: true
+    compiler_mixing: true
+    ##########################################################################################
+    #                                         Modules                                        #
+    ##########################################################################################
+  modules:
+    default:
+      roots:
+        lmod: /sw/test/modules
+        tcl: /sw/test/modules
+      lmod:
+        hide_implicits: true
+        projections:
+          r: 'R/{version}'
+          hdf5~threadsafe: 'hdf5/{version}-nonatomic'
+          intel-oneapi-compilers-classic: 'intel/{version}'
+          miniforge3: 'mamba/{version}'
+          py-mpi4py: 'mpi4py/{version}'
+          rseurat: "rseurat/{version}-R-{^r.version}"
+        hash_length: 0
+        core_compilers:
+        - gcc@14.3.1
+        - aocc
+        - oneapi
+        - llvm
+        hierarchy:: []
+        core_specs:
+        - gcc@14.3.1
+        - gcc-runtime@14.3.1
+        exclude:
+        - gcc-runtime@14.3.1
+        - glibc
+        - autoconf
+        - compiler-wrapper
+        - compiler-wrapper
+        - util-macros
+        - py-pip
+        - py-setuptools
+        - py-wheel
+        - py-cython
+        - python-venv
+        gcc-runtime:
+          template: gcc-runtime.lua

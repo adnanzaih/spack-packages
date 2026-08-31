@@ -117,7 +117,7 @@ class R(AutotoolsPackage):
     conflicts("@:4.4.2 %gcc@15:")
 
     build_directory = "spack-build"
-    arc_cran_mirror = "https://repo.miserver.it.umich.edu/cran"
+    arc_cran_mirror = "https://cran.r-project.org"
     arc_r_packages = (
         "doParallel", "flexiblas", "stringi", "utf8", "credentials", "zip",
         "httpuv", "later", "promises", "sourcetools", "systemfonts",

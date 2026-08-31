@@ -1,0 +1,78 @@
+# This is a Spack Environment file.
+#
+# It describes a set of packages to be installed, along with
+# configuration settings.
+spack:
+  config:
+    install_tree:
+      root: /sw/spack/opt/pkgs
+  upstreams:
+    arc-compiler-stacks:
+      install_tree: /sw/spack/opt/pkgs
+      modules:
+        lmod: /sw/spack/opt/modules
+  view: false
+  specs:
+  ##########################################################################################
+  #                                       Software                                         #
+  ##########################################################################################
+  - group: Python stacks
+    specs:
+    - py-globus-cli
+    - awscli
+    override:
+      packages:
+        c:
+          prefer: [gcc@14.3.1]
+        cxx:
+          prefer: [gcc@14.3.1]
+        fortran:
+          prefer: [gcc@14.3.1]
+        python:
+          require:
+          - +arc
+        openmpi:
+          require:
+          - +arc
+        r:
+          require:
+          - +arc
+  concretizer:
+    unify: when_possible
+    reuse: true
+    compiler_mixing: true
+    ##########################################################################################
+    #                                         Modules                                        #
+    ##########################################################################################
+  modules:
+    default:
+      roots:
+        lmod: /sw/spack/opt/modules
+        tcl: /sw/spack/opt/modules
+      lmod:
+        projections:
+          r: R/{version}
+          hdf5~threadsafe: hdf5/{version}-nonatomic
+          intel-oneapi-compilers-classic: intel/{version}
+          miniforge3: mamba/{version}
+          py-mpi4py: mpi4py/{version}
+          py-globus-cli: globus-cli/{version}
+        hash_length: 0
+        hide_implicits: true
+        core_compilers:
+        - gcc@14.3.1
+        hierarchy:
+        - r
+        - mpi
+        core_specs:
+        - gcc@14.3.1
+        - gcc-runtime@14.3.1
+        exclude:
+        - gcc-runtime@14.3.1
+        - glibc
+        - autoconf
+        - compiler-wrapper
+        - util-macros
+        - poppler-data
+        gcc-runtime:
+          template: gcc-runtime.lua

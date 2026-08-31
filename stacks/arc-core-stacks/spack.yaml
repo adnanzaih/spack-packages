@@ -15,7 +15,7 @@ spack:
   - group: Base-GCC14-Compiler
     specs:
     - argtable cflags="-Wno-error=implicit-function-declaration"
-    - gcc@14.3.1
+    - gcc@14.3.1/o4xno4x
     - python@3.14.7
     - python@3.13.13
     - python@3.9.24
@@ -46,6 +46,7 @@ spack:
     - libgd@2.3.3
     - r@4.6.1
     - r@4.5.3
+    - r@4.3.1+X+arc
     - py-mpi4py ^python@3.13.13 ^openmpi@5.0.10
     - fiji@2026.03.07
     - cuda@13
@@ -54,6 +55,16 @@ spack:
     - mumps +complex+double+float+metis+parmetis+scotch+mpi
     - ruby
     - julia cpu_target=znver5
+    - lammps+mpi+lib+jpeg+png+ffmpeg+openmp+opencl+kspace~kokkos+h5md+spin %gcc@14.3.1 ^ffmpeg/ipusu3b
+    - gromacs+cuda+mpi %gcc@14.3.1
+    - quantum-espresso %gcc@14.3.1 ^fftw/q2kkuso
+    - rclone 
+    - jags
+    - nco ^netcdf-c~mpi~parallel-netcdf ^hdf5~mpi@1.14.6
+    - pgplot
+    - ncview ^libxaw@1.0.15 ^netcdf-c~mpi~parallel-netcdf ^hdf5~mpi@1.14.6
+    - gh
+    - nvtop
     override:
       packages:
         c:
@@ -86,6 +97,9 @@ spack:
     - nvhpc@26.5
     - llvm/ganxupa ^python@3.10.19 
     - gcc@10.3.0+binutils
+    - gcc@12.3.0+binutils
+    - go ^gcc/o4xno4x
+    - rust
     override:
       packages:
         c:
@@ -124,7 +138,16 @@ spack:
           miniforge3: 'mamba/{version}'
           py-mpi4py: 'mpi4py/{version}'
           intel-oneapi-mpi: 'impi/{version}'
+          gh: 'github-cli/{version}'
         hash_length: 0
+        all:
+          suffixes:
+            'binutils target=x86_64': x86_64
+            'gmp target=x86_64': x86_64
+            'mpc target=x86_64': x86_64
+            'mpfr target=x86_64': x86_64
+            'zlib-ng target=x86_64': x86_64
+            'zstd target=x86_64': x86_64
         core_compilers:
           - gcc@14.3.1
         hierarchy:
@@ -161,3 +184,7 @@ spack:
               SLURM_MPI_TYPE: pmi2
               I_MPI_HYDRA_BOOSTRAP: slurm
               I_MPI_PMI_LIBRARY: /usr/lib64/libpmi2.so
+        aocc@5.2.0:
+          environment:
+            prepend_path:
+              MODULEPATH: /sw/spack/chemistry/opt/modules/linux-rhel10-x86_64/aocc/5.2.0

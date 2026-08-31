@@ -35,9 +35,14 @@ spack:
     - sqlite@3.53.1
     - archivetar@0.18.2 ^python@3.13.13 ^openmpi@5.0.10
     - libsodium@1.0.22
-    - r@4.6.1
-    - r@4.5.3
+    - r@4.6.1 %c,cxx=aocc@5.2.0 %fortran=gcc@14.3.1 ^flexiblas/xs4rhnv # gcc flexiblas
+    - r@4.5.3 %c,cxx=aocc@5.2.0 %fortran=gcc@14.3.1 ^flexiblas/xs4rhnv # gcc flexiblas
     - mumps +complex+double+float+metis+parmetis+scotch+mpi
+    - ffmpeg@8.1+X+bzlib~doc+drawtext+gpl+libaom+libmp3lame+libopenjpeg~libopus~libsnappy~libspeex~libssh~libvorbis~libvpx+libwebp~libx264+libxml2+libzmq+lzma~nonfree~openssl~sdl2+shared+version3
+    - fftw+mpi %aocc@5.2.0
+    - lammps+mpi+lib+jpeg+png+ffmpeg+openmp+opencl+kspace~kokkos+h5md+spin %aocc@5.2.0 ^ffmpeg/avaqiff
+    #- gromacs+cuda+mpi %aocc@5.2.0
+    - quantum-espresso %aocc@5.2.0 ^fftw/o2447w4
     override:
       packages:
         c:
@@ -64,6 +69,7 @@ spack:
   concretizer:
     unify: false
     reuse: true
+    compiler_mixing: true
     ##########################################################################################
     #                                         Modules                                        #
     ##########################################################################################

@@ -6,6 +6,8 @@ spack:
   config:
     install_tree:
       root: /sw/spack/bioinformatics/opt/pkgs
+  mirrors:
+      buildcache: file:///sw/spack/buildcache
   upstreams:
     arc-compiler-stacks:
       install_tree: /sw/spack/opt/pkgs
@@ -32,7 +34,6 @@ spack:
     - plink2
     - gatk@4.5.0.0+r ^r/hsmq64i
     - mothur@1.48.0+boost+gsl+hdf5 ^usearch@12 ^boost@1.80
-    #- py-multiqc@1.28^python@3.13.13+arc
     - rdeseq2@1.52
     - rsem ^zlib
     - bowtie
@@ -44,64 +45,34 @@ spack:
     - stringtie@3.0.3
     - stringtie@2.2.1
     - itk@5.4.4
-    # - blat
-    # - bowtie
-    # - bowtie2
-    # - bwa
-    # - cairo
-    # - canu
-    # - cap3
-    # - clustal-omega
-    # - cufflinks
-    # - delly2
-    # - fastqc
-    # - figtree
-    # - gatk
-    # - gdk-pixbuf
-    # - gnuplot
-    # - harfbuzz
-    # - hisat2
-    # - hmmer
-    # - homer
-    # - htslib
-    # - igv
-    # - imagemagick
-    # - impute2
-    # - itk
-    # - jellyfish
-    # - libxft
-    # - masurca
-    # - minimap2
-    # - mothur
-    # - ncftp
-    # - neuron
-    # - nextflow
-    # - openslide
-    # - pango
-    # - pdf2svg
-    # - poppler
-    # - raxml
-    # - rmats
-    # - rsem
-    # - salmon
-    # - samtools
-    # - seqkit
-    # - spades
-    # - sratoolkit
-    # - star
-    # - stringtie
-    # - trimgalore
+    - hmmer ^gcc/o4xno4x
+    - fasttree ^gcc/o4xno4x
+    - trimmomatic
+    - tabix
+    - kallisto
+    - mafft
+    - mrbayes~mpi
+    - sage ^rust@1.97.1
+    - spades cxxflags="-mno-avx512f" ^python+arc ^aocc
+    - subread
+    - picard
+    - vcftools
+    - exonerate
+    - py-quast
+    - glimmer
+    - mummer
+    - py-nanoplot
     override:
       packages:
+        c:
+          prefer: [gcc@14.3.1]
+        cxx:
+          prefer: [gcc@14.3.1]
+        fortran:
+          prefer: [gcc@14.3.1]
         apr-util:
           prefer:
-          - '~crypto'
-        c:
-          prefer: [gcc@14]
-        cxx:
-          prefer: [gcc@14]
-        fortran:
-          prefer: [gcc@14]        
+          - '~crypto'    
   concretizer:
     unify: false
     reuse: true
@@ -126,25 +97,24 @@ spack:
         hash_length: 0
         core_compilers:
         - gcc@14.3.1
-        - gcc@10.3.0
+        - aocc
         - oneapi
         - llvm
         hierarchy:: []
         core_specs:
         - gcc@14.3.1
         - gcc-runtime@14.3.1
-        - gcc@10.3.0
-        - gcc-runtime@10.3.0
         exclude:
         - gcc-runtime@14.3.1
         - glibc
         - autoconf
         - compiler-wrapper
+        - compiler-wrapper
+        - util-macros
+        - py-pip
+        - py-setuptools
+        - py-wheel
+        - py-cython
+        - python-venv
         gcc-runtime:
           template: gcc-runtime.lua
-  mirrors:
-    spack-public:
-      url: https://binaries.spack.io/v2026.06.0
-      binary: true
-      source: true
-      signed: true
