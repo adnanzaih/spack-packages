@@ -354,7 +354,7 @@ class Gdal(CMakePackage, AutotoolsPackage, PythonExtension):
     # depends_on('mrsid', when='+mrsid')
     # depends_on('lizardtech-lidar', when='+mrsid_lidar')
     # depends_on('mssql_ncli', when='+mssql_ncli')
-    depends_on('mssql_odbc', when='+mssql_odbc')
+    #depends_on('mssql_odbc', when='+mssql_odbc')
     depends_on("muparser", when="+muparser")
     depends_on("mysql", when="+mysql")
     depends_on("netcdf-c@4.7:", when="@3.9:+netcdf")

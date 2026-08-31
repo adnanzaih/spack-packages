@@ -1,0 +1,64 @@
+# Copyright Spack Project Developers. See COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+from spack_repo.builtin.build_systems.cargo import CargoPackage
+
+from spack.package import *
+
+
+class Ripgrep(CargoPackage):
+    """ripgrep is a line-oriented search tool that recursively searches
+    your current directory for a regex pattern.  ripgrep is similar to
+    other popular search tools like The Silver Searcher, ack and grep.
+    """
+
+    homepage = "https://github.com/BurntSushi/ripgrep"
+    url = "https://github.com/BurntSushi/ripgrep/archive/11.0.2.tar.gz"
+    supplier = "Person: Andrew Gallant"
+
+    maintainers("alecbcs", "mcmehrtens")
+
+    license("MIT OR Unlicense", checked_by="mcmehrtens")
+
+    version("15.2.0", sha256="7605249d3eb0d5f170e3414498e3344e26b1e7a147aec518b57090b80036a562")
+    version("15.1.0", sha256="046fa01a216793b8bd2750f9d68d4ad43986eb9c0d6122600f993906012972e8")
+    version("14.1.1", sha256="4dad02a2f9c8c3c8d89434e47337aa654cb0e2aa50e806589132f186bf5c2b66")
+    version("14.1.0", sha256="33c6169596a6bbfdc81415910008f26e0809422fda2d849562637996553b2ab6")
+    version("14.0.3", sha256="f5794364ddfda1e0411ab6cad6dd63abe3a6b421d658d9fee017540ea4c31a0e")
+    version("13.0.0", sha256="0fb17aaf285b3eee8ddab17b833af1e190d73de317ff9648751ab0660d763ed2")
+    version("11.0.2", sha256="0983861279936ada8bc7a6d5d663d590ad34eb44a44c75c2d6ccd0ab33490055")
+
+    variant("pcre2", default=False, description="Add support for Perl-style regex via PCRE2")
+
+    depends_on("c", type="build")
+    depends_on("pkgconfig", type="build", when="+pcre2")
+    depends_on("rust@1.85:", type="build", when="@15:")
+    depends_on("rust@1.72:", type="build", when="@14:")
+    depends_on("rust@1.31:", type="build")
+
+    depends_on("pcre2", when="+pcre2")
+
+    @property
+    def build_args(self):
+        args = []
+        if self.spec.satisfies("+pcre2"):
+            args.extend(["--features", "pcre2"])
+
+        return args
+
+    @run_after("install", when="@14:")
+    def install_completions(self):
+        rg = Executable(self.prefix.bin.rg)
+
+        mkdirp(bash_completion_path(self.prefix))
+        with open(bash_completion_path(self.prefix) / "rg", "w") as file:
+            rg("--generate", "complete-bash", output=file)
+
+        mkdirp(fish_completion_path(self.prefix))
+        with open(fish_completion_path(self.prefix) / "rg.fish", "w") as file:
+            rg("--generate", "complete-fish", output=file)
+
+        mkdirp(zsh_completion_path(self.prefix))
+        with open(zsh_completion_path(self.prefix) / "_rg", "w") as file:
+            rg("--generate", "complete-zsh", output=file)

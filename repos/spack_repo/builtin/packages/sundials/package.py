@@ -368,7 +368,7 @@ class Sundials(CMakePackage, CudaPackage):
                 from_variant("PTHREAD_ENABLE", "pthread"),
                 from_variant("ENABLE_SYCL", "sycl"),
                 from_variant("CUDA_ENABLE", "cuda"),
-                define("ENABLE_HIP:BOOL=OFF"),
+                define("ENABLE_HIP", "OFF"),
                 from_variant("HYPRE_ENABLE", "hypre"),
                 from_variant("KLU_ENABLE", "klu"),
                 from_variant("LAPACK_ENABLE", "lapack"),

@@ -30,8 +30,8 @@ _versions = {
     "6.0.0": {"Linux-x86_64": "219bd1deb6d64a63cb72471926cb81665cbbcdec19f9c9549761be67d49a29c6"},
     "5.0.4": {"Linux-x86_64": "c4ea5aea60da7bcb18a6b7042609206fbeb2a765c6fa958c5689d450b588b036"},
     "5.0.3": {"Linux-x86_64": "b8b9076d1711150a6d6cb3eb30b18e2782fa847c5a86d8404b9339faef105043"},
-    "4.2.1": {"Linux-x86_64": "a84b6d2706f0ddb2f3750951864502a5c49d081836b00164448b1d81c577f51a"},
-    "4.2.0": {"Linux-x86_64": "01096466e41a5232e5a18af7400e48c02a6e489f0d5d668a90cdd2746e8e22e2"},
+    #"4.2.1": {"Linux-x86_64": "a84b6d2706f0ddb2f3750951864502a5c49d081836b00164448b1d81c577f51a"},
+    #"4.2.0": {"Linux-x86_64": "01096466e41a5232e5a18af7400e48c02a6e489f0d5d668a90cdd2746e8e22e2"},
 }
 
 
@@ -62,8 +62,8 @@ class Orca(Package):
     # Map Orca version with the required OpenMPI version
     # OpenMPI@4.1.1 has issues in pmix environments, hence 4.1.2 here
     openmpi_versions = {
-        "4.2.0": "3.1.4",
-        "4.2.1": "3.1.4",
+        #"4.2.0": "3.1.4",
+        #"4.2.1": "3.1.4",
         "5.0.3": "4.1.2",
         "5.0.4": "4.1.2",
         "6.0.0": "4.1.6",

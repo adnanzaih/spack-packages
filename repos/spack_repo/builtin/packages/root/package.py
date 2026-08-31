@@ -1,0 +1,930 @@
+# Copyright Spack Project Developers. See COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+
+import os
+import sys
+
+from spack_repo.builtin.build_systems.cmake import CMakePackage
+
+import spack.util.environment as envutil
+from spack.package import *
+
+_is_macos = sys.platform == "darwin"
+
+
+class Root(CMakePackage):
+    """ROOT is a data analysis framework."""
+
+    homepage = "https://root.cern.ch"
+    url = "https://root.cern/download/root_v6.16.00.source.tar.gz"
+    git = "https://github.com/root-project/root.git"
+
+    executables = ["^root$", "^root-config$"]
+
+    tags = ["hep"]
+
+    maintainers("drbenmorgan", "gartung", "greenc-FNAL", "marcmengel", "vitodb", "vvolkl")
+
+    # ###################### Versions ##########################
+
+    # Master branch
+    version("master", branch="master")
+
+    # Development version (when more recent than production).
+    version("develop", branch="master")
+
+    # Production release series
+    version("6.40.02", sha256="f631eebee3dbea128f1415f4b784f5e83637a2b431193bce75f10385f71efc56")
+    version("6.40.00", sha256="676f8fde8926ce05902be7f44ce7d492a4a2060022fcab0e3d1c44f6dc0fbde8")
+    version("6.36.12", sha256="1243fc48b7c1358ebf69e6140a13d9c27e0fd84663632cc6217beda875a4a317")
+    version("6.36.10", sha256="8ccbfbca9d05016c8c324dd61c25a1091ae61847fb9404298652b83bf0cd3be0")
+    version("6.36.08", sha256="1678fd272cf3172d7ba602e2786ec659bd3ca28b38f0471005d456d968ef55a1")
+    version("6.36.06", sha256="62f9d38d2f2ed3d46653529c98e8cbc9b8866776494eb40ba0c23e2f46b681c4")
+    version("6.36.04", sha256="cc6367d8f563c6d49ca34c09d0b53cb0f41a528db6f86af111fd76744cda4596")
+    version("6.36.02", sha256="510d677b33ac7ca48aa0d712bdb88d835a1ff6a374ef86f1a1e168fa279eb470")
+    version("6.36.00", sha256="94afc8def92842679a130a27521be66e2abdaa37620888e61d828a43fc4b01a2")
+
+    # Supported LTS release series (note: more recent STS releases may be further down)
+    version("6.32.22", sha256="4745ef6763cf2dd72a798785055a14c55c0a74a1b3a939f562f63d605fd57cfd")
+    version("6.32.20", sha256="c4a9936d55adea8b5b20db9be2e356d95a0d97c9e78a92cd6494b7294838d261")
+    version("6.32.18", sha256="0b7d18b209e2a34e611e7cb2e6b82b6559fd86d64d1a7e8bf65cd13059839956")
+    version("6.32.16", sha256="1b9afc6730aa727722cc60d44a403f7a39b7226086181827bc4cabd0bea4c568")
+    version("6.32.14", sha256="dfb5193127ff80ebfa10e6a4dcdf56eeec0eface65fc3de347d853ae9653aeff")
+    version("6.32.12", sha256="2e41968aeb0406ee31c30af9c046143099b251846e0839cb04f4e960c7893e19")
+    version("6.32.10", sha256="5a896804ec153685e8561adaa4e546b708139c484280aa6713a0a178f5b7f98b")
+    version("6.32.08", sha256="29ad4945a72dff1a009c326a65b6fa5ee2478498823251d3cef86a2cbeb77b27")
+    version("6.32.06", sha256="3fc032d93fe848dea5adb1b47d8f0a86279523293fee0aa2b3cd52a1ffab7247")
+    version("6.32.04", sha256="132f126aae7d30efbccd7dcd991b7ada1890ae57980ef300c16421f9d4d07ea8")
+    version("6.32.02", sha256="3d0f76bf05857e1807ccfb2c9e014f525bcb625f94a2370b455f4b164961602d")
+    version("6.32.00", sha256="12f203681a59041c474ce9523761e6f0e8861b3bee78df5f799a8db55189e5d2")
+
+    # Supported STS release series
+    # 6.38 (through 2026-06-30)
+    version("6.38.06", sha256="104efe8668215fc5ceb818afbf050410f0994694baba2d40f6ac640e15ef8738")
+    version("6.38.04", sha256="1ca561d03b3addae00cb76af57f8c75d3c229e8bd6939bdd408ec33fda9d3487")
+    version("6.38.02", sha256="77d34d2bca0ea720acfd43798bcb5d09a28584013b4d0a2910823c867d4bfa42")
+    version("6.38.00", sha256="a4429422c460f832cde514a580dd202b1d3c96e8919c24363c3d42f8cf5accdc")
+
+    # 6.34 (through 2025-06-30)
+    with default_args(deprecated=True):
+        version(
+            "6.34.10", sha256="d91aa27fde29b257b347af1750b0c5c51487eb7d4b1767f4df33b4d789b7b313"
+        )
+        version(
+            "6.34.08", sha256="806045b156de03fe8f5661a670eab877f2e4d2da6c234dc3e31e98e2d7d96fe8"
+        )
+        version(
+            "6.34.06", sha256="a799d632dae5bb1ec87eae6ebc046a12268c6849f2a8837921c118fc51b6cff3"
+        )
+        version(
+            "6.34.04", sha256="e320c5373a8e87bb29b7280954ca8355ad8c4295cf49235606f0c8b200acb374"
+        )
+        version(
+            "6.34.02", sha256="166bec562e420e177aaf3133fa3fb09f82ecddabe8a2e1906345bad442513f94"
+        )
+        version(
+            "6.34.00", sha256="f3b00f3db953829c849029c39d7660a956468af247efd946e89072101796ab03"
+        )
+
+    # Older release series
+    with default_args(deprecated=True):
+        version(
+            "6.30.08", sha256="8bb8594867b9ded20a65e59f2cb6da965aa30851b8960f8cbf76293aec046b69"
+        )
+        version(
+            "6.30.06", sha256="300db7ed1b678ed2fb9635ca675921a1945c7c2103da840033b493091f55700c"
+        )
+        version(
+            "6.30.04", sha256="2b4180b698f39cc65d91084d833a884515b325bc5f673c8e39abe818b025d8cc"
+        )
+        version(
+            "6.30.02", sha256="7965a456d1ad1ee0d5fe4769bf5a8fec291af684ed93db0f3080a9c362435183"
+        )
+        version(
+            "6.30.00", sha256="0592c066954cfed42312957c9cb251654456064fe2d8dabdcb8826f1c0099d71"
+        )
+        version(
+            "6.28.12", sha256="fcd325267d238e9c6008f56a3a7e7c87fd864b1e633b0ffcf1f82b7e7ad3d249"
+        )
+        version(
+            "6.28.10", sha256="69d6fdeb607e6b20bd02c757fa6217024c0b6132c1e9b1dff4d85d9a2bb7e51e"
+        )
+        version(
+            "6.28.06", sha256="af3b673b9aca393a5c9ae1bf86eab2672aaf1841b658c5c6e7a30ab93c586533"
+        )
+        version(
+            "6.28.04", sha256="70f7f86a0cd5e3f2a0befdc59942dd50140d990ab264e8e56c7f17f6bfe9c965"
+        )
+        version(
+            "6.28.02", sha256="6643c07710e68972b00227c68b20b1016fec16f3fba5f44a571fa1ce5bb42faa"
+        )
+        version(
+            "6.28.00", sha256="afa1c5c06d0915411cb9492e474ea9ab12b09961a358e7e559013ed63b5d8084"
+        )
+
+    # ###################### Patches ##########################
+
+    # Widely used patch (CMS, FNAL) to increase the size of static
+    # buffers used to improve the operation of TString.
+    patch("format-stringbuf-size.patch", level=0)
+    # Support recent versions of protobuf with their own CMake config
+    # (provided the CMake being used supports targets), _cf_
+    # https://github.com/root-project/root/commit/f6cfe3bdab544e5f7fd49514562147ebd5d67d7c
+    patch("protobuf-config.patch", level=0, when="@:6.30.02 ^protobuf ^cmake@3.9:")
+
+    patch("webgui.patch", level=0, when="@6.28.00:6.28.08,6.30.00 +webgui")
+
+    # Back-ported patches fixing segfault in weighted likelihood fits
+    patch(
+        "https://github.com/root-project/root/commit/2f00d6df258906c1f6fe848135a88b836db3077f.patch?full_index=1",
+        sha256="8da36032082e65ae246c03558a4c3fd67b157d1d0c6d20adac9de263279d1db6",
+        when="@6.28.6:6.28.12",
+    )
+    patch(
+        "https://github.com/root-project/root/commit/14838b35600b08278e69bc3d8d8669773bc11399.patch?full_index=1",
+        sha256="4647898ef28cb1adbaacdeedb04b417d69ccbaf02fc2b3aab20e07c0b2a96a0f",
+        when="@6.30:6.30.04",
+    )
+
+    # Fix TUri to be PCRE2 compatible
+    patch(
+        "https://github.com/root-project/root/commit/37f59306938f91f3ff2cce963ecbb041591dff43.patch?full_index=1",
+        sha256="a530978b5a9e9aa4a58958aed5b1d7c7d5e91f949ea04254bf0afa2000e1eee9",
+        when="@6.32.0:6.32.02",
+    )
+
+    # Fix cppyy double-install overwriting rpath
+    patch(
+        "https://github.com/root-project/root/commit/5b09965c2acf098f0bfba465c395a2ce23f276b5.patch?full_index=1",
+        sha256="131ab40a3be20b14929327bf9fc0a4c5e2da7d56aa1ad6f8bd39c7826038da81",
+        when="@6.38.0 +python",
+    )
+
+    # Fix CMake bug that becomes an error in newer versions
+    patch(
+        "https://github.com/root-project/root/pull/22790.diff?full_index=1",
+        sha256="8f95c3d0532be4880dbe4e74b0180ecaed410c59ed915067c4f585aba270029c",
+        when="@6.40.02 ^cmake@4.4:",
+    )
+
+    if _is_macos:
+        # Fix macOS build when cocoa is disabled:
+        patch(
+            "https://github.com/root-project/root/commit/ebcda91aa14a359f06fa1c50690d5be9e4c98b94.patch?full_index=1",
+            sha256="559495f7bdd6b7674d3b1019da9b76e8b374f6dca3dbe72fb1320b0be2b00e53",
+            when="@6.30:6.30.3 ~aqua",
+        )
+        # Fix build issues with libAfterImage for macOS
+        patch(
+            "https://github.com/root-project/root/commit/854cbc1af3eddf144aaa98b530103b229ab63ed3.patch?full_index=1",
+            sha256="e68be5fe7b1ec873da134bd39c5c72730c4ca06d51b52eb436ae44fe81cd472d",
+            when="@:6.30.04 +x",
+        )
+        # Fix rpath for loading cppyy
+        patch(
+            "https://github.com/root-project/root/pull/15925.diff?full_index=1",
+            sha256="1937290a4d54cd2e3e8a8d23d93b8dedaca9ed8dcfdcfa2f0d16629ff53fb3b7",
+            when="@6.28:6.32 +python",
+        )
+
+    # ###################### Variants ##########################
+    # See README.md for specific notes about what ROOT configuration
+    # options are or are not supported, and why.
+
+    variant("aqua", default=_is_macos, description="Enable native macOS (Cocoa) interface")
+    variant("arrow", default=False, description="Enable Arrow interface")
+    variant("cuda", default=False, description="Enable CUDA support")
+    variant("cudnn", default=False, description="Enable cuDNN support")
+    # C++ module support in ROOT seemingly not currently working in macOS,
+    # will lead to build errors if turned on
+    # See https://root-forum.cern.ch/t/build-error-on-macos-macports-with-unctrl-h-ncurses-h/40239/22
+    variant("cxxmodules", default=not _is_macos, description="Enable C++ modules")
+    variant("daos", default=False, description="Enable RNTuple support for DAOS storage")
+    variant("davix", default=True, description="Compile with external Davix")
+    variant("dcache", default=False, description="Enable support for dCache")
+    variant("emacs", default=False, description="Enable Emacs support")
+    variant("examples", default=True, description="Install examples")
+    variant("fftw", default=False, description="Enable Fast Fourier Transform support")
+    variant(
+        "fits", default=False, description="Enable support for images and data from FITS files"
+    )
+    variant("fortran", default=False, description="Enable the Fortran components of ROOT")
+    variant("graphviz", default=False, description="Enable graphviz support")
+    variant("gdml", default=True, description="Enable GDML writer and reader")
+    variant(
+        "gminimal",
+        default=True,
+        description="Ignore most of Root's feature defaults except for basic graphic options",
+    )
+    variant("geom", default=True, description="Enable support for the geometry library")
+    conflicts("~geom", when="@:6.33", msg="geom is always enabled through 6.33")
+    variant("geombuilder", default=False, description="Enable support for the geombuilder library")
+    conflicts("~geombuilder", when="@:6.33", msg="geombuilder is always enabled through 6.33")
+    variant("gsl", default=True, description="Enable linking against shared libraries for GSL")
+    variant("http", default=False, description="Enable HTTP server support")
+    variant(
+        "jemalloc",
+        when="@:6.28",
+        default=False,
+        description="Enable using the jemalloc allocator (deprecated in 6.28)",
+    )
+    variant("math", default=True, description="Build the new libMathMore extended math library")
+    # Minuit must not be installed as a dependency of root
+    # otherwise it crashes with the internal minuit library
+    variant("minuit", default=True, description="Automatically search for support libraries")
+    variant(
+        "mlp",
+        default=False,
+        description="Enable support for TMultilayerPerceptron classes' federation",
+    )
+    variant(
+        "mysql", when="@:6.36", default=False, description="Enable support for MySQL databases"
+    )
+    variant("opengl", default=True, description="Enable OpenGL support")
+    variant(
+        "oracle", when="@:6.30", default=False, description="Enable support for Oracle databases"
+    )
+    variant("postgres", when="@:6.36", default=False, description="Enable postgres support")
+    variant("pythia6", when="@:6.30", default=False, description="Enable pythia6 support")
+    variant("pythia8", default=False, description="Enable pythia8 support")
+    variant("python", default=True, description="Enable Python ROOT bindings")
+    variant("qt5", when="@:6.34", default=False, description="Enable Qt5 web-based display")
+    variant("qt6", default=False, description="Enable Qt6 web-based display")
+    variant("r", default=False, description="Enable R ROOT bindings", when="@:6.40")
+    variant("rpath", default=True, description="Enable RPATH", when="@:6.40")
+    conflicts(
+        "~rpath", when="@6.38:", msg="RPATHs are always applied if operating systems supports it"
+    )
+    variant("roofit", default=True, description="Build the libRooFit advanced fitting package")
+    variant("root7", default=False, description="Enable ROOT 7 support")
+    variant("shadow", default=False, description="Enable shadow password support")
+    variant("spectrum", default=False, description="Enable support for TSpectrum")
+    variant("sqlite", default=False, description="Enable SQLite support")
+    variant("ssl", default=False, description="Enable SSL encryption support")
+    variant("tbb", default=True, description="TBB multi-threading support")
+    variant(
+        "tiff",
+        when="@6.36:",
+        default=True,
+        description="Support TIFF in image processing (requires libtiff)",
+    )
+    variant("tmva", default=False, description="Build TMVA multi variate analysis library")
+    variant(
+        "tmva-cpu",
+        default=True,
+        description="Build TMVA with CPU support for deep learning (requires BLAS)",
+    )
+    variant(
+        "tmva-cudnn",
+        when="@6.34.00:",
+        default=True,
+        description="Enable support for cuDNN in TMVA",
+    )
+    variant(
+        "tmva-gpu",
+        default=False,
+        description="Build TMVA with GPU support for deep learning (requires CUDA)",
+    )
+    variant(
+        "tmva-pymva",
+        default=False,
+        description="Enable support for Python in TMVA (requires numpy)",
+    )
+    variant(
+        "tmva-sofie",
+        default=False,
+        description="Build TMVA with support for sofie - "
+        "fast inference code generation (requires protobuf 3)",
+    )
+    variant(
+        "tpython",
+        when="@6.34.00: +python",
+        default=True,
+        description="Build the TPython class to run Python code from C++",
+    )
+    variant("unuran", default=True, description="Use UNURAN for random number generation")
+    variant(
+        "vc",
+        default=False,
+        description="Enable Vc for adding new types for SIMD programming",
+        when="@:6.40",
+    )
+    variant("vdt", default=True, description="Enable set of fast and vectorisable math functions")
+    variant(
+        "veccore",
+        default=False,
+        description="Enable support for VecCore SIMD abstraction library",
+        when="@:6.40",
+    )
+    variant(
+        "webgui", default=True, description="Enable web-based UI components of ROOT", when="+root7"
+    )
+    variant("x", default=(not _is_macos), description="Enable set of graphical options")
+    variant("xml", default=True, description="Enable XML parser interface")
+    variant("xrootd", default=False, description="Build xrootd file server and its client")
+    variant(
+        "builtin_llvm",
+        default=True,
+        description="Use ROOT's bundled copy of LLVM (but bundled clang is always used)",
+    )
+
+    # ###################### Compiler variants ########################
+
+    variant(
+        "cxxstd",
+        default="17",
+        values=("11", "14", "17", "20", "23"),
+        multi=False,
+        description="Use the specified C++ standard when building.",
+    )
+
+    # ###################### Dependencies ######################
+
+    depends_on("c", type="build")
+    depends_on("cxx", type="build")
+    depends_on("fortran", type="build", when="+fortran")
+
+    depends_on("cmake@3.16:", type="build")
+    depends_on("cmake@3.19:", type="build", when="platform=darwin")
+    depends_on("cmake@3.20:", type="build", when="@6.34.00:")
+    depends_on("pkgconfig", type="build")
+
+    # 6.32.00 requires sys/random.h
+    with when("@6.32.00:"):
+        depends_on("glibc@2.25:", when="^[virtuals=libc] glibc")
+        #depends_on("musl@1.1.20:", when="^[virtuals=libc] musl")
+
+    depends_on("freetype")
+    depends_on("giflib")
+    depends_on("jpeg")
+    depends_on("libice")
+    depends_on("libpng")
+    depends_on("lz4")  # See cmake_args, below.
+    depends_on("ncurses")
+    depends_on("nlohmann-json")
+    depends_on("pcre", when="@:6.33")
+    depends_on("pcre2", when="@6.34:")
+    depends_on("xxhash")  # See cmake_args, below.
+    depends_on("xz")
+    depends_on("zlib-api")
+    depends_on("zstd")
+
+    # X-Graphics
+    depends_on("libx11", when="+x")
+    depends_on("libxext", when="+x")
+    depends_on("libxft", when="+x")
+    depends_on("libxpm", when="+x")
+    depends_on("libsm", when="+x")
+    depends_on("fontconfig", when="+x", type="build")
+    depends_on("xproto", when="+x", type="build")
+    depends_on("xextproto", when="+x", type="build")
+
+    # OpenGL
+    depends_on("ftgl@2.4.0:", when="+opengl")
+    depends_on("glew", when="+opengl")
+    depends_on("gl2ps", when="+opengl")
+    depends_on("gl", when="+opengl")
+    depends_on("glu", when="+opengl")
+    depends_on("libglx", when="+opengl+x")
+
+    # Qt
+    with when("+qt5"):
+        conflicts("+qt6", msg="+qt? options are mutually exclusive")
+        depends_on("qt@5.0.0:5")
+    with when("+qt6"):
+        conflicts("+qt5", msg="+qt? options are mutually exclusive")
+        depends_on("qt-base +accessibility +gui")
+
+    # Python
+    depends_on("python@2.7:", when="+python", type=("build", "run"))
+    depends_on("python@3.8:", when="@6.34.00: +python", type=("build", "run"))
+    conflicts("^python +freethreading", when="@6.40.00", msg="v6.40.00 requires GIL")
+    depends_on("py-numpy", type=("build", "run"), when="+tmva-pymva")
+    depends_on("py-numpy", type=("build", "run"), when="+tmva-sofie @6.40:")
+
+    # TMVA
+    depends_on("blas", when="+tmva-cpu")
+    requires("^openblas ~ilp64 symbol_suffix=none", when="^[virtuals=blas] openblas")
+    depends_on("cuda", when="+tmva-gpu")
+    depends_on("protobuf@3:", when="+tmva-sofie")
+
+    # Optional dependencies
+    depends_on("arrow", when="+arrow")
+    depends_on("civetweb +shared", when="+http")
+    depends_on("cuda", when="+cuda")
+    depends_on("cuda", when="+cudnn")
+    depends_on("cudnn", when="+cudnn")
+    depends_on("daos", when="+daos")
+    depends_on("davix @0.7.1:", when="+davix")
+    depends_on("dcap", when="+dcache")
+    depends_on("cfitsio", when="+fits")
+    depends_on("fcgi", when="+http")
+    depends_on("fftw", when="+fftw")
+    depends_on("graphviz", when="+graphviz")
+    depends_on("gsl", when="+gsl")
+    depends_on("jemalloc", when="+jemalloc")
+    depends_on("libtiff", when="+tiff")
+    depends_on("mysql-client", when="+mysql")
+    depends_on("openssl", when="+ssl")
+    depends_on("openssl", when="+davix")  # Also with davix
+    depends_on("postgresql", when="+postgres")
+    depends_on("pythia6+root", when="+pythia6")
+    depends_on("pythia8", when="+pythia8")
+    depends_on("r", when="+r", type=("build", "run"))
+    depends_on("r-rcpp", when="+r", type=("build", "run"))
+    depends_on("r-rcpp@:1.0.12", when="+r @:6.32.02", type=("build", "run"))
+    depends_on("r-rinside", when="+r", type=("build", "run"))
+    depends_on("readline", when="+r")
+    depends_on("shadow", when="+shadow")
+    depends_on("sqlite", when="+sqlite")
+    depends_on("tbb", when="+tbb")
+    depends_on("unuran", when="+unuran")
+    depends_on("vc@1.3.0:", when="+vc")
+    depends_on("vc@1.4.4:", when="@6.29.02: +vc")
+    depends_on("vdt", when="+vdt")
+    depends_on("veccore@0.4.2:", when="+veccore")
+    depends_on("libxml2", when="+xml")
+    depends_on("xrootd", when="+xrootd")
+
+    # External LLVM (used when ~builtin_llvm).  ROOT bundles its own patched Clang
+    # (interpreter/llvm-project/clang) and builds it against the external LLVM, so
+    # vanilla LLVM is sufficient here.  ROOT's patches to llvm-project only touch
+    # clang/, not the LLVM core.
+    depends_on("llvm@20.1.0:20.1+polly+clang", when="@6.36: ~builtin_llvm")
+
+    depends_on("googletest", when="@6.28.00:", type="test")
+
+    # ###################### Conflicts ######################
+
+    # I was unable to build root with any Intel compiler
+    # See https://sft.its.cern.ch/jira/browse/ROOT-7517
+    conflicts("%intel")
+
+    # External LLVM is only supported for ROOT 6.36+ (requires LLVM 20.1.x).
+    # Older ROOT versions have different LLVM major requirements that have not
+    # been mapped to spack dependencies yet.
+    conflicts(
+        "~builtin_llvm",
+        when="@:6.35",
+        msg="External LLVM is only supported for ROOT 6.36+ in this spack recipe",
+    )
+
+    # GCC 15 support was added in 6.34.04
+    conflicts("%gcc@15:", when="@:6.34.02")
+
+    # Incompatible variants
+    if _is_macos:
+        conflicts("+opengl", when="~x ~aqua", msg="root+opengl requires X or Aqua")
+        # https://github.com/root-project/root/issues/7160
+        conflicts("+aqua", when="~opengl", msg="+aqua requires OpenGL to be enabled")
+    else:
+        conflicts("+opengl", when="~x", msg="root+opengl requires X")
+    conflicts("+math", when="~gsl", msg="root+math requires GSL")
+    conflicts("+tmva", when="~gsl", msg="root+tmva requires GSL")
+    conflicts("+tmva", when="~mlp", msg="root+tmva requires MLP")
+    conflicts("+tmva-cpu", when="~tmva", msg="root+tmva-cpu requires TMVA")
+    conflicts("+tmva-gpu", when="~tmva", msg="root+tmva-gpu requires TMVA")
+    conflicts("+tmva-gpu", when="~cuda", msg="root+tmva-gpu requires CUDA")
+    conflicts("+tmva-pymva", when="~tmva", msg="root+tmva-pymva requires TMVA")
+    conflicts("+tmva-sofie", when="~tmva", msg="root+tmva-sofie requires TMVA")
+    conflicts("~http", when="+webgui", msg="root+webgui requires HTTP")
+    conflicts("cxxstd=11", msg="ROOT requires at least C++14")
+    conflicts("cxxstd=14", when="@6.30.00:", msg="This version of root requires at least C++17")
+    conflicts(
+        "cxxstd=20", when="@:6.28.02", msg="C++20 support requires root version at least 6.28.04"
+    )
+    conflicts(
+        "cxxstd=23", when="@:6.34", msg="C++23 support requires root version at least 6.36.00"
+    )
+
+    conflicts("%gcc@:10", when="cxxstd=20")
+
+    # See https://github.com/root-project/root/issues/16219
+    if _is_macos and macos_version() >= Version("15"):
+        conflicts("@:6.32.05", msg="macOS 15 support was added in root 6.32.06")
+
+    # ROOT does not support LTO builds
+    # See https://github.com/root-project/root/issues/11135
+    conflicts("+ipo", msg="LTO is not a supported configuration for building ROOT")
+
+    @when("+root7 +geom +webgui")
+    def patch(self):
+        filter_file(
+            r"#include <sstream>",
+            "#include <sstream>\n#include <cstdint>",
+            "graf3d/eve7/inc/ROOT/REveTypes.hxx",
+        )
+
+    @classmethod
+    def filter_detected_exes(cls, prefix, exes_in_prefix):
+        result = []
+        for exe in exes_in_prefix:
+            # no need to check the root executable itself
+            # we can get all information from root-config
+            if exe.endswith("root"):
+                continue
+            result.append(exe)
+        return result
+
+    @classmethod
+    def determine_version(cls, exe):
+        output = Executable(exe)("--version", output=str, error=str)
+        # turn the output of root-config --version
+        # (something like 6.22/06)
+        # into the format used in this recipe (6.22.06)
+        return output.strip().replace("/", ".")
+
+    @classmethod
+    def determine_variants(cls, exes, version_str):
+        v = []  # list of determined variants
+        # there is a fairly direct mapping between build options ( which
+        # root-config helpfully outputs) and variants
+        output = Executable(exes[0])("--features", output=str, error=str)
+        f = set(output.strip().split())  # features as reported by root-config
+        # only multivalued variant: cxxstd
+        if "cxx11" in f:
+            v.append("cxxstd=11")
+        elif "cxx14" in f:
+            v.append("cxxstd=14")
+        elif "cxx17" in f:
+            v.append("cxxstd=17")
+        elif "cxx20" in f:
+            v.append("cxxstd=20")
+        elif "cxx23" in f:
+            v.append("cxxstd=23")
+
+        # helper function: check if featurename is in features, and if it is,
+        # append variantname to variants. featurename may be a list/tuple, in
+        # which case the variant is only added if all of them are present
+        def _add_variant(variants, features, featurename, variantname):
+            if isinstance(featurename, str):
+                if featurename in features:
+                    variants.append("%s" % variantname)
+                else:
+                    variants.append("~%s" % variantname[1:])
+            else:
+                if set(featurename).issubset(features):
+                    variants.append("%s" % variantname)
+                else:
+                    variants.append("~%s" % variantname[1:])
+
+        _add_variant(v, f, "cocoa", "+aqua")
+        _add_variant(v, f, "daos", "+daos")
+        _add_variant(v, f, "davix", "+davix")
+        _add_variant(v, f, "dcache", "+dcache")
+        _add_variant(v, f, "fftw3", "+fftw")
+        _add_variant(v, f, "fitsio", "+fits")
+        _add_variant(v, f, ("ftgl", "opengl"), "+opengl")
+        _add_variant(v, f, "gdml", "+gdml")
+        _add_variant(v, f, "geom", "+geom")
+        _add_variant(v, f, "geombuilder", "+geombuilder")
+        _add_variant(v, f, "mathmore", "+math")
+        _add_variant(v, f, "gviz", "+graphviz")
+        _add_variant(v, f, "http", "+http")
+        _add_variant(v, f, ("imt", "tbb"), "+tbb")
+        if Version(version_str) <= Version("6.28"):
+            _add_variant(v, f, "jemalloc", "+jemalloc")
+        _add_variant(v, f, ("minuit", "minuit2"), "+minuit")
+        _add_variant(v, f, "mlp", "+mlp")
+        if Version(version_str) <= Version("6.36"):
+            _add_variant(v, f, "mysql", "+mysql")
+        if Version(version_str) <= Version("6.30"):
+            _add_variant(v, f, "oracle", "+oracle")
+        if Version(version_str) <= Version("6.36"):
+            _add_variant(v, f, "pgsql", "+postgres")
+        if Version(version_str) <= Version("6.30"):
+            _add_variant(v, f, "pythia6", "+pythia6")
+        _add_variant(v, f, "pythia8", "+pythia8")
+        _add_variant(v, f, "pyroot", "+python")
+        if Version(version_str) <= Version("6.34"):
+            _add_variant(v, f, "qt5web", "+qt5")
+        _add_variant(v, f, "qt6web", "+qt6")
+        _add_variant(v, f, "r", "+r")
+        _add_variant(v, f, "roofit", "+roofit")
+        # webui feature renamed to webgui in 6.18
+        _add_variant(v, f, ("root7", "webgui"), "+webgui")
+        if Version(version_str) < Version("6.38"):
+            _add_variant(v, f, "rpath", "+rpath")
+        _add_variant(v, f, "runtime_cxxmodules", "+cxxmodules")
+        _add_variant(v, f, "shadowpw", "+shadow")
+        _add_variant(v, f, "spectrum", "+spectrum")
+        _add_variant(v, f, "sqlite", "+sqlite")
+        _add_variant(v, f, "ssl", "+ssl")
+        _add_variant(v, f, "tmva", "+tmva")
+        _add_variant(v, f, "tmva-cpu", "+tmva-cpu")
+        _add_variant(v, f, "tmva-gpu", "+tmva-gpu")
+        _add_variant(v, f, "tmva-pymva", "+tmva-pymva")
+        _add_variant(v, f, "tmva-sofie", "+tmva-sofie")
+        _add_variant(v, f, "unuran", "+unuran")
+        _add_variant(v, f, "vc", "+vc")
+        _add_variant(v, f, "vdt", "+vdt")
+        _add_variant(v, f, "veccore", "+veccore")
+        _add_variant(v, f, ("x11", "xft"), "+x")
+        _add_variant(v, f, "xml", "+xml")
+        _add_variant(v, f, "xrootd", "+xrootd")
+        return " ".join(v)
+
+    def url_for_version(self, version):
+        dotted = version.dotted
+        if version < Version("6.36.04"):
+            # Older releases available only on CERN mirror
+            return f"https://root.cern/download/root_v{dotted}.source.tar.gz"
+        else:
+            # Faster downloads
+            dashed = version.dashed
+            return f"https://github.com/root-project/root/releases/download/v{dashed}/root_v{dotted}.source.tar.gz"
+
+    def cmake_args(self):
+        define = self.define
+        define_from_variant = self.define_from_variant
+        options = []
+
+        # ###################### Boolean Options ######################
+        # For option list format see _process_opts(), below.
+
+        # Options controlling gross build / config behavior.
+        options += [
+            define("fail-on-missing", True),
+            define_from_variant("fortran"),
+            define_from_variant("gminimal"),
+            define("gnuinstall", True),
+            define("libcxx", False),
+            define("roottest", False),
+            define_from_variant("runtime_cxxmodules", "cxxmodules"),
+            define_from_variant("rpath"),
+            define("shared", True),
+            define("soversion", True),
+            define("testing", self.run_tests),
+            # The following option makes sure that Cling will call the compiler
+            # it was compiled with at run time; see #17488, #18078 and #23886
+            define("CLING_CXX_PATH", self.compiler.cxx),
+        ]
+
+        if self.spec.satisfies("@:6.28"):
+            options.append(define("cxxmodules", False))
+
+        if self.spec.satisfies("@:6.30"):
+            options.append(define("exceptions", True))
+
+        # Options related to ROOT's ability to download and build its own
+        # dependencies. Per Spack convention, this should generally be avoided.
+
+        options += [
+            define("builtin_cfitsio", False),
+            define("builtin_civetweb", False),
+            define("builtin_clang", True),  # use builtin_clang even when ~builtin_llvm
+            define("builtin_davix", False),
+            define("builtin_fftw3", False),
+            define("builtin_freetype", False),
+            define("builtin_ftgl", False),
+            define("builtin_gif", False),
+            define("builtin_gl2ps", False),
+            define("builtin_glew", False),
+            define("builtin_gsl", False),
+            define_from_variant("builtin_llvm"),
+            define("builtin_lz4", False),
+            define("builtin_lzma", False),
+            define("builtin_nlohmannjson", False),
+            define("builtin_openssl", False),
+            define("builtin_pcre", False),
+            define("builtin_tbb", False),
+            define("builtin_unuran", False),
+            define("builtin_vc", False),
+            define("builtin_vdt", False),
+            define("builtin_veccore", False),
+            define("builtin_xrootd", False),
+            define("builtin_xxhash", False),
+            define("builtin_zlib", False),
+        ]
+
+        if self.spec.satisfies("@:6.32"):
+            options.append(
+                define(
+                    "builtin_afterimage",
+                    ("+x" in self.spec) if "platform=darwin" not in self.spec else True,
+                )
+            )
+
+        if self.spec.satisfies("@6.36:"):
+            options += [
+                define("builtin_gif", False),
+                define("builtin_jpeg", False),
+                define("builtin_png", False),
+            ]
+
+        # Features
+        options += [
+            define("afdsmrgd", False),
+            define("afs", False),
+            define("alien", False),
+            define_from_variant("arrow"),
+            define("asimage", True),
+            define("bonjour", False),
+            define("castor", False),
+            define("ccache", False),
+            define("chirp", False),
+            define_from_variant("cocoa", "aqua"),
+            define("dataframe", True),
+            define_from_variant("davix"),
+            define_from_variant("daos"),
+            define_from_variant("dcache"),
+            define_from_variant("fftw3", "fftw"),
+            define_from_variant("fitsio", "fits"),
+            define_from_variant("ftgl", "opengl"),
+            define_from_variant("gdml"),
+            define_from_variant("geom"),
+            define_from_variant("geombuilder"),
+            define_from_variant("genvector", "math"),
+            define("geocad", False),
+            define("gfal", False),
+            define_from_variant("gl2ps", "opengl"),
+            define("glite", False),
+            define("globus", False),
+            define_from_variant("gviz", "graphviz"),
+            define("hdfs", False),
+            define_from_variant("http"),  # See conflicts
+            define_from_variant("imt", "tbb"),
+            define_from_variant("jemalloc"),
+            define("krb5", False),
+            define("ldap", False),
+            define_from_variant("mathmore", "math"),
+            define("minimal", False),
+            define_from_variant("minuit"),
+            define_from_variant("mlp"),
+            define("monalisa", False),
+            define_from_variant("opengl"),
+            define_from_variant("oracle"),
+            define_from_variant("pythia6"),
+            define_from_variant("pythia8"),
+            define_from_variant("r"),
+            define("rfio", False),
+            define_from_variant("roofit"),
+            define_from_variant("root7"),  # See conflicts
+            define("ruby", False),
+            define("sapdb", False),
+            define_from_variant("shadowpw", "shadow"),
+            define_from_variant("spectrum"),
+            define_from_variant("sqlite"),
+            define("srp", False),
+            define_from_variant("ssl"),
+            define_from_variant("tbb"),
+            define("tcmalloc", False),
+            define_from_variant("tmva"),
+            define_from_variant("unuran"),
+            define("use_gsl_cblas", False),
+            define_from_variant("vc"),
+            define_from_variant("vdt"),
+            define_from_variant("veccore"),
+            define_from_variant("x11", "x"),
+            define_from_variant("xft", "x"),
+            define_from_variant("xml"),
+            define_from_variant("xrootd"),
+        ]
+
+        options.append(define_from_variant("cuda"))
+
+        # Necessary due to name change of variant (webui->webgui)
+        # https://github.com/root-project/root/commit/d631c542909f2f793ca7b06abc622e292dfc4934
+        options.append(define_from_variant("webgui", "webgui"))
+
+        # Some special features
+        options.append(define_from_variant("tmva-cpu"))
+        options.append(define_from_variant("tmva-gpu"))
+        options.append(define_from_variant("tmva-pymva"))
+        options.append(define_from_variant("cudnn"))
+        options.append(define_from_variant("pyroot", "python"))
+        options.append(define_from_variant("tmva-sofie"))
+
+        if self.spec.satisfies("@:6.30"):
+            options.append(define_from_variant("minuit2", "minuit"))
+
+        if self.spec.satisfies("@6.34:"):
+            options += [
+                define_from_variant("tmva-cudnn", "tmva-cudnn"),
+                define_from_variant("tmva-cudnn", "cudnn"),
+                define_from_variant("tpython"),
+            ]
+
+        if self.spec.satisfies("@:6.36"):
+            options += [
+                define_from_variant("mysql"),
+                define_from_variant("pgsql", "postgres"),
+                define("odbc", False),
+            ]
+
+        if self.spec.satisfies("@6.36:"):
+            options.append(define_from_variant("asimage_tiff", "tiff"))
+
+        # #################### Compiler options ####################
+
+        if _is_macos and self.compiler.cc == "gcc":
+            cflags = "-D__builtin_unreachable=__builtin_trap"
+            options.extend([define("CMAKE_C_FLAGS", cflags), define("CMAKE_CXX_FLAGS", cflags)])
+
+        options.append(define_from_variant("CMAKE_CXX_STANDARD", "cxxstd"))
+
+        if "+x+opengl" in self.spec:
+            ftgl_prefix = self.spec["ftgl"].prefix
+            options.append(define("FTGL_ROOT_DIR", ftgl_prefix))
+            options.append(define("FTGL_INCLUDE_DIR", ftgl_prefix.include))
+
+        # Fix RPath handling with gnuinstall
+        if "+rpath" in self.spec:
+            options.append(define("CMAKE_INSTALL_RPATH", self.prefix.lib.root))
+
+        return options
+
+    def setup_build_environment(self, env: EnvironmentModifications) -> None:
+        spec = self.spec
+
+        if "lz4" in spec:
+            env.append_path("CMAKE_PREFIX_PATH", spec["lz4"].prefix)
+
+        # This hack is made necessary by a header name collision between
+        # asimage's "import.h" and Python's "import.h" headers...
+        env.set("SPACK_INCLUDE_DIRS", "", force=True)
+
+        # ...but it breaks header search for any ROOT dependency which does not
+        # use CMake. To resolve this, we must bring back those dependencies's
+        # include paths into SPACK_INCLUDE_DIRS.
+        #
+        # But in doing so, we must be careful not to inject system header paths
+        # into SPACK_INCLUDE_DIRS, even in a deprioritized form, because some
+        # system/compiler combinations don't like having -I/usr/include around.
+        def add_include_path(dep_name):
+            include_path = spec[dep_name].prefix.include
+            if not envutil.is_system_path(include_path):
+                env.append_path("SPACK_INCLUDE_DIRS", include_path)
+
+        # With that done, let's go fixing those deps
+        if "+x" in spec:
+            add_include_path("xextproto")
+            add_include_path("fontconfig")
+            add_include_path("libx11")
+            add_include_path("xproto")
+        if "+opengl" in spec and "platform=darwin" not in spec:
+            add_include_path("glew")
+            add_include_path("glu")
+        if "platform=darwin" in spec:
+            # Newer deployment targets cause fatal errors in rootcling, so
+            # override with an empty value even though it may lead to link
+            # warnings when building against ROOT
+            env.unset("MACOSX_DEPLOYMENT_TARGET")
+
+        # https://github.com/root-project/root/issues/18949
+        if "+cxxmodules" in self.spec and "+vc" in self.spec:
+            env.prepend_path("ROOT_INCLUDE_PATH", self.spec["vc"].prefix.include)
+
+    @property
+    def root_library_path(self):
+        # The ROOT_LIBRARY_PATH environment variable was added to ROOT 6.26.
+        # For previous versions (no longer supported by Spack) it was
+        # LD_LIBRARY_PATH.
+        return "ROOT_LIBRARY_PATH"
+
+    def setup_run_environment(self, env: EnvironmentModifications) -> None:
+        env.set("ROOTSYS", self.prefix)
+        env.set("ROOT_VERSION", "v{0}".format(self.version.up_to(1)))
+        env.prepend_path("PYTHONPATH", self.prefix.lib.root)
+        # the following vars are copied from thisroot.sh; silence a cppyy warning
+        env.set("CLING_STANDARD_PCH", "none")
+        env.set("CPPYY_API_PATH", "none")
+        env.set("CPPYY_BACKEND_LIBRARY", self.prefix.lib.root.libcppyy_backend)
+        # Always define ROOT's library path for downstream usage
+        env.prepend_path(self.root_library_path, self.prefix.lib.root)
+
+        # https://github.com/root-project/root/issues/18949
+        if "+cxxmodules" in self.spec and "+vc" in self.spec:
+            env.prepend_path("ROOT_INCLUDE_PATH", self.spec["vc"].prefix.include)
+
+    def setup_dependent_build_environment(self, env: EnvironmentModifications, dependent_spec):
+        env.set("ROOTSYS", self.prefix)
+        env.set("ROOT_VERSION", "v{0}".format(self.version.up_to(1)))
+        env.prepend_path("PYTHONPATH", self.prefix.lib.root)
+        env.prepend_path("PATH", self.prefix.bin)
+        env.append_path("CMAKE_MODULE_PATH", self.prefix.cmake)
+        if "platform=darwin" in self.spec:
+            # Newer deployment targets cause fatal errors in rootcling
+            env.unset("MACOSX_DEPLOYMENT_TARGET")
+
+        # Note that setup_dependent_run_environment will add include and
+        # library path
+
+        # https://github.com/root-project/root/issues/18949
+        if "+cxxmodules" in self.spec and "+vc" in self.spec:
+            env.prepend_path("ROOT_INCLUDE_PATH", self.spec["vc"].prefix.include)
+
+    def setup_dependent_run_environment(self, env: EnvironmentModifications, dependent_spec):
+        # Set up runtime dependencies *of downstream packages* that use ROOT
+        env.prepend_path("ROOT_INCLUDE_PATH", dependent_spec.prefix.include)
+
+        # For dependents that build dictionaries, ROOT needs to know where the
+        # dictionaries have been installed.  This can be facilitated by
+        # automatically prepending dependent package library paths to
+        # ROOT_LIBRARY_PATH (for @6.26:) or LD_LIBRARY_PATH (for older
+        # versions).
+        for lib_path in [dependent_spec.prefix.lib, dependent_spec.prefix.lib64]:
+            if os.path.exists(lib_path):
+                env.prepend_path(self.root_library_path, lib_path)

@@ -21,7 +21,7 @@ class SuperluDist(CMakePackage, CudaPackage):
     maintainers("xiaoyeli", "gchavez2", "balay", "pghysels", "liuyangzhuan")
 
     version("develop", branch="master")
-    #version("amd", branch="amd")
+    version("amd", branch="amd")
     version("9.2.1", sha256="c80a1c2edaaa451ee9a54e005e5f3f56dc55cabe2b0a8d7acf5a1447a648157a")
     version("9.2.0", sha256="d1df0e53d269cfc17379bb358e1b2b566d2807cb4a680b2ec1e4f35a77f707d1")
     version("9.1.0", sha256="1cb2c6dc7e8231b2ec30c1266e55e440ffca9f55527771d8df28f900dd179f9d")

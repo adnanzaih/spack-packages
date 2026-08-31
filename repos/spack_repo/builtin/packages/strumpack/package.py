@@ -149,7 +149,7 @@ class Strumpack(CMakePackage, CudaPackage):
             self.define_from_variant("STRUMPACK_USE_MPI", "mpi"),
             self.define_from_variant("STRUMPACK_USE_OPENMP", "openmp"),
             self.define_from_variant("STRUMPACK_USE_CUDA", "cuda"),
-            self.define("STRUMPACK_USE_HIP:BOOL=OFF"),
+            self.define("STRUMPACK_USE_HIP", "OFF"),
             self.define_from_variant("TPL_ENABLE_PARMETIS", "parmetis"),
             self.define_from_variant("TPL_ENABLE_SCOTCH", "scotch"),
             self.define_from_variant("TPL_ENABLE_BPACK", "butterflypack"),

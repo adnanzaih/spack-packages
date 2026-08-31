@@ -6,7 +6,6 @@ import os
 
 from spack_repo.builtin.build_systems.autotools import AutotoolsPackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
@@ -16,7 +15,7 @@ from spack.package import *
 #
 
 
-class Elpa(AutotoolsPackage, CudaPackage, ROCmPackage):
+class Elpa(AutotoolsPackage, CudaPackage):
     """Eigenvalue solvers for Petaflop-Applications (ELPA)"""
 
     homepage = "https://elpa.mpcdf.mpg.de/"
@@ -80,9 +79,9 @@ class Elpa(AutotoolsPackage, CudaPackage, ROCmPackage):
         variant(
             "gpu_streams", default=True, when="+cuda", description="Activates GPU streams support"
         )
-        variant(
-            "gpu_streams", default=True, when="+rocm", description="Activates GPU streams support"
-        )
+        #variant(
+        #    "gpu_streams", default=True, when="+rocm", description="Activates GPU streams support"
+        #)
 
     patch("fujitsu.patch", when="%fj")
     # wrong filename handling in elpa's custom preprocessor
@@ -91,7 +90,7 @@ class Elpa(AutotoolsPackage, CudaPackage, ROCmPackage):
         sha256="90f18c84e740a35d726e44078a111fac3b6278a0e750ce1f3ea154ee78e93298",
         when="@:2025.01.001",
     )
-    patch("hipcc.patch", when="+rocm @2025.01.001:2025.06.001")
+    #patch("hipcc.patch", when="+rocm @2025.01.001:2025.06.001")
     # Suppress debug output to stderr for non-debug builds
     patch("elpa-2026.02.001-wantDebug.patch", when="@2026.02.001:")
 
@@ -106,10 +105,10 @@ class Elpa(AutotoolsPackage, CudaPackage, ROCmPackage):
     depends_on("lapack")
     depends_on("mpi", when="+mpi")
     depends_on("scalapack", when="+mpi")
-    depends_on("rocblas", when="+rocm")
+    #depends_on("rocblas", when="+rocm")
     # elpa 2024.05.001 enables rocsolver by default
     # https://github.com/marekandreas/elpa/commit/de90ce3d634be468e71c2827d788de52ceb606bf#diff-49473dca262eeab3b4a43002adb08b4db31020d190caaad1594b47f1d5daa810R2635-R2638
-    depends_on("rocsolver", when="+rocm @2024.05.001:")
+    #depends_on("rocsolver", when="+rocm @2024.05.001:")
     depends_on("libtool", type="build")
     depends_on("python@3:", type="build")
     depends_on("scalapack", when="+autotune")
@@ -128,7 +127,7 @@ class Elpa(AutotoolsPackage, CudaPackage, ROCmPackage):
         when="@2021.05.001: %gcc@:7",
         msg="ELPA-2021.05.001+ requires GCC-8+ for OpenMP support",
     )
-    conflicts("+mpi", when="+rocm @:2024", msg="ROCm support and MPI are not yet compatible")
+    #conflicts("+mpi", when="+rocm @:2024", msg="ROCm support and MPI are not yet compatible")
     conflicts(
         "+gpu_streams",
         when="@:2023.11.001-patched +openmp",
@@ -245,25 +244,25 @@ class Elpa(AutotoolsPackage, CudaPackage, ROCmPackage):
         else:
             options.append(f"--disable-{cuda_flag}" + kernels)
 
-        if spec.satisfies("+rocm"):
-            # Can't yet be changed to the new option --enable-amd-gpu-kernels
-            # https://github.com/marekandreas/elpa/issues/55
-            options.append("--enable-amd-gpu")
-            if spec.satisfies("@2025.01.001:"):
-                options.append(
-                    "HIPCC={0} {1} {2}".format(
-                        spec["hip"].hipcc,
-                        spec["rocblas"].headers.include_flags,
-                        spec["rocsolver"].headers.include_flags,
-                    )
-                )
-            else:
-                options.append("CXX={0}".format(spec["hip"].hipcc))
+        #if spec.satisfies("+rocm"):
+        #    # Can't yet be changed to the new option --enable-amd-gpu-kernels
+        #    # https://github.com/marekandreas/elpa/issues/55
+        #    options.append("--enable-amd-gpu")
+        #    if spec.satisfies("@2025.01.001:"):
+        #        options.append(
+        #            "HIPCC={0} {1} {2}".format(
+        #                spec["hip"].hipcc,
+        #                spec["rocblas"].headers.include_flags,
+        #                spec["rocsolver"].headers.include_flags,
+        #            )
+        #        )
+        #    else:
+        #        options.append("CXX={0}".format(spec["hip"].hipcc))
 
-            if spec.satisfies("+gpu_streams"):
-                options.append("--enable-gpu-streams=amd")
+        #    if spec.satisfies("+gpu_streams"):
+        #        options.append("--enable-gpu-streams=amd")
 
-        elif self.spec.satisfies("@2021.05.001:"):
+        if self.spec.satisfies("@2021.05.001:"):
             options.append("--disable-amd-gpu" + kernels)
 
         options += self.enable_or_disable("openmp")
