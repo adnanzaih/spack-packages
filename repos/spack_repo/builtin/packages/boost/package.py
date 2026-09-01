@@ -86,9 +86,37 @@ class Boost(Package):
     version("1.40.0", sha256="36cf4a239b587067a4923fdf6e290525a14c3af29829524fa73f3dec6841530c")
     version("1.39.0", sha256="44785eae8c6cce61a29a8a51f9b737e57b34d66baa7c0bcd4af188832b8018fd")
 
-    # Build compiled Boost libraries by default, matching the legacy build
-    # script's "build everything except MPI/Python" behavior.
-    # Boost.GraphParallel is MPI-backed, so keep it disabled with MPI.
+    with_default_variants = "boost" + "".join(
+        [
+            "+atomic",
+            "+chrono",
+            "+date_time",
+            "+exception",
+            "+filesystem",
+            "+graph",
+            "+iostreams",
+            "+locale",
+            "+log",
+            "+math",
+            "+program_options",
+            "+random",
+            "+regex",
+            "+serialization",
+            "+system",
+            "+test",
+            "+thread",
+            "+timer",
+            "+wave",
+        ]
+    )
+
+    # mpi/python are not installed by default because they pull in many
+    # dependencies and/or because there is a great deal of customization
+    # possible (and it would be difficult to choose sensible defaults)
+    #
+    # Boost.Container can be both header-only and compiled. '+container'
+    # indicates the compiled version which requires Extended Allocator
+    # support. The header-only library is installed when no variant is given.
     all_libs = [
         "atomic",
         "charconv",
@@ -131,12 +159,6 @@ class Boost(Package):
         "wave",
     ]
 
-    default_disabled_libs = ("graph_parallel", "mpi", "python")
-    with_default_variants = "boost"
-    for lib in all_libs:
-        if lib not in default_disabled_libs:
-            with_default_variants += "+{0}".format(lib)
-
     # Add any extra requirements for specific libraries
     # signals library was removed from boost in 1.69
     # https://www.boost.org/releases/1.69.0/#:~:text=Discontinued
@@ -164,12 +186,7 @@ class Boost(Package):
 
     for lib in all_libs:
         lib_opts = all_libs_opts.get(lib, {})
-        variant(
-            lib,
-            default=lib not in default_disabled_libs,
-            description="Compile with {0} library".format(lib),
-            **lib_opts,
-        )
+        variant(lib, default=False, description="Compile with {0} library".format(lib), **lib_opts)
 
     @property
     def libs(self):
@@ -223,7 +240,7 @@ class Boost(Package):
     variant(
         "singlethreaded", default=False, description="Build single-threaded versions of libraries"
     )
-    variant("icu", default=True, description="Build with Unicode and ICU support")
+    variant("icu", default=False, description="Build with Unicode and ICU suport")
     variant("taggedlayout", default=False, description="Augment library names with build options")
     variant(
         "versionedlayout",
@@ -253,13 +270,26 @@ class Boost(Package):
     depends_on("c", type="build")
     depends_on("cxx", type="build")
 
-    # Unicode support. The stack config marks icu4c external, so do not
-    # constrain its cxxstd variant here.
+    # Unicode support
     depends_on("icu4c", when="+icu")
-
+    depends_on("icu4c cxxstd=11", when="+icu cxxstd=11")
+    depends_on("icu4c cxxstd=14", when="+icu cxxstd=14")
+    depends_on("icu4c cxxstd=17", when="+icu cxxstd=17")
     conflicts("cxxstd=98", when="+icu")  # Requires c++11 at least
     conflicts("+locale ~icu")  # Boost.Locale "strongly recommends" icu, so enforce it
-    conflicts("+graph_parallel", when="~mpi")
+
+    depends_on("python", when="+python")
+    # https://github.com/boostorg/python/commit/cbd2d9f033c61d29d0a1df14951f4ec91e7d05cd
+    depends_on("python@:3.9", when="@:1.75 +python")
+
+    depends_on("mpi", when="+mpi")
+    depends_on("bzip2", when="+iostreams")
+    depends_on("zlib-api", when="+iostreams")
+    depends_on("zstd", when="+iostreams")
+    depends_on("xz", when="+iostreams")
+    depends_on("py-numpy", when="+numpy", type=("build", "run"))
+    # https://github.com/boostorg/python/issues/431
+    depends_on("py-numpy@:1", when="@:1.86+numpy", type=("build", "run"))
 
     # Improve the error message when the context-impl variant is conflicting
     conflicts("context-impl=fcontext", when="@:1.65.0")
@@ -549,7 +579,7 @@ class Boost(Package):
         else:
             options.append("--with-toolset=%s" % boost_toolset_id)
         if with_libs:
-            options.append("--without-libraries=mpi,python")
+            options.append("--with-libraries=%s" % ",".join(sorted(with_libs)))
         else:
             options.append("--with-libraries=headers")
 
@@ -594,6 +624,31 @@ class Boost(Package):
             options.extend(["-s", "ICU_PATH=%s" % spec["icu4c"].prefix])
         else:
             options.append("--disable-icu")
+
+        if spec.satisfies("+iostreams"):
+            options.extend(
+                [
+                    "-s",
+                    "BZIP2_INCLUDE=%s" % spec["bzip2"].prefix.include,
+                    "-s",
+                    "BZIP2_LIBPATH=%s" % spec["bzip2"].prefix.lib,
+                    "-s",
+                    "ZLIB_INCLUDE=%s" % spec["zlib-api"].prefix.include,
+                    "-s",
+                    "ZLIB_LIBPATH=%s" % spec["zlib-api"].prefix.lib,
+                    "-s",
+                    "LZMA_INCLUDE=%s" % spec["xz"].prefix.include,
+                    "-s",
+                    "LZMA_LIBPATH=%s" % spec["xz"].prefix.lib,
+                    "-s",
+                    "ZSTD_INCLUDE=%s" % spec["zstd"].prefix.include,
+                    "-s",
+                    "ZSTD_LIBPATH=%s" % spec["zstd"].prefix.lib,
+                ]
+            )
+            # At least with older Xcode, _lzma_cputhreads is missing (#33998)
+            if self.spec.satisfies("platform=darwin"):
+                options.extend(["-s", "NO_LZMA=1"])
 
         link_types = ["static"]
         if spec.satisfies("+shared"):
