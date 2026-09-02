@@ -4,12 +4,11 @@
 
 from spack_repo.builtin.build_systems.cmake import CMakePackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class Exacmech(CMakePackage, CudaPackage, ROCmPackage):
+class Exacmech(CMakePackage, CudaPackage):
     """GPU-friendly materials library with a focus on crystal plasticity methods"""
 
     homepage = "https://github.com/llnl/ExaCMech"
@@ -41,7 +40,7 @@ class Exacmech(CMakePackage, CudaPackage, ROCmPackage):
     with default_args(type="build"):
         depends_on("blt")
         depends_on("cmake@3.20:")
-        depends_on("c", when="+rocm +tests")
+        depends_on("c", when="+tests")
         depends_on("cxx")
 
     depends_on("raja")
@@ -72,7 +71,7 @@ class Exacmech(CMakePackage, CudaPackage, ROCmPackage):
             self.define_from_variant("ENABLE_OPENMP", "openmp"),
             self.define_from_variant("CMAKE_CUDA_SEPARABLE_COMPILATION", "cuda"),
             self.define_from_variant("ENABLE_CUDA", "cuda"),
-            self.define_from_variant("ENABLE_HIP", "rocm"),
+            #self.define_from_variant("ENABLE_HIP", "rocm"),
             self.define_from_variant("ENABLE_TESTS", "tests"),
         ]
 

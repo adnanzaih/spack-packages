@@ -5,12 +5,11 @@
 
 from spack_repo.builtin.build_systems.cmake import CMakePackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class Seissol(CMakePackage, CudaPackage, ROCmPackage):
+class Seissol(CMakePackage, CudaPackage):
     """Seissol - A scientific software for the numerical simulation
     of seismic wave phenomena and earthquake dynamics.
     """
@@ -107,7 +106,7 @@ class Seissol(CMakePackage, CudaPackage, ROCmPackage):
         when="+intel_gpu",
     )
 
-    forwarded_variants = ["cuda", "intel_gpu", "rocm"]
+    forwarded_variants = ["cuda", "intel_gpu"]
     for v in forwarded_variants:
         variant(
             "sycl_backend",
@@ -124,9 +123,8 @@ class Seissol(CMakePackage, CudaPackage, ROCmPackage):
         )
 
     requires(
-        "-cuda -rocm -intel_gpu",
+        "-cuda -intel_gpu",
         "+cuda",
-        "+rocm",
         "+intel_gpu",
         policy="one_of",
         msg="You may either compile for one GPU backend, or for CPU.",
@@ -137,7 +135,7 @@ class Seissol(CMakePackage, CudaPackage, ROCmPackage):
     depends_on("hipsycl@0.9.3: +cuda", when="+cuda sycl_backend=acpp")
 
     # TODO: this one needs to be +rocm as well--but that's not implemented yet
-    depends_on("hipsycl@develop", when="+rocm sycl_backend=acpp")
+    #depends_on("hipsycl@develop", when="+rocm sycl_backend=acpp")
 
     # TODO: extend as soon as level zero is available
     depends_on("hipsycl@develop", when="+intel_gpu sycl_backend=acpp")
@@ -151,11 +149,11 @@ class Seissol(CMakePackage, CudaPackage, ROCmPackage):
         msg="A value for cuda_arch must be specified. Add cuda_arch=XX",
     )
 
-    conflicts(
-        "amdgpu_target=none",
-        when="+rocm",
-        msg="A value for amdgpu_arch must be specified. Add amdgpu_arch=XX",
-    )
+    #conflicts(
+    #    "amdgpu_target=none",
+    #    when="+rocm",
+    #    msg="A value for amdgpu_arch must be specified. Add amdgpu_arch=XX",
+    #)
 
     conflicts(
         "intel_gpu_arch=none",
@@ -188,15 +186,15 @@ class Seissol(CMakePackage, CudaPackage, ROCmPackage):
         for var in ["openmpi", "mpich", "mvapich-plus"]:
             depends_on(f"{var} +cuda", when=f"^[virtuals=mpi] {var}")
 
-    with when("+rocm"):
-        for var in ["openmpi@5:", "mpich", "mvapich-plus"]:
-            depends_on(f"{var} +rocm", when=f"^[virtuals=mpi] {var}")
+    #with when("+rocm"):
+    #    for var in ["openmpi@5:", "mpich", "mvapich-plus"]:
+    #        depends_on(f"{var} +rocm", when=f"^[virtuals=mpi] {var}")
 
     # with cuda 12 and llvm 14:15, we have the issue: "error: no template named 'texture"
     # https://github.com/llvm/llvm-project/issues/61340
     conflicts("cuda@12", when="+cuda ^llvm@14:15")
     depends_on("cuda@11:", when="+cuda")
-    depends_on("hip", when="+rocm")
+    #depends_on("hip", when="+rocm")
 
     # graph partitioning
     with when("graph_partitioning_libs=parmetis"):
@@ -242,7 +240,7 @@ class Seissol(CMakePackage, CudaPackage, ROCmPackage):
         depends_on("py-matplotlib")
         depends_on("py-pspamm", when="gemm_tools_list=PSpaMM")
 
-        forwarded_variants = ["cuda", "intel_gpu", "rocm"]
+        forwarded_variants = ["cuda", "intel_gpu"]
         for v in forwarded_variants:
             depends_on("py-gemmforge", when=f"+{v}")
             depends_on("py-chainforgecodegen", when=f"+{v}")
@@ -273,7 +271,7 @@ class Seissol(CMakePackage, CudaPackage, ROCmPackage):
 
         with_gpu = (
             self.spec.satisfies("+cuda")
-            or self.spec.satisfies("+rocm")
+            #or self.spec.satisfies("+rocm")
             or self.spec.satisfies("+intel_gpu")
         )
 
@@ -287,18 +285,18 @@ class Seissol(CMakePackage, CudaPackage, ROCmPackage):
                     args.append("-DDEVICE_BACKEND=cuda")
 
             # ROCm/AMD GPUs
-            if self.spec.satisfies("+rocm"):
-                amdgpu_target = self.spec.variants["amdgpu_target"].value[0]
-                args.append(f"-DDEVICE_ARCH={amdgpu_target}")
-                args.append("-DENABLE_PROFILING_MARKERS=ON")
+            #if self.spec.satisfies("+rocm"):
+            #    amdgpu_target = self.spec.variants["amdgpu_target"].value[0]
+            #    args.append(f"-DDEVICE_ARCH={amdgpu_target}")
+            #    args.append("-DENABLE_PROFILING_MARKERS=ON")
 
-                if self.spec.satisfies("+rocm@:5.6"):
-                    args.append("-DUSE_GRAPH_CAPTURING=OFF")
-                else:
-                    args.append("-DUSE_GRAPH_CAPTURING=ON")
+            #    if self.spec.satisfies("+rocm@:5.6"):
+            #        args.append("-DUSE_GRAPH_CAPTURING=OFF")
+            #    else:
+            #        args.append("-DUSE_GRAPH_CAPTURING=ON")
 
-                if self.spec.satisfies("~sycl_gemm"):
-                    args.append("-DDEVICE_BACKEND=hip")
+            #    if self.spec.satisfies("~sycl_gemm"):
+            #        args.append("-DDEVICE_BACKEND=hip")
 
             # Intel GPUs
             if self.spec.satisfies("+intel_gpu"):

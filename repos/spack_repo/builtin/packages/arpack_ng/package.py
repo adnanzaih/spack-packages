@@ -89,9 +89,9 @@ class ArpackNg(CMakePackage, AutotoolsPackage):
             if spec.satisfies("%oneapi"):
                 flags.append("-Wno-error=implicit-function-declaration")
 
-        if name == "fflags":
-            if self.spec.satisfies("%cce"):
-                flags.append("-hnopattern")
+        #if name == "fflags":
+        #    if self.spec.satisfies("%cce"):
+        #        flags.append("-hnopattern")
 
         return flags, None, None
 

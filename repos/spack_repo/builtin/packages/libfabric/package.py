@@ -7,12 +7,11 @@ import re
 
 from spack_repo.builtin.build_systems.autotools import AutotoolsPackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class Libfabric(AutotoolsPackage, CudaPackage, ROCmPackage):
+class Libfabric(AutotoolsPackage, CudaPackage):
     """The Open Fabrics Interfaces (OFI) is a framework focused on exporting
     fabric communication services to applications."""
 
@@ -78,7 +77,7 @@ class Libfabric(AutotoolsPackage, CudaPackage, ROCmPackage):
     version("1.4.2", sha256="5d027d7e4e34cb62508803e51d6bd2f477932ad68948996429df2bfff37ca2a5")
 
     fabrics = (
-        "cxi",
+        #"cxi",
         "efa",
         "gni",
         "lnx",
@@ -140,11 +139,11 @@ class Libfabric(AutotoolsPackage, CudaPackage, ROCmPackage):
     # Backporting from main for versions 2.3.x
     # The CXI provider hardcodes CXIP_FI_VERSION to FI_VERSION(2, 2).
     # Make it match the libfabric we're building
-    patch(
-        "https://github.com/ofiwg/libfabric/commit/f565852cedc7b6fd3848ed2f11b1dd90ed37be05.patch?full_index=1",
-        sha256="da2514252074c350fb5cbdb04f267cf227d0a575902fe6cad355afe1dc7c0102",
-        when="@2.3 fabrics=cxi",
-    )
+    #patch(
+    #    "https://github.com/ofiwg/libfabric/commit/f565852cedc7b6fd3848ed2f11b1dd90ed37be05.patch?full_index=1",
+    #    sha256="da2514252074c350fb5cbdb04f267cf227d0a575902fe6cad355afe1dc7c0102",
+    #    when="@2.3 fabrics=cxi",
+    #)
 
     # For version 1.9.0:
     # headers: fix forward-declaration of enum fi_collective_op with C++
@@ -170,11 +169,11 @@ class Libfabric(AutotoolsPackage, CudaPackage, ROCmPackage):
     depends_on("numactl", when="fabrics=opx")
     depends_on("liburing@2.1:", when="+uring")
     depends_on("oneapi-level-zero", when="+level_zero")
-    depends_on("libcxi", when="fabrics=cxi")
+    #depends_on("libcxi", when="fabrics=cxi")
     # https://github.com/ofiwg/libfabric/issues/12036
-    depends_on("libcxi@14:", when="@2.5.0 fabrics=cxi")
-    depends_on("cassini-headers", when="fabrics=cxi")
-    depends_on("cxi-driver", when="fabrics=cxi")
+    #depends_on("libcxi@14:", when="@2.5.0 fabrics=cxi")
+    #depends_on("cassini-headers", when="fabrics=cxi")
+    #depends_on("cxi-driver", when="fabrics=cxi")
     depends_on("xpmem", when="fabrics=xpmem")
     depends_on("gdrcopy", when="+gdrcopy")
 
@@ -182,8 +181,8 @@ class Libfabric(AutotoolsPackage, CudaPackage, ROCmPackage):
     depends_on("autoconf", when="@main", type="build")
     depends_on("automake", when="@main", type="build")
     depends_on("libtool", when="@main", type="build")
-    depends_on("json-c", when="fabrics=cxi")
-    depends_on("curl", when="fabrics=cxi")
+    #depends_on("json-c", when="fabrics=cxi")
+    #depends_on("curl", when="fabrics=cxi")
 
     conflicts("@1.9.0", when="platform=darwin", msg="This distribution is missing critical files")
     conflicts("fabrics=opx", when="@:1.14.99")
@@ -256,9 +255,9 @@ class Libfabric(AutotoolsPackage, CudaPackage, ROCmPackage):
             *self.with_or_without("cuda", activation_value="prefix"),
             *self.with_or_without("ze", variant="level_zero"),
             *self.with_or_without("gdrcopy", activation_value="prefix"),
-            *self.with_or_without(
-                "rocr", variant="rocm", activation_value=lambda _: self.spec["hip"].prefix
-            ),
+            #*self.with_or_without(
+            #    "rocr", variant="rocm", activation_value=lambda _: self.spec["hip"].prefix
+            #),
         ]
 
         if self.spec.satisfies("+kdreg"):
@@ -268,16 +267,16 @@ class Libfabric(AutotoolsPackage, CudaPackage, ROCmPackage):
             if f"fabrics={fabric}" in self.spec:
                 if fabric == "xpmem":
                     args.append(f"--enable-xpmem={self.spec['xpmem'].prefix}")
-                elif fabric == "cxi":
-                    args.append(f"--with-json-c={self.spec['json-c'].prefix}")
-                    args.append(f"--with-curl={self.spec['curl'].prefix}")
-                    args.append(
-                        f"--with-cassini-headers={self.spec['cassini-headers'].prefix.include}"
-                    )
-                    args.append(
-                        f"--with-cxi-uapi-headers={self.spec['cxi-driver'].prefix.include}"
-                    )
-                    args.append(f"--enable-cxi={self.spec['libcxi'].prefix}")
+                #elif fabric == "cxi":
+                #    args.append(f"--with-json-c={self.spec['json-c'].prefix}")
+                #    args.append(f"--with-curl={self.spec['curl'].prefix}")
+                #    args.append(
+                #        f"--with-cassini-headers={self.spec['cassini-headers'].prefix.include}"
+                #    )
+                #    args.append(
+                #        f"--with-cxi-uapi-headers={self.spec['cxi-driver'].prefix.include}"
+                #    )
+                #    args.append(f"--enable-cxi={self.spec['libcxi'].prefix}")
                 else:
                     args.append(f"--enable-{fabric}")
             else:

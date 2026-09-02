@@ -92,10 +92,10 @@ class Variorum(CMakePackage):
         cmake_args.append("-DBUILD_EXAMPLES=ON")
         cmake_args.append("-DBUILD_TESTS=ON")
 
-        if spec.satisfies("%cce"):
-            cmake_args.append("-DCMAKE_C_FLAGS=-fcommon")
-            cmake_args.append("-DCMAKE_CCC_FLAGS=-fcommon")
-            cmake_args.append("-DCMAKE_Fortran_FLAGS=-ef")
+        #if spec.satisfies("%cce"):
+        #    cmake_args.append("-DCMAKE_C_FLAGS=-fcommon")
+        #    cmake_args.append("-DCMAKE_CCC_FLAGS=-fcommon")
+        #    cmake_args.append("-DCMAKE_Fortran_FLAGS=-ef")
 
         # CPU architecture selection.
         if spec.satisfies("cpu=intel"):

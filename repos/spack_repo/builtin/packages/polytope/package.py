@@ -2,12 +2,11 @@
 
 from spack_repo.builtin.build_systems.cmake import CMakePackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class Polytope(CMakePackage, CudaPackage, ROCmPackage):
+class Polytope(CMakePackage, CudaPackage):
     """C++ library for generating polygonal and polyhedral meshes"""
 
     homepage = "https://github.com/llnl/polytope"

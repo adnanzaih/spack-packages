@@ -172,10 +172,10 @@ class KokkosKernels(CMakePackage, CudaPackage):
         "superlu": (False, "superlu", "SUPERLU", "@3.1.00:", "Link to SuperLU library"),
         "cblas": (False, "cblas", "CBLAS", "@3.1.00:", "Link to CBLAS library"),
         "lapacke": (False, "clapack", "LAPACKE", "@3.1.00:", "Link to LAPACKE library"),
-        "rocblas": (False, "rocblas", "ROCBLAS", "@3.6.00:", "Link to AMD BLAS library"),
-        "rocsparse": (False, "rocsparse", "ROCSPARSE", "@3.6.00:", "Link to AMD sparse library"),
+        #"rocblas": (False, "rocblas", "ROCBLAS", "@3.6.00:", "Link to AMD BLAS library"),
+        #"rocsparse": (False, "rocsparse", "ROCSPARSE", "@3.6.00:", "Link to AMD sparse library"),
         "cusolver": (False, "cuda", None, "@4.3.00:", "Link to CUDA solver library"),
-        "rocsolver": (False, "rocsolver", "ROCSOLVER", "@4.3.00:", "Link to AMD solver library"),
+        #"rocsolver": (False, "rocsolver", "ROCSOLVER", "@4.3.00:", "Link to AMD solver library"),
     }
 
     for tpl in tpls:
@@ -211,16 +211,16 @@ class KokkosKernels(CMakePackage, CudaPackage):
         ]
         if spec.satisfies("^kokkos+pic"):
             options.append(self.define("CMAKE_POSITION_INDEPENDENT_CODE", True))
-        if spec.satisfies("^kokkos+rocm+hip_relocatable_device_code"):
-            options.append(self.define("HIP_RELOCATABLE_DEVICE_CODE", True))
+        #if spec.satisfies("^kokkos+rocm+hip_relocatable_device_code"):
+        #    options.append(self.define("HIP_RELOCATABLE_DEVICE_CODE", True))
 
         options.append(self.define("Kokkos_ROOT", spec["kokkos"].prefix))
-        if spec.satisfies("^kokkos+rocm") and not (
-            spec.satisfies("^kokkos %cxx=clang") or spec.satisfies("^kokkos %cxx=rocmcc")
-        ):
-            options.append(self.define("CMAKE_CXX_COMPILER", spec["hip"].hipcc))
-        else:
-            options.append(self.define("CMAKE_CXX_COMPILER", self["kokkos"].kokkos_cxx))
+        #if spec.satisfies("^kokkos+rocm") and not (
+        #    spec.satisfies("^kokkos %cxx=clang") or spec.satisfies("^kokkos %cxx=rocmcc")
+        #):
+        #    options.append(self.define("CMAKE_CXX_COMPILER", spec["hip"].hipcc))
+        #else:
+        options.append(self.define("CMAKE_CXX_COMPILER", self["kokkos"].kokkos_cxx))
 
         if self.run_tests:
             options.append(self.define("KokkosKernels_ENABLE_TESTS", True))

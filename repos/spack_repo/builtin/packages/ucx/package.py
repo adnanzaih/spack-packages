@@ -104,7 +104,7 @@ class Ucx(AutotoolsPackage, CudaPackage):
     variant("optimizations", default=True, description="Enable optimizations")
     variant("parameter_checking", default=False, description="Enable parameter checking")
     variant("pic", default=True, description="Builds with PIC support")
-    variant("rocm", default=False, description="Enable ROCm support")
+    #variant("rocm", default=False, description="Enable ROCm support")
     variant(
         "simd",
         description="SIMD features",
@@ -156,11 +156,11 @@ class Ucx(AutotoolsPackage, CudaPackage):
     depends_on("rdma-core", when="+rdmacm")
     depends_on("rdma-core", when="+verbs")
     depends_on("xpmem", when="+xpmem")
-    depends_on("hip", when="+rocm")
-    depends_on("hsa-rocr-dev", when="+rocm")
+    #depends_on("hip", when="+rocm")
+    #depends_on("hsa-rocr-dev", when="+rocm")
 
     conflicts("+gdrcopy", when="~cuda", msg="gdrcopy currently requires cuda support")
-    conflicts("+rocm", when="+gdrcopy", msg="gdrcopy > 2.0 does not support rocm")
+    #conflicts("+rocm", when="+gdrcopy", msg="gdrcopy > 2.0 does not support rocm")
 
     # https://github.com/openucx/ucx/issues/10589
     conflicts("%gcc@15:", when="@:1.18")
@@ -200,7 +200,7 @@ class Ucx(AutotoolsPackage, CudaPackage):
         "gdrcopy": (("uct_cuda_MODULES", "gdrcopy"),),
         "knem": (("uct_MODULES", "knem"),),
         "rdmacm": (("uct_MODULES", "rdmacm"),),
-        "rocm": (("uct_MODULES", "rocm"), ("ucm_MODULES", "rocm")),
+        #"rocm": (("uct_MODULES", "rocm"), ("ucm_MODULES", "rocm")),
         "vfs": (("ucs_MODULES", "fuse"),),
         "xpmem": (("uct_MODULES", "xpmem"),),
     }
@@ -263,21 +263,21 @@ class Ucx(AutotoolsPackage, CudaPackage):
     # See https://github.com/openucx/ucx/pull/8629, wrong int type
     patch("commit-2523555.patch", when="@1.13.1")
 
-    def patch(self):
-        if self.spec.satisfies("+rocm"):
-            filter_file("$$with_rocm", "${with_rocm[@]}", "configure", string=True)
-            filter_file(
-                "-I$with_rocm/include/hip -I$with_rocm/include",
-                "$ROCM_CPPFLAGS",
-                "configure",
-                string=True,
-            )
-            filter_file(
-                "-L$with_rocm/hip/lib -L$with_rocm/lib", "$ROCM_LDFLAGS", "configure", string=True
-            )
+    #def patch(self):
+    #    if self.spec.satisfies("+rocm"):
+    #        filter_file("$$with_rocm", "${with_rocm[@]}", "configure", string=True)
+    #        filter_file(
+    #            "-I$with_rocm/include/hip -I$with_rocm/include",
+    #            "$ROCM_CPPFLAGS",
+    #            "configure",
+    #            string=True,
+    #        )
+    #        filter_file(
+    #            "-L$with_rocm/hip/lib -L$with_rocm/lib", "$ROCM_LDFLAGS", "configure", string=True
+    #        )
 
-            if self.spec.satisfies("@:1.15 ^hip@6:"):
-                filter_file("HIP_PLATFORM_HCC", "HIP_PLATFORM_AMD", "configure", string=True)
+    #        if self.spec.satisfies("@:1.15 ^hip@6:"):
+    #            filter_file("HIP_PLATFORM_HCC", "HIP_PLATFORM_AMD", "configure", string=True)
 
     @when("@master")
     def autoreconf(self, spec, prefix):
@@ -372,26 +372,26 @@ class Ucx(AutotoolsPackage, CudaPackage):
         if "%aocc" in spec:
             args.append("LDFLAGS=-fuse-ld=bfd")
 
-        if "+rocm" in spec:
-            cppflags = " ".join(
-                "-I" + include_dir
-                for include_dir in (
-                    self.spec["hip"].prefix.include,
-                    self.spec["hip"].prefix.include.hip,
-                    self.spec["hsa-rocr-dev"].prefix.include.hsa,
-                )
-            )
-            ldflags = " ".join(
-                "-L" + library_dir
-                for library_dir in (
-                    self.spec["hip"].prefix.lib,
-                    self.spec["hsa-rocr-dev"].prefix.lib,
-                )
-            )
-            args.extend(["CPPFLAGS=" + cppflags, "LDFLAGS=" + ldflags])
-            args.append("--with-rocm=" + self.spec["hip"].prefix)
-        else:
-            args.append("--without-rocm")
+        #if "+rocm" in spec:
+        #    cppflags = " ".join(
+        #        "-I" + include_dir
+        #        for include_dir in (
+        #            self.spec["hip"].prefix.include,
+        #            self.spec["hip"].prefix.include.hip,
+        #            self.spec["hsa-rocr-dev"].prefix.include.hsa,
+        #        )
+        #    )
+        #    ldflags = " ".join(
+        #        "-L" + library_dir
+        #        for library_dir in (
+        #            self.spec["hip"].prefix.lib,
+        #            self.spec["hsa-rocr-dev"].prefix.lib,
+        #        )
+        #    )
+        #    args.extend(["CPPFLAGS=" + cppflags, "LDFLAGS=" + ldflags])
+        #    args.append("--with-rocm=" + self.spec["hip"].prefix)
+        #else:
+        args.append("--without-rocm")
 
         return args
 

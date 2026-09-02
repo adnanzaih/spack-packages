@@ -7,12 +7,12 @@ import re
 
 from spack_repo.builtin.build_systems.cmake import CMakePackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmLibrary, ROCmPackage
+from spack_repo.builtin.build_systems.rocm import ROCmLibrary
 
 from spack.package import *
 
 
-class Hipfft(ROCmLibrary, CMakePackage, CudaPackage, ROCmPackage):
+class Hipfft(ROCmLibrary, CMakePackage, CudaPackage):
     """hipFFT is an FFT marshalling library. Currently, hipFFT supports
     either rocFFT or cuFFT as backends.hipFFT exports an interface that
     does not require the client to change, regardless of the chosen backend.
@@ -61,21 +61,21 @@ class Hipfft(ROCmLibrary, CMakePackage, CudaPackage, ROCmPackage):
     version("5.7.0", sha256="daa5dc44580145e85ff8ffa7eb40a3d1ef41f3217549c01281715ff696a31588")
 
     # default to an 'auto' variant until amdgpu_targets can be given a better default than 'none'
-    amdgpu_targets = ROCmPackage.amdgpu_targets
-    variant(
-        "amdgpu_target",
-        description="AMD GPU architecture",
-        values=disjoint_sets(("auto",), amdgpu_targets)
-        .with_default("auto")
-        .with_error(
-            "the values 'auto' and 'none' are mutually exclusive with any of the other values"
-        )
-        .with_non_feature_values("auto", "none"),
-        sticky=True,
-    )
-    variant("rocm", default=True, description="Enable ROCm support")
-    conflicts("+cuda +rocm", msg="CUDA and ROCm support are mutually exclusive")
-    conflicts("~cuda ~rocm", msg="CUDA or ROCm support is required")
+    #amdgpu_targets = ROCmPackage.amdgpu_targets
+    #variant(
+    #    "amdgpu_target",
+    #    description="AMD GPU architecture",
+    #    values=disjoint_sets(("auto",), amdgpu_targets)
+    #    .with_default("auto")
+    #    .with_error(
+    #        "the values 'auto' and 'none' are mutually exclusive with any of the other values"
+    #    )
+    #    .with_non_feature_values("auto", "none"),
+    #    sticky=True,
+    #)
+    #variant("rocm", default=True, description="Enable ROCm support")
+    #conflicts("+cuda +rocm", msg="CUDA and ROCm support are mutually exclusive")
+    conflicts("~cuda", msg="CUDA support is required")
     variant("asan", default=False, description="Build with address-sanitizer enabled or disabled")
 
     depends_on("cxx", type="build")  # generated
@@ -117,10 +117,10 @@ class Hipfft(ROCmLibrary, CMakePackage, CudaPackage, ROCmPackage):
         "7.14.0",
     ]:
         depends_on(f"rocm-cmake@{ver}:", type="build", when=f"@{ver}")
-        for tgt in itertools.chain(["auto"], amdgpu_targets):
-            depends_on(
-                f"rocfft@{ver} amdgpu_target={tgt}", when=f"@{ver} +rocm amdgpu_target={tgt}"
-            )
+        #for tgt in itertools.chain(["auto"], amdgpu_targets):
+        #    depends_on(
+        #        f"rocfft@{ver} amdgpu_target={tgt}", when=f"@{ver} +rocm amdgpu_target={tgt}"
+        #    )
 
     # https://github.com/ROCm/rocFFT/pull/85)
     patch("001-remove-submodule-and-sync-shared-files-from-rocFFT.patch", when="@6.0.0")
@@ -153,9 +153,9 @@ class Hipfft(ROCmLibrary, CMakePackage, CudaPackage, ROCmPackage):
             self.define("CMAKE_MODULE_PATH", self.spec["hip"].prefix.lib.cmake.hip),
             self.define("CMAKE_INSTALL_LIBDIR", "lib"),
         ]
-        if self.spec.satisfies("+rocm"):
-            args.append(self.define("BUILD_WITH_LIB", "ROCM"))
-        elif self.spec.satisfies("+cuda"):
+        #if self.spec.satisfies("+rocm"):
+        #    args.append(self.define("BUILD_WITH_LIB", "ROCM"))
+        if self.spec.satisfies("+cuda"):
             args.append(self.define("BUILD_WITH_LIB", "CUDA"))
         if self.spec.satisfies("@:6.3.1"):
             args.append(self.define("BUILD_FILE_REORG_BACKWARD_COMPATIBILITY", True))

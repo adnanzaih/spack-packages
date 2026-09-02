@@ -226,7 +226,7 @@ class IntelOneapiMkl(IntelOneApiLibraryPackage):
         requires("mpi_family=mpich", when="^[virtuals=mpi] mpich")
         requires("mpi_family=mpich", when="^[virtuals=mpi] mvapich")
         requires("mpi_family=mpich", when="^[virtuals=mpi] mvapich2")
-        requires("mpi_family=mpich", when="^[virtuals=mpi] cray-mpich")
+        #requires("mpi_family=mpich", when="^[virtuals=mpi] cray-mpich")
         requires("mpi_family=openmpi", when="^[virtuals=mpi] openmpi")
         requires("mpi_family=openmpi", when="^[virtuals=mpi] hpcx-mpi")
 

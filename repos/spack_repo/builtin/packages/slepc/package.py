@@ -1,0 +1,235 @@
+# Copyright Spack Project Developers. See COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+import os
+import sys
+
+from spack_repo.builtin.build_systems.cuda import CudaPackage
+from spack_repo.builtin.build_systems.generic import Package
+
+from spack.package import *
+
+
+class Slepc(Package, CudaPackage):
+    """Scalable Library for Eigenvalue Problem Computations."""
+
+    homepage = "https://slepc.upv.es"
+    url = "https://slepc.upv.es/download/distrib/slepc-3.17.1.tar.gz"
+    git = "https://gitlab.com/slepc/slepc.git"
+
+    maintainers("joseeroman", "balay")
+
+    tags = ["e4s"]
+    test_requires_compiler = True
+
+    version("main", branch="main")
+    version("3.25.1", sha256="906ddbe15a20774c23ddcdf13a5054889d00a26c3c37463447ee593c757d03ee")
+    version("3.25.0", sha256="ba2d1cd42d637a7577cab63b0f9e910921fdd60db58290dd1041d60152655f78")
+    version("3.24.3", sha256="3f13421f3fcd68fd720a143088506e0f91e24243844703997597eee793225452")
+    version("3.24.2", sha256="6f1f7e45b9bbd15631562f193284832ae4e9655eb3af7f1ba59bdf8bdaefb638")
+    version("3.24.1", sha256="b07e1c335eb620dfc50a2b8d4fb12db03c6929ae624f0338ff8acf879a072abf")
+    version("3.24.0", sha256="6e2d14c98aa9138ac698a2a04a7c6a9f9569988f570b2cfbe4935d32364cb4e9")
+    version("3.23.3", sha256="6b0c4f706bdfca46f00b30026b4d92a4eb68faa03e40cbcbfeadb89999653621")
+    version("3.23.2", sha256="3060a95692151ef0f9ba4ca11da18d5dcd86697b59f6aeee723de92d7bd465a1")
+    version("3.23.1", sha256="c2fde066521bbccfbc80aa15182bca69ffaf00a7de648459fd04b81589896238")
+    version("3.23.0", sha256="78252f7b2f540c5fdadadee0fd21f3e6eff810f82cb45482f327b524c8db63d0")
+    version("3.22.2", sha256="b60e58b2fa5eb7db05ce5e3a585811b43b1cc7cf89c32266e37b05f0cefd8899")
+    version("3.22.1", sha256="badb5cb038d09dbf1cc8f34d194673ab011c69cc46888101955c786d21c8d8c9")
+    version("3.22.0", sha256="45eb4d085875b50108c91fd9168ed17bc9158cc3b1e530ac843b26d9981c3db0")
+    version("3.21.2", sha256="306fa649750509b3957b9f9311bff5dc1d20be5c5d494dd6472584c439b931f6")
+    version("3.21.1", sha256="beb33f0a15c3ce81744b15ad09ddf84dae70dbf3475c5ef032b8549ab87d6d8a")
+    version("3.21.0", sha256="782833f0caa6585509a837ccd470265c62a1bb56ba64e54c38bde6c63d92629e")
+    version("3.20.2", sha256="125258c87360e326675238eaeb21ce2fbb3f27f4eeb1c72062043931aea05493")
+    version("3.20.1", sha256="5a36b664895881d3858d0644f56bf7bb922bdab70d732fa11cbf6442fec11806")
+    version("3.20.0", sha256="780c50260a9bc9b72776cb920774800c73832370938f1d48c2ea5c66d31b7380")
+    version("3.19.2", sha256="ca7ed906795971fbe35f08ee251a26b86a4442a18609b878cba00835c9d62034")
+    version("3.19.1", sha256="280737e9ef762d7f0079ad3ad29913215c799ebf124651c723c1972f71fbc0db")
+    version("3.19.0", sha256="724f6610a2e38b1be7586fd494fe350b58f5aee1ca734bd85e783aa9d3daa8de")
+    version("3.18.3", sha256="1b02bdf87c083749e81b3735aae7728098eaab78143b262b92c2ab164924c6f5")
+    version("3.18.2", sha256="5bd90a755934e702ab1fdb3320b9fe75ab5fc28c93d364248ea86a372fbe6a62")
+    version("3.18.1", sha256="f6e6e16d8399c3f94d187da9d4bfdfca160de50ebda7d63f6fa8ef417597e9b4")
+    version("3.18.0", sha256="18af535d979a646363df01f407c75f0e3b0dd97b3fdeb20dca25b30cd89239ee")
+    version("3.17.2", sha256="f784cca83a14156631d6e0f5726ca0778e259e1fe40c927607d5fb12d958d705")
+    version("3.17.1", sha256="11386cd3f4c0f9727af3c1c59141cc4bf5f83bdf7c50251de0845e406816f575")
+    version("3.17.0", sha256="d4685fed01b2351c66706cbd6d08e4083a4645df398ef5ccd68fdfeb2f86ea97")
+    version("3.16.3", sha256="b92bd170632a3de4d779f3f0697e7cb9b663e2c34606c9e97d899d7c1868014e")
+    version("3.16.2", sha256="3ba58f5005513ae0ab9f3b27579c82d245a82687886eaaa67cad4cd6ba2ca3a1")
+    version("3.16.1", sha256="b1a8ad8db1ad88c60616e661ab48fc235d5a8b6965023cb6d691b9a2cfa94efb")
+    version("3.16.0", sha256="be7292b85430e52210eb389c4f434b67164e96d19498585e82d117e850d477f4")
+    version("3.15.2", sha256="15fd317c4dd07bb41a994ad4c27271a6675af5f2abe40b82a64a27eaae2e632a")
+    version("3.15.1", sha256="9c7c3a45f0d9df51decf357abe090ef05114c38a69b7836386a19a96fb203aea")
+    version("3.15.0", sha256="e53783ae13acadce274ea65c67186b5ab12332cf17125a694e21d598aa6b5f00")
+    version("3.14.2", sha256="3e54578dda1f4c54d35ac27d02f70a43f6837906cb7604dbcec0e033cfb264c8")
+    version("3.14.1", sha256="cc78a15e34d26b3e6dde003d4a30064e595225f6185c1975bbd460cb5edd99c7")
+    version("3.14.0", sha256="37f8bb270169d1d3f5d43756ac8929d56204e596bd7a78a7daff707513472e46")
+
+    variant("arpack", default=False, description="Enables Arpack wrappers")
+    variant("blopex", default=False, description="Enables BLOPEX wrappers")
+    variant("hpddm", default=False, description="Enables HPDDM wrappers")
+    # Default installation contains ~1 k tutorial/example files.
+    # Give packagers a switch to trim them away (‘spack install slepc ~examples’)
+    # while preserving current behaviour by default.
+    variant("examples", default=True, description="Install test and tutorial example sources")
+
+    depends_on("c", type="build")  # generated
+    depends_on("cxx", type="build")  # generated
+    depends_on("fortran", type="build")  # generated
+
+    # NOTE: make sure PETSc and SLEPc use the same python.
+    depends_on("python@2.6:2.8,3.4:", type="build")
+    depends_on("gmake", type="build")
+
+    # Cannot mix release and development versions of SLEPc and PETSc:
+    depends_on("petsc@main", when="@main")
+    for ver in [
+        "3.25",
+        "3.24",
+        "3.23",
+        "3.22",
+        "3.21",
+        "3.20",
+        "3.19",
+        "3.18",
+        "3.17",
+        "3.16",
+        "3.15",
+        "3.14",
+    ]:
+        depends_on(f"petsc@{ver}", when=f"@{ver}")
+    depends_on("petsc+cuda", when="+cuda")
+    depends_on("arpack-ng~mpi", when="+arpack^petsc~mpi~int64")
+    depends_on("arpack-ng+mpi", when="+arpack^petsc+mpi~int64")
+
+    #for arch in ROCmPackage.amdgpu_targets:
+    #    rocm_dep = "+rocm amdgpu_target={0}".format(arch)
+    #    depends_on("petsc {0}".format(rocm_dep), when=rocm_dep)
+
+    # arpack-ng does not have an int64 variant that can enabled explicitly.
+    conflicts("+arpack", when="^petsc+int64")
+    # BLOPEX can not be used with 64bit integers.
+    conflicts("+blopex", when="^petsc+int64")
+    # HPDDM cannot be used in both PETSc and SLEPc prior to 3.19.0
+    conflicts("+hpddm", when="@:3.18 ^petsc+hpddm")
+
+    resource(
+        name="blopex",
+        git="https://github.com/lobpcg/blopex",
+        commit="6eba31f0e071f134a6e4be8eccfb8d9d7bdd5ac7",
+        destination=join_path("installed-arch-" + sys.platform + "-c-opt", "externalpackages"),
+        when="+blopex",
+    )
+
+    def revert_kokkos_nvcc_wrapper(self):
+        # revert changes by kokkos-nvcc-wrapper
+        if self.spec.satisfies("^kokkos+cuda+wrapper"):
+            env["MPICH_CXX"] = env["CXX"]
+            env["OMPI_CXX"] = env["CXX"]
+            env["MPICXX_CXX"] = env["CXX"]
+
+    def install(self, spec, prefix):
+        # set SLEPC_DIR for installation
+        # Note that one should set the current (temporary) directory instead
+        # its symlink in spack/stage/ !
+        os.environ["SLEPC_DIR"] = os.getcwd()
+
+        self.revert_kokkos_nvcc_wrapper()
+        if self.spec.satisfies("%cce"):
+            filter_file(
+                "          flags = l",
+                '          flags = l\n        flags += ["-fuse-ld=gold"]',
+                "config/package.py",
+            )
+
+        options = []
+        if "+arpack" in spec:
+            if spec.satisfies("@3.15:"):
+                options.extend(
+                    [
+                        "--with-arpack-include=%s" % spec["arpack-ng"].prefix.include,
+                        "--with-arpack-lib=%s" % spec["arpack-ng"].libs.joined(),
+                    ]
+                )
+            else:
+                if "arpack-ng~mpi" in spec:
+                    arpacklib = "-larpack"
+                else:
+                    arpacklib = "-lparpack,-larpack"
+                options.extend(
+                    [
+                        "--with-arpack-dir=%s" % spec["arpack-ng"].prefix,
+                        "--with-arpack-lib=%s" % arpacklib,
+                    ]
+                )
+
+        # It isn't possible to install BLOPEX separately and link to it;
+        # BLOPEX has to be downloaded with SLEPc at configure time
+        if "+blopex" in spec:
+            options.append("--download-blopex")
+
+        # For the moment, HPDDM does not work as a dependency
+        # using download instead
+        if "+hpddm" in spec:
+            options.append("--download-hpddm")
+
+        python("configure", "--prefix=%s" % prefix, *options)
+
+        make("V=1")
+        if self.run_tests:
+            make("test", parallel=False)
+
+        # SLEPc provides a lighter target that omits docs/examples.
+        target = "install" if "+examples" in spec else "install-lib"
+        make(target, parallel=False)
+
+    def setup_run_environment(self, env: EnvironmentModifications) -> None:
+        # set SLEPC_DIR & PETSC_DIR in the module file
+        env.set("SLEPC_DIR", self.prefix)
+        env.set("PETSC_DIR", self.spec["petsc"].prefix)
+
+    def setup_dependent_build_environment(
+        self, env: EnvironmentModifications, dependent_spec: Spec
+    ) -> None:
+        # Set up SLEPC_DIR for dependent packages built with SLEPc
+        env.set("SLEPC_DIR", self.prefix)
+
+    @property
+    def archive_files(self):
+        return [
+            join_path(self.stage.source_path, "configure.log"),
+            join_path(self.stage.source_path, "make.log"),
+        ]
+
+    def test_hello(self):
+        """build and run hello"""
+        test_dir = self.test_suite.current_test_data_dir
+        if not os.path.exists(test_dir):
+            raise SkipTest(f"Test data directory ({test_dir}) is missing")
+
+        test_exe = "hello"
+        options = [
+            f"-I{self.prefix.include}",
+            "-L",
+            self.prefix.lib,
+            "-l",
+            "slepc",
+            "-L",
+            self.spec["petsc"].prefix.lib,
+            "-l",
+            "petsc",
+            "-L",
+            self.spec["mpi"].prefix.lib,
+            "-l",
+            "mpi",
+            "-o",
+            test_exe,
+            join_path(test_dir, f"{test_exe}.c"),
+        ]
+
+        cc = which(os.environ["CC"], required=True)
+        with working_dir(test_dir):
+            cc(*options)
+
+            hello = which(test_exe, required=True)
+            out = hello(output=str.split, error=str.split)
+            assert "Hello world" in out

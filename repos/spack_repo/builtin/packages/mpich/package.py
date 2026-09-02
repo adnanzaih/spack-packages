@@ -8,7 +8,6 @@ import sys
 
 from spack_repo.builtin.build_systems.autotools import AutotoolsPackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
@@ -60,7 +59,7 @@ class MpichEnvironmentModifications(PackageBase):
         env.set("MPIF90", join_path(self.prefix.bin, "mpif90"))
 
 
-class Mpich(MpichEnvironmentModifications, AutotoolsPackage, CudaPackage, ROCmPackage):
+class Mpich(MpichEnvironmentModifications, AutotoolsPackage, CudaPackage):
     """MPICH is a high performance and widely portable implementation of
     the Message Passing Interface (MPI) standard."""
 
@@ -121,7 +120,7 @@ class Mpich(MpichEnvironmentModifications, AutotoolsPackage, CudaPackage, ROCmPa
         "pmi",
         default="default",
         description="""PMI interface.""",
-        values=("default", "pmi", "pmi2", "pmix", "cray"),
+        values=("default", "pmi", "pmi2", "pmix"),
         multi=False,
     )
     variant(
@@ -188,7 +187,7 @@ supported, and netmod is ignored if device is ch3:sock.""",
         with when(_yaksa_cond):
             depends_on("yaksa")
             depends_on("yaksa+cuda", when="+cuda")
-            depends_on("yaksa+rocm", when="+rocm")
+            #depends_on("yaksa+rocm", when="+rocm")
 
     variant(
         "hcoll",
@@ -203,7 +202,7 @@ supported, and netmod is ignored if device is ch3:sock.""",
     conflicts("datatype-engine=yaksa", when="device=ch3")
     conflicts("datatype-engine=yaksa", when="device=ch3:sock")
     conflicts("datatype-engine=dataloop", when="+cuda")
-    conflicts("datatype-engine=dataloop", when="+rocm")
+    #conflicts("datatype-engine=dataloop", when="+rocm")
 
     depends_on("c", type="build")
     depends_on("cxx", type="build")
@@ -217,10 +216,10 @@ supported, and netmod is ignored if device is ch3:sock.""",
     conflicts("+cuda", when="@:3.3")
     conflicts("+cuda", when="device=ch3")
     conflicts("+cuda", when="device=ch3:sock")
-    conflicts("+rocm", when="@:4.0")
-    conflicts("+rocm", when="device=ch3")
-    conflicts("+rocm", when="device=ch3:sock")
-    conflicts("+cuda", when="+rocm", msg="CUDA must be disabled to support ROCm")
+    #conflicts("+rocm", when="@:4.0")
+    #conflicts("+rocm", when="device=ch3")
+    #conflicts("+rocm", when="device=ch3:sock")
+    #conflicts("+cuda", when="+rocm", msg="CUDA must be disabled to support ROCm")
 
     provides("mpi@:5.0", when="@5:")
     provides("mpi@:4.0", when="@:4.3")
@@ -367,7 +366,7 @@ supported, and netmod is ignored if device is ch3:sock.""",
     # MPICH's Yaksa submodule requires python to configure
     depends_on("python@3.0:", when="@5:", type="build")
 
-    depends_on("cray-pmi", when="pmi=cray")
+    #depends_on("cray-pmi", when="pmi=cray")
     depends_on("oneapi-level-zero", when="+level_zero")
 
     conflicts("device=ch4", when="@:3.2")
@@ -380,7 +379,7 @@ supported, and netmod is ignored if device is ch3:sock.""",
     conflicts("pmi=pmix", when="device=ch3")
     conflicts("pmi=pmix", when="device=ch3:sock")
     conflicts("pmi=pmix", when="+hydra")
-    conflicts("pmi=cray", when="+hydra")
+    #conflicts("pmi=cray", when="+hydra")
 
     # MPICH does not require libxml2 and libpciaccess for versions before 3.3
     # when ~hydra is set: prevent users from setting +libxml2 and +pci in this
@@ -513,9 +512,9 @@ supported, and netmod is ignored if device is ch3:sock.""",
 
     def setup_build_environment(self, env: EnvironmentModifications) -> None:
         MpichEnvironmentModifications.setup_build_environment(self, env)
-        if "pmi=cray" in self.spec:
-            env.set("CRAY_PMI_INCLUDE_OPTS", "-I" + self.spec["cray-pmi"].headers.directories[0])
-            env.set("CRAY_PMI_POST_LINK_OPTS", "-L" + self.spec["cray-pmi"].libs.directories[0])
+        #if "pmi=cray" in self.spec:
+        #    env.set("CRAY_PMI_INCLUDE_OPTS", "-I" + self.spec["cray-pmi"].headers.directories[0])
+        #    env.set("CRAY_PMI_POST_LINK_OPTS", "-L" + self.spec["cray-pmi"].libs.directories[0])
 
     def autoreconf(self, spec, prefix):
         """Not needed usually, configure should be already there"""
@@ -585,10 +584,10 @@ supported, and netmod is ignored if device is ch3:sock.""",
                 # use the PMIx client interface with an external PMIx library
                 config_args.append("--with-pmi=pmix")
                 config_args.append(f"--with-pmix={spec['pmix'].prefix}")
-            elif "pmi=cray" in spec:
-                # use PMI2 interface of the Cray PMI library
-                config_args.append("--with-pmi=pmi2")
-                config_args.append(f"--with-pmi2={spec['cray-pmi'].prefix}")
+            #elif "pmi=cray" in spec:
+            #    # use PMI2 interface of the Cray PMI library
+            #    config_args.append("--with-pmi=pmi2")
+            #    config_args.append(f"--with-pmi2={spec['cray-pmi'].prefix}")
         else:
             if "pmi=pmi" in spec:
                 config_args.append("--with-pmi=simple")
@@ -596,8 +595,8 @@ supported, and netmod is ignored if device is ch3:sock.""",
                 config_args.append("--with-pmi=pmi2/simple")
             elif "pmi=pmix" in spec:
                 config_args.append(f"--with-pmix={spec['pmix'].prefix}")
-            elif "pmi=cray" in spec:
-                config_args.append("--with-pmi=cray")
+            #elif "pmi=cray" in spec:
+            #    config_args.append("--with-pmi=cray")
 
         if "+cuda" in spec:
             config_args.append("--with-cuda={0}".format(spec["cuda"].prefix))
@@ -606,10 +605,10 @@ supported, and netmod is ignored if device is ch3:sock.""",
             # (see https://github.com/pmodels/mpich/pull/5060):
             config_args.append("--without-cuda")
 
-        if "+rocm" in spec:
-            config_args.append("--with-hip={0}".format(spec["hip"].prefix))
-        else:
-            config_args.append("--without-hip")
+        #if "+rocm" in spec:
+        #    config_args.append("--with-hip={0}".format(spec["hip"].prefix))
+        #else:
+        config_args.append("--without-hip")
 
         # setup device configuration
         device_config = ""

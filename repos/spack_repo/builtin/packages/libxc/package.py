@@ -6,12 +6,11 @@ from spack_repo.builtin.build_systems import autotools, cmake
 from spack_repo.builtin.build_systems.autotools import AutotoolsPackage
 from spack_repo.builtin.build_systems.cmake import CMakePackage, generator
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class Libxc(AutotoolsPackage, CudaPackage, ROCmPackage, CMakePackage):
+class Libxc(AutotoolsPackage, CudaPackage, CMakePackage):
     """Libxc is a library of exchange-correlation functionals for
     density-functional theory."""
 
@@ -73,9 +72,9 @@ class Libxc(AutotoolsPackage, CudaPackage, ROCmPackage, CMakePackage):
     depends_on("py-pytest", type="test", when="@7.1: build_system=cmake")
 
     conflicts("+shared +cuda", when="@:7.0.0", msg="Only ~shared supported with +cuda")
-    conflicts("+cuda +rocm", msg="CUDA and ROCm are mutually exclusive")
+    #conflicts("+cuda +rocm", msg="CUDA and ROCm are mutually exclusive")
     conflicts("+cuda", when="@:4", msg="CUDA support only in libxc 5.0.0 and above")
-    conflicts("+rocm", when="@:7.0", msg="HIP support was added in libxc 7.1.0")
+    #conflicts("+rocm", when="@:7.0", msg="HIP support was added in libxc 7.1.0")
 
     # GitLab source archives need the Autotools-generated files.
     depends_on("autoconf", type="build", when="build_system=autotools")
@@ -188,7 +187,7 @@ class CMakeBuilder(cmake.CMakeBuilder):
         ]
 
         if spec.satisfies("@7.1:"):
-            args.append(self.define_from_variant("ENABLE_HIP", "rocm"))
+            args.append(self.define("ENABLE_HIP", "OFF"))
             maxorder = 2
             if spec.satisfies("+lxc"):
                 maxorder = 4
@@ -208,14 +207,14 @@ class CMakeBuilder(cmake.CMakeBuilder):
             cuda_arch = ";".join(spec.variants["cuda_arch"].value)
             args.append(self.define("CMAKE_CUDA_ARCHITECTURES", cuda_arch))
 
-        if spec.satisfies("+rocm"):
-            hip_compiler = join_path(spec["llvm-amdgpu"].prefix.bin, "amdclang++")
-            amdgpu_target = ";".join(spec.variants["amdgpu_target"].value)
-            args.extend(
-                [
-                    self.define("CMAKE_HIP_COMPILER", hip_compiler),
-                    self.define("CMAKE_HIP_ARCHITECTURES", amdgpu_target),
-                ]
-            )
+        #if spec.satisfies("+rocm"):
+        #    hip_compiler = join_path(spec["llvm-amdgpu"].prefix.bin, "amdclang++")
+        #    amdgpu_target = ";".join(spec.variants["amdgpu_target"].value)
+        #    args.extend(
+        #        [
+        #            self.define("CMAKE_HIP_COMPILER", hip_compiler),
+        #            self.define("CMAKE_HIP_ARCHITECTURES", amdgpu_target),
+        #        ]
+        #    )
 
         return args

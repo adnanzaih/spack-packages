@@ -13,13 +13,12 @@ from spack_repo.builtin.build_systems.cached_cmake import (
     cmake_cache_string,
 )
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 from spack_repo.builtin.packages.blt.package import llnl_link_helpers
 
 from spack.package import *
 
 
-class Umpire(CachedCMakePackage, CudaPackage, ROCmPackage):
+class Umpire(CachedCMakePackage, CudaPackage):
     """An application-focused API for memory management on NUMA & GPU
     architectures"""
 
@@ -197,7 +196,7 @@ class Umpire(CachedCMakePackage, CudaPackage, ROCmPackage):
     # require adapting umpire build system.
     patch("dual_blt_import_umpire_2022.10_2023.06.patch", when="@2023.06.0")
     patch("export_includes.patch", when="@2022.10.0")
-    patch("std-filesystem-pr784.patch", when="@2022.03.1 +rocm ^blt@0.5.2:")
+    #patch("std-filesystem-pr784.patch", when="@2022.03.1 +rocm ^blt@0.5.2:")
     patch("camp_target_umpire_3.0.0.patch", when="@3.0.0")
     patch("cmake_version_check.patch", when="@4.1")
     patch("missing_header_for_numeric_limits.patch", when="@4.1:5.0.1")
@@ -295,9 +294,9 @@ class Umpire(CachedCMakePackage, CudaPackage, ROCmPackage):
     depends_on("fortran", type="build", when="+fortran")
 
     depends_on("cmake@3.23:", when="@2024.07.0:", type="build")
-    depends_on("cmake@3.23:", when="@2022.10.0: +rocm", type="build")
+    #depends_on("cmake@3.23:", when="@2022.10.0: +rocm", type="build")
     depends_on("cmake@3.20:", when="@2022.10.0:2024.02.1", type="build")
-    depends_on("cmake@:3.20", when="@2022.03.0:2022.03 +rocm", type="build")
+    #depends_on("cmake@:3.20", when="@2022.03.0:2022.03 +rocm", type="build")
     depends_on("cmake@3.14:", when="@2022.03.0:", type="build")
     depends_on("cmake@3.9:", when="+cuda", type="build")
     depends_on("cmake@3.8:", type="build")
@@ -313,12 +312,12 @@ class Umpire(CachedCMakePackage, CudaPackage, ROCmPackage):
     depends_on("blt@0.4.1", type="build", when="@6.0.0")
     depends_on("blt@0.4.0:0.4.1", type="build", when="@4.1.3:5.0.1")
     depends_on("blt@0.3.6:0.4.1", type="build", when="@:4.1.2")
-    conflicts("^blt@:0.3.6", when="+rocm")
+    #conflicts("^blt@:0.3.6", when="+rocm")
 
     depends_on("camp")
     depends_on("camp+openmp", when="+openmp")
     depends_on("camp~cuda", when="~cuda")
-    depends_on("camp~rocm", when="~rocm")
+    #depends_on("camp~rocm", when="~rocm")
     depends_on("camp@2026.07.1:", when="@2026.07:")
     depends_on("camp@2025.12", when="@2025.12")
     depends_on("camp@2025.09", when="@2025.09")
@@ -348,13 +347,13 @@ class Umpire(CachedCMakePackage, CudaPackage, ROCmPackage):
             for sm_ in CudaPackage.cuda_arch_values:
                 depends_on("camp+cuda cuda_arch={0}".format(sm_), when="cuda_arch={0}".format(sm_))
 
-        with when("+rocm"):
-            depends_on("camp+rocm")
-            for arch_ in ROCmPackage.amdgpu_targets:
-                depends_on(
-                    "camp+rocm amdgpu_target={0}".format(arch_),
-                    when="amdgpu_target={0}".format(arch_),
-                )
+        #with when("+rocm"):
+        #    depends_on("camp+rocm")
+        #    for arch_ in ROCmPackage.amdgpu_targets:
+        #        depends_on(
+        #            "camp+rocm amdgpu_target={0}".format(arch_),
+        #            when="amdgpu_target={0}".format(arch_),
+        #        )
 
     conflicts("+numa", when="@:0.3.2")
     conflicts("~c", when="+fortran", msg="Fortran API requires C API")
@@ -362,15 +361,15 @@ class Umpire(CachedCMakePackage, CudaPackage, ROCmPackage):
     # device allocator must be used with more current umpire versions, rocm 5.4.0 and greater,
     # and with either rocm or cuda enabled
     conflicts("+device_alloc", when="@:2022.03.0")
-    conflicts("+device_alloc", when="^hip@:5.3.99")
-    conflicts("+device_alloc", when="~rocm~cuda")
+    #conflicts("+device_alloc", when="^hip@:5.3.99")
+    conflicts("+device_alloc", when="~cuda")
 
-    conflicts("+deviceconst", when="~rocm~cuda")
+    conflicts("+deviceconst", when="~cuda")
     conflicts("~openmp", when="+omptarget", msg="OpenMP target requires OpenMP")
-    conflicts("+cuda", when="+rocm")
-    conflicts(
-        "+rocm", when="+omptarget", msg="Cant support both rocm and openmp device backends at once"
-    )
+    #conflicts("+cuda", when="+rocm")
+    #conflicts(
+    #    "+rocm", when="+omptarget", msg="Cant support both rocm and openmp device backends at once"
+    #)
     conflicts("+ipc_shmem", when="@:5.0.1")
     conflicts("+mpi3_shmem", when="@:2024.07.0")
     conflicts("+mpi3_shmem", when="~mpi")
@@ -415,8 +414,8 @@ class Umpire(CachedCMakePackage, CudaPackage, ROCmPackage):
         # Default entries are already defined in CachedCMakePackage, inherit them:
         entries = super().initconfig_compiler_entries()
 
-        if spec.satisfies("+rocm ^blt@:0.6"):
-            entries.insert(0, cmake_cache_path("CMAKE_CXX_COMPILER", spec["hip"].hipcc))
+        #if spec.satisfies("+rocm ^blt@:0.6"):
+        #    entries.insert(0, cmake_cache_path("CMAKE_CXX_COMPILER", spec["hip"].hipcc))
 
         option_prefix = "UMPIRE_" if spec.satisfies("@2022.03.0:") else ""
 
@@ -465,35 +464,35 @@ class Umpire(CachedCMakePackage, CudaPackage, ROCmPackage):
         else:
             entries.append(cmake_cache_option("ENABLE_CUDA", False))
 
-        if spec.satisfies("+rocm"):
-            entries.append(cmake_cache_option("ENABLE_HIP", True))
+        #if spec.satisfies("+rocm"):
+        #    entries.append(cmake_cache_option("ENABLE_HIP", True))
 
-            # HIP configuration from hip_for_radiuss_projects
-            rocm_root = spec["llvm-amdgpu"].prefix
-            hip_link_flags = ""
-            gcc_toolchain_regex = re.compile(".*gcc-toolchain.*")
-            using_toolchain = list(
-                filter(gcc_toolchain_regex.match, spec.compiler_flags["cxxflags"])
-            )
-            if using_toolchain:
-                gcc_prefix = using_toolchain[0]
-                entries.append(
-                    cmake_cache_string("HIP_CLANG_FLAGS", "--gcc-toolchain={0}".format(gcc_prefix))
-                )
-                entries.append(
-                    cmake_cache_string(
-                        "CMAKE_EXE_LINKER_FLAGS",
-                        hip_link_flags + " -Wl,-rpath={0}/lib64".format(gcc_prefix),
-                    )
-                )
-            else:
-                entries.append(
-                    cmake_cache_string(
-                        "CMAKE_EXE_LINKER_FLAGS", "-Wl,-rpath={0}/llvm/lib/".format(rocm_root)
-                    )
-                )
-        else:
-            entries.append(cmake_cache_option("ENABLE_HIP", False))
+        #    # HIP configuration from hip_for_radiuss_projects
+        #    rocm_root = spec["llvm-amdgpu"].prefix
+        #    hip_link_flags = ""
+        #    gcc_toolchain_regex = re.compile(".*gcc-toolchain.*")
+        #    using_toolchain = list(
+        #        filter(gcc_toolchain_regex.match, spec.compiler_flags["cxxflags"])
+        #    )
+        #    if using_toolchain:
+        #        gcc_prefix = using_toolchain[0]
+        #        entries.append(
+        #            cmake_cache_string("HIP_CLANG_FLAGS", "--gcc-toolchain={0}".format(gcc_prefix))
+        #        )
+        #        entries.append(
+        #            cmake_cache_string(
+        #                "CMAKE_EXE_LINKER_FLAGS",
+        #                hip_link_flags + " -Wl,-rpath={0}/lib64".format(gcc_prefix),
+        #            )
+        #        )
+        #    else:
+        #        entries.append(
+        #            cmake_cache_string(
+        #                "CMAKE_EXE_LINKER_FLAGS", "-Wl,-rpath={0}/llvm/lib/".format(rocm_root)
+        #            )
+        #        )
+        #else:
+        entries.append(cmake_cache_option("ENABLE_HIP", False))
 
         entries.append(
             cmake_cache_option(

@@ -59,16 +59,16 @@ class Hip(ROCmLibrary, CMakePackage):
     version("5.7.1", sha256="ea34c75d2cff366fcdd45109c5be460a48d4fcf72b8a534368b54eae5d05db0e")
     version("5.7.0", sha256="8974a436e7f1daf232a77e27a215bcb24a8cc132aa11b5b885a7417ad4246074")
 
-    variant("rocm", default=True, description="Enable ROCm support")
-    variant("cuda", default=False, description="Build with CUDA")
-    variant("asan", default=False, description="Build with address-sanitizer enabled or disabled")
-    conflicts("+cuda +rocm", msg="CUDA and ROCm support are mutually exclusive")
-    conflicts("~cuda ~rocm", msg="CUDA or ROCm support is required")
-    conflicts("~rocm +asan", msg="ROCm must be enabled for asan")
+    #variant("rocm", default=True, description="Enable ROCm support")
+    variant("cuda", default=True, description="Build with CUDA")
+    #variant("asan", default=False, description="Build with address-sanitizer enabled or disabled")
+    #conflicts("+cuda +rocm", msg="CUDA and ROCm support are mutually exclusive")
+    conflicts("~cuda", msg="CUDA support is required")
+    #conflicts("~rocm +asan", msg="ROCm must be enabled for asan")
 
-    conflicts("+asan", when="os=rhel9")
-    conflicts("+asan", when="os=centos7")
-    conflicts("+asan", when="os=centos8")
+    #conflicts("+asan", when="os=rhel9")
+    #conflicts("+asan", when="os=centos7")
+    #conflicts("+asan", when="os=centos8")
 
     depends_on("c", type="build")
     depends_on("cxx", type="build")
@@ -81,65 +81,65 @@ class Hip(ROCmLibrary, CMakePackage):
 
     test_requires_compiler = True
 
-    with when("+rocm"):
-        depends_on("gl@4.5:")
-        depends_on("py-cppheaderparser", type="build")
-        depends_on("libx11", when="+asan")
-        depends_on("xproto", when="+asan")
-        # hipcc likes to add `-lnuma` by default :(
-        # ref https://github.com/ROCm/HIP/pull/2202
-        depends_on("numactl")
+    #with when("+rocm"):
+    #    depends_on("gl@4.5:")
+    #    depends_on("py-cppheaderparser", type="build")
+    #    depends_on("libx11", when="+asan")
+    #    depends_on("xproto", when="+asan")
+    #    # hipcc likes to add `-lnuma` by default :(
+    #    # ref https://github.com/ROCm/HIP/pull/2202
+    #    depends_on("numactl")
 
-        for ver in [
-            "5.7.0",
-            "5.7.1",
-            "6.0.0",
-            "6.0.2",
-            "6.1.0",
-            "6.1.1",
-            "6.1.2",
-            "6.2.0",
-            "6.2.1",
-            "6.2.4",
-        ]:
-            depends_on(f"hsakmt-roct@{ver}", when=f"@{ver}")
+    #    for ver in [
+    #        "5.7.0",
+    #        "5.7.1",
+    #        "6.0.0",
+    #        "6.0.2",
+    #        "6.1.0",
+    #        "6.1.1",
+    #        "6.1.2",
+    #        "6.2.0",
+    #        "6.2.1",
+    #        "6.2.4",
+    #    ]:
+    #        depends_on(f"hsakmt-roct@{ver}", when=f"@{ver}")
 
-        for ver in [
-            "5.7.0",
-            "5.7.1",
-            "6.0.0",
-            "6.0.2",
-            "6.1.0",
-            "6.1.1",
-            "6.1.2",
-            "6.2.0",
-            "6.2.1",
-            "6.2.4",
-            "6.3.0",
-            "6.3.1",
-            "6.3.2",
-            "6.3.3",
-            "6.4.0",
-            "6.4.1",
-            "6.4.2",
-            "6.4.3",
-            "7.0.0",
-            "7.0.2",
-            "7.1.0",
-            "7.1.1",
-            "7.2.0",
-            "7.2.1",
-            "7.2.3",
-            "7.13.0",
-            "7.14.0",
-        ]:
-            depends_on(f"hsa-rocr-dev@{ver}", when=f"@{ver}")
-            depends_on(f"comgr@{ver}", when=f"@{ver}")
-            depends_on(f"llvm-amdgpu@{ver} +rocm-device-libs", when=f"@{ver}")
-            depends_on(f"rocminfo@{ver}", when=f"@{ver}")
-            depends_on(f"roctracer-dev-api@{ver}", when=f"@{ver}")
-            depends_on(f"hipify-clang@{ver}", when=f"@{ver}")
-            depends_on(f"rocm-core@{ver}", when=f"@{ver}")
+    #    for ver in [
+    #        "5.7.0",
+    #        "5.7.1",
+    #        "6.0.0",
+    #        "6.0.2",
+    #        "6.1.0",
+    #        "6.1.1",
+    #        "6.1.2",
+    #        "6.2.0",
+    #        "6.2.1",
+    #        "6.2.4",
+    #        "6.3.0",
+    #        "6.3.1",
+    #        "6.3.2",
+    #        "6.3.3",
+    #        "6.4.0",
+    #        "6.4.1",
+    #        "6.4.2",
+    #        "6.4.3",
+    #        "7.0.0",
+    #        "7.0.2",
+    #        "7.1.0",
+    #        "7.1.1",
+    #        "7.2.0",
+    #        "7.2.1",
+    #        "7.2.3",
+    #        "7.13.0",
+    #        "7.14.0",
+    #    ]:
+    #        depends_on(f"hsa-rocr-dev@{ver}", when=f"@{ver}")
+    #        depends_on(f"comgr@{ver}", when=f"@{ver}")
+    #        depends_on(f"llvm-amdgpu@{ver} +rocm-device-libs", when=f"@{ver}")
+    #        depends_on(f"rocminfo@{ver}", when=f"@{ver}")
+    #        depends_on(f"roctracer-dev-api@{ver}", when=f"@{ver}")
+    #        depends_on(f"hipify-clang@{ver}", when=f"@{ver}")
+    #        depends_on(f"rocm-core@{ver}", when=f"@{ver}")
     for ver in [
         "6.0.0",
         "6.0.2",
@@ -398,67 +398,67 @@ class Hip(ROCmLibrary, CMakePackage):
         return ver
 
     def set_variables(self, env):
-        if self.spec.satisfies("+rocm"):
-            # Note: do not use self.spec[name] here, since not all dependencies
-            # have defined prefixes when hip is marked as external.
-            paths = self.get_paths()
+        #if self.spec.satisfies("+rocm"):
+        #    # Note: do not use self.spec[name] here, since not all dependencies
+        #    # have defined prefixes when hip is marked as external.
+        #    paths = self.get_paths()
 
-            # Used in hipcc, but only useful when hip is external, since only then
-            # there is a common prefix /opt/rocm-x.y.z.
-            env.set("ROCM_PATH", paths["rocm-path"])
-            env.set("HIPIFY_CLANG_PATH", paths["hipify-clang"])
-            if self.spec.satisfies("@6.1:"):
-                env.prepend_path("LD_LIBRARY_PATH", paths["hsa-rocr-dev"].lib)
+        #    # Used in hipcc, but only useful when hip is external, since only then
+        #    # there is a common prefix /opt/rocm-x.y.z.
+        #    env.set("ROCM_PATH", paths["rocm-path"])
+        #    env.set("HIPIFY_CLANG_PATH", paths["hipify-clang"])
+        #    if self.spec.satisfies("@6.1:"):
+        #        env.prepend_path("LD_LIBRARY_PATH", paths["hsa-rocr-dev"].lib)
 
-            # hipcc recognizes HIP_PLATFORM == hcc and HIP_COMPILER == clang, even
-            # though below we specified HIP_PLATFORM=rocclr and HIP_COMPILER=clang
-            # in the CMake args.
-            env.set("HIP_PLATFORM", "amd")
+        #    # hipcc recognizes HIP_PLATFORM == hcc and HIP_COMPILER == clang, even
+        #    # though below we specified HIP_PLATFORM=rocclr and HIP_COMPILER=clang
+        #    # in the CMake args.
+        #    env.set("HIP_PLATFORM", "amd")
 
-            env.set("HIP_COMPILER", "clang")
+        #    env.set("HIP_COMPILER", "clang")
 
-            # bin directory where clang++ resides
-            env.set("HIP_CLANG_PATH", paths["llvm-amdgpu"].bin)
+        #    # bin directory where clang++ resides
+        #    env.set("HIP_CLANG_PATH", paths["llvm-amdgpu"].bin)
 
-            # Path to hsa-rocr-dev prefix used by hipcc.
-            env.set("HSA_PATH", paths["hsa-rocr-dev"])
+        #    # Path to hsa-rocr-dev prefix used by hipcc.
+        #    env.set("HSA_PATH", paths["hsa-rocr-dev"])
 
-            # https://github.com/ROCm/HIP/pull/2138
-            env.set("ROCMINFO_PATH", paths["rocminfo"])
+        #    # https://github.com/ROCm/HIP/pull/2138
+        #    env.set("ROCMINFO_PATH", paths["rocminfo"])
 
-            # This one is used in hipcc to run `clang --hip-device-lib-path=...`
-            env.set("DEVICE_LIB_PATH", paths["bitcode"])
+        #    # This one is used in hipcc to run `clang --hip-device-lib-path=...`
+        #    env.set("DEVICE_LIB_PATH", paths["bitcode"])
 
-            # And this is used in clang whenever the --hip-device-lib-path is not
-            # used (e.g. when clang is invoked directly)
-            env.set("HIP_DEVICE_LIB_PATH", paths["bitcode"])
+        #    # And this is used in clang whenever the --hip-device-lib-path is not
+        #    # used (e.g. when clang is invoked directly)
+        #    env.set("HIP_DEVICE_LIB_PATH", paths["bitcode"])
 
-            # Just the prefix of hip (used in hipcc)
-            # Deprecated in 5.1.0 and breaks hipcc in 5.5.1+
-            if self.spec.satisfies("@:5.4"):
-                env.set("HIP_PATH", paths["hip-path"])
+        #    # Just the prefix of hip (used in hipcc)
+        #    # Deprecated in 5.1.0 and breaks hipcc in 5.5.1+
+        #    if self.spec.satisfies("@:5.4"):
+        #        env.set("HIP_PATH", paths["hip-path"])
 
-            # Used in comgr and seems necessary when using the JIT compiler, e.g.
-            # hiprtcCreateProgram:
-            # https://github.com/ROCm/ROCm-CompilerSupport/blob/rocm-4.0.0/lib/comgr/src/comgr-env.cpp
-            env.set("LLVM_PATH", paths["llvm-amdgpu"])
-            env.set("COMGR_PATH", paths["comgr"])
+        #    # Used in comgr and seems necessary when using the JIT compiler, e.g.
+        #    # hiprtcCreateProgram:
+        #    # https://github.com/ROCm/ROCm-CompilerSupport/blob/rocm-4.0.0/lib/comgr/src/comgr-env.cpp
+        #    env.set("LLVM_PATH", paths["llvm-amdgpu"])
+        #    env.set("COMGR_PATH", paths["comgr"])
 
-            # Finally we have to set --rocm-path=<prefix> ourselves, which is not
-            # the same as --hip-device-lib-path (set by hipcc). It's used to set
-            # default bin, include and lib folders in clang. If it's not set it is
-            # infered from the clang install dir (and they try to find
-            # /opt/rocm again...). If this path is set, there is no strict checking
-            # and parsing of the <prefix>/bin/.hipVersion file. Let's just set this
-            # to the hip prefix directory for non-external builds so that the
-            # bin/.hipVersion file can still be parsed.
-            # See also https://github.com/ROCm/HIP/issues/2223
-            env.append_flags("HIPCC_COMPILE_FLAGS_APPEND", f"--rocm-path={paths['rocm-path']}")
-            env.append_flags("HIPCC_LINK_FLAGS_APPEND", f"--rocm-path={paths['rocm-path']}")
-            env.append_flags(
-                "HIPCC_COMPILE_FLAGS_APPEND", f"-isystem {paths['rocm-core']}/include"
-            )
-        elif self.spec.satisfies("+cuda"):
+        #    # Finally we have to set --rocm-path=<prefix> ourselves, which is not
+        #    # the same as --hip-device-lib-path (set by hipcc). It's used to set
+        #    # default bin, include and lib folders in clang. If it's not set it is
+        #    # infered from the clang install dir (and they try to find
+        #    # /opt/rocm again...). If this path is set, there is no strict checking
+        #    # and parsing of the <prefix>/bin/.hipVersion file. Let's just set this
+        #    # to the hip prefix directory for non-external builds so that the
+        #    # bin/.hipVersion file can still be parsed.
+        #    # See also https://github.com/ROCm/HIP/issues/2223
+        #    env.append_flags("HIPCC_COMPILE_FLAGS_APPEND", f"--rocm-path={paths['rocm-path']}")
+        #    env.append_flags("HIPCC_LINK_FLAGS_APPEND", f"--rocm-path={paths['rocm-path']}")
+        #    env.append_flags(
+        #        "HIPCC_COMPILE_FLAGS_APPEND", f"-isystem {paths['rocm-core']}/include"
+        #    )
+        if self.spec.satisfies("+cuda"):
             env.set("CUDA_PATH", self.spec["cuda"].prefix)
             env.set("HIP_PATH", self.spec.prefix)
             env.set("HIP_PLATFORM", "nvidia")
@@ -492,27 +492,27 @@ class Hip(ROCmLibrary, CMakePackage):
         self, env: EnvironmentModifications, dependent_spec: Spec
     ) -> None:
         env.set("HIPCC_COMPILE_FLAGS_APPEND", "")
-        if self.spec.satisfies("+rocm"):
-            paths = self.get_paths()
-            env.append_path(
-                "HIPCC_COMPILE_FLAGS_APPEND", f"--rocm-path={paths['rocm-path']}", separator=" "
-            )
-            env.append_path(
-                "HIPCC_LINK_FLAGS_APPEND", f"--rocm-path={paths['rocm-path']}", separator=" "
-            )
-            env.append_path(
-                "HIPCC_COMPILE_FLAGS_APPEND",
-                f"-isystem {paths['rocm-core']}/include",
-                separator=" ",
-            )
+        #if self.spec.satisfies("+rocm"):
+        #    paths = self.get_paths()
+        #    env.append_path(
+        #        "HIPCC_COMPILE_FLAGS_APPEND", f"--rocm-path={paths['rocm-path']}", separator=" "
+        #    )
+        #    env.append_path(
+        #        "HIPCC_LINK_FLAGS_APPEND", f"--rocm-path={paths['rocm-path']}", separator=" "
+        #    )
+        #    env.append_path(
+        #        "HIPCC_COMPILE_FLAGS_APPEND",
+        #        f"-isystem {paths['rocm-core']}/include",
+        #        separator=" ",
+        #    )
 
-            if "amdgpu_target" in dependent_spec.variants:
-                arch = dependent_spec.variants["amdgpu_target"].value
-                # some packages may define their own amdgpu_target variant that is not multi
-                if isinstance(arch, str):
-                    arch = [arch]
-                if "none" not in arch and "auto" not in arch:
-                    env.set("HCC_AMDGPU_TARGET", ",".join(arch))
+        #    if "amdgpu_target" in dependent_spec.variants:
+        #        arch = dependent_spec.variants["amdgpu_target"].value
+        #        # some packages may define their own amdgpu_target variant that is not multi
+        #        if isinstance(arch, str):
+        #            arch = [arch]
+        #        if "none" not in arch and "auto" not in arch:
+        #            env.set("HCC_AMDGPU_TARGET", ",".join(arch))
 
         if self.spec.external and self.spec.satisfies("%gcc"):
             # This is picked up by hipcc.
@@ -537,20 +537,20 @@ class Hip(ROCmLibrary, CMakePackage):
             clr_dir = "rocm-systems/projects/clr"
         else:
             clr_dir = "clr"
-        if self.spec.satisfies("@5.7:6.2 +rocm"):
-            filter_file(
-                '"${ROCM_PATH}/llvm"',
-                self.spec["llvm-amdgpu"].prefix,
-                "clr/hipamd/hip-config-amd.cmake",
-                string=True,
-            )
-        if self.spec.satisfies("@6.3: +rocm"):
-            filter_file(
-                '"${ROCM_PATH}/llvm"',
-                self.spec["llvm-amdgpu"].prefix,
-                f"{clr_dir}/hipamd/hip-config-amd.cmake.in",
-                string=True,
-            )
+        #if self.spec.satisfies("@5.7:6.2 +rocm"):
+        #    filter_file(
+        #        '"${ROCM_PATH}/llvm"',
+        #        self.spec["llvm-amdgpu"].prefix,
+        #        "clr/hipamd/hip-config-amd.cmake",
+        #        string=True,
+        #    )
+        #if self.spec.satisfies("@6.3: +rocm"):
+        #    filter_file(
+        #        '"${ROCM_PATH}/llvm"',
+        #        self.spec["llvm-amdgpu"].prefix,
+        #        f"{clr_dir}/hipamd/hip-config-amd.cmake.in",
+        #        string=True,
+        #    )
         perl = self.spec["perl"].command
         if self.spec.satisfies("@:7.2"):
             with working_dir(f"{clr_dir}/hipamd/bin"):
@@ -558,10 +558,10 @@ class Hip(ROCmLibrary, CMakePackage):
         if self.spec.satisfies("@5.7"):
             with working_dir("hipcc/bin"):
                 filter_shebang("hipconfig")
-            if self.spec.satisfies("+rocm"):
-                numactl = self.spec["numactl"].prefix.lib
-                with working_dir("hipcc/src"):
-                    filter_file(" -lnuma", f" -L{numactl} -lnuma", "hipBin_amd.h")
+            #if self.spec.satisfies("+rocm"):
+            #    numactl = self.spec["numactl"].prefix.lib
+            #    with working_dir("hipcc/src"):
+            #        filter_file(" -lnuma", f" -L{numactl} -lnuma", "hipBin_amd.h")
 
     def cmake_args(self):
         args = [
@@ -572,43 +572,43 @@ class Hip(ROCmLibrary, CMakePackage):
             # https://github.com/ROCm/clr/commit/a2a8dad980b0fa1a6086e0c0f95847ae80f5a2c6.
             self.define("CMAKE_POLICY_DEFAULT_CMP0074", "NEW")
         ]
-        if self.spec.satisfies("+rocm"):
-            # find_package(Clang) and find_package(LLVM) in clr/hipamd/src/hiprtc/CMakeLists.txt
-            # should find llvm-amdgpu
-            args.append(self.define("LLVM_ROOT", self.spec["llvm-amdgpu"].prefix))
-            args.append(self.define("Clang_ROOT", self.spec["llvm-amdgpu"].prefix))
+        #if self.spec.satisfies("+rocm"):
+        #    # find_package(Clang) and find_package(LLVM) in clr/hipamd/src/hiprtc/CMakeLists.txt
+        #    # should find llvm-amdgpu
+        #    args.append(self.define("LLVM_ROOT", self.spec["llvm-amdgpu"].prefix))
+        #    args.append(self.define("Clang_ROOT", self.spec["llvm-amdgpu"].prefix))
 
-            args.append(self.define("HSA_PATH", self.spec["hsa-rocr-dev"].prefix))
-            args.append(self.define("HIP_COMPILER", "clang"))
-            args.append(
-                self.define(
-                    "PROF_API_HEADER_PATH",
-                    self.spec["roctracer-dev-api"].prefix.roctracer.include.ext,
-                )
-            )
-            args.append(self.define("HIP_RUNTIME", "rocclr"))
-            args.append(self.define("HIP_PLATFORM", "amd"))
-            args.append(self.define("HIP_LLVM_ROOT", self.spec["llvm-amdgpu"].prefix))
-            if self.spec.satisfies("@6.1.0:") and self.spec.satisfies("+asan"):
-                args.append(self.define("ADDRESS_SANITIZER", "ON"))
-                args.append(
-                    self.define("CMAKE_C_COMPILER", f"{self.spec['llvm-amdgpu'].prefix}/bin/clang")
-                )
-                args.append(
-                    self.define(
-                        "CMAKE_CXX_COMPILER", f"{self.spec['llvm-amdgpu'].prefix}/bin/clang++"
-                    )
-                )
-                args.append(
-                    self.define(
-                        "CMAKE_CXX_FLAGS",
-                        f"-I{self.spec['libx11'].prefix.include} "
-                        f"-I{self.spec['mesa'].prefix.include} "
-                        f"-I{self.spec['xproto'].prefix.include}",
-                    )
-                )
-            if self.spec.satisfies("@6.4.0:"):
-                args.append(self.define("clang", f"{self.spec['llvm-amdgpu'].prefix}/bin/clang"))
+        #    args.append(self.define("HSA_PATH", self.spec["hsa-rocr-dev"].prefix))
+        #    args.append(self.define("HIP_COMPILER", "clang"))
+        #    args.append(
+        #        self.define(
+        #            "PROF_API_HEADER_PATH",
+        #            self.spec["roctracer-dev-api"].prefix.roctracer.include.ext,
+        #        )
+        #    )
+        #    args.append(self.define("HIP_RUNTIME", "rocclr"))
+        #    args.append(self.define("HIP_PLATFORM", "amd"))
+        #    args.append(self.define("HIP_LLVM_ROOT", self.spec["llvm-amdgpu"].prefix))
+        #    if self.spec.satisfies("@6.1.0:") and self.spec.satisfies("+asan"):
+        #        args.append(self.define("ADDRESS_SANITIZER", "ON"))
+        #        args.append(
+        #            self.define("CMAKE_C_COMPILER", f"{self.spec['llvm-amdgpu'].prefix}/bin/clang")
+        #        )
+        #        args.append(
+        #            self.define(
+        #                "CMAKE_CXX_COMPILER", f"{self.spec['llvm-amdgpu'].prefix}/bin/clang++"
+        #            )
+        #        )
+        #        args.append(
+        #            self.define(
+        #                "CMAKE_CXX_FLAGS",
+        #                f"-I{self.spec['libx11'].prefix.include} "
+        #                f"-I{self.spec['mesa'].prefix.include} "
+        #                f"-I{self.spec['xproto'].prefix.include}",
+        #            )
+        #        )
+        #    if self.spec.satisfies("@6.4.0:"):
+        #        args.append(self.define("clang", f"{self.spec['llvm-amdgpu'].prefix}/bin/clang"))
 
         if self.spec.satisfies("+cuda"):
             args.append(self.define("HIP_PLATFORM", "nvidia"))

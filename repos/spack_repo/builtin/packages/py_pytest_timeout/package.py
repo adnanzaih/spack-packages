@@ -1,0 +1,35 @@
+# Copyright Spack Project Developers. See COPYRIGHT file for details.
+#
+# SPDX-License-Identifier: (Apache-2.0 OR MIT)
+
+
+from spack_repo.builtin.build_systems.python import PythonPackage
+
+from spack.package import *
+
+
+class PyPytestTimeout(PythonPackage):
+    """A plugin which will terminate tests after a certain timeout,
+    assuming the test session isn't being debugged."""
+
+    homepage = "https://github.com/pytest-dev/pytest-timeout/"
+    pypi = "pytest-timeout/pytest_timeout-2.4.0.tar.gz"
+
+    license("MIT")
+
+    version("2.4.0", sha256="7e68e90b01f9eff71332b25001f85c75495fc4e3a836701876183c4bcfd0540a")
+    version("2.2.0", sha256="3b0b95dabf3cb50bac9ef5ca912fa0cfc286526af17afc806824df20c2f72c90")
+    version("1.4.2", sha256="20b3113cf6e4e80ce2d403b6fb56e9e1b871b510259206d40ff8d609f48bda76")
+
+    depends_on("python@3.7:", type="build")
+    depends_on("py-setuptools", type="build")
+    depends_on("py-pytest@7:", when="@2.3:", type=("build", "run"))
+    depends_on("py-pytest@5:", when="@2:", type=("build", "run"))
+    depends_on("py-pytest@3.6.0:", type=("build", "run"))
+
+    def url_for_version(self, version):
+        if version >= Version("2.4"):
+            name = "pytest_timeout"
+        else:
+            name = "pytest-timeout"
+        return f"https://files.pythonhosted.org/packages/source/p/{name}/{name}-{version}.tar.gz"

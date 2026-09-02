@@ -7,13 +7,12 @@ import sys
 
 from spack_repo.builtin.build_systems.cmake import CMakePackage, generator
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 from spack_repo.builtin.packages.boost.package import Boost
 
 from spack.package import *
 
 
-class Hpx(CMakePackage, CudaPackage, ROCmPackage):
+class Hpx(CMakePackage, CudaPackage):
     """C++ runtime system for parallel and distributed applications."""
 
     homepage = "https://hpx.stellar-group.org/"
@@ -129,7 +128,7 @@ class Hpx(CMakePackage, CudaPackage, ROCmPackage):
     depends_on("valgrind", when="instrumentation=valgrind")
 
     # Only ROCm or CUDA maybe be enabled at once
-    conflicts("+rocm", when="+cuda")
+    #conflicts("+rocm", when="+cuda")
 
     # Restrictions for 1.9.X
     with when("@1.9:"):
@@ -152,7 +151,7 @@ class Hpx(CMakePackage, CudaPackage, ROCmPackage):
         conflicts("%clang@:6")
 
     # Restrictions for 1.6.X
-    conflicts("+rocm", when="@:1.5")
+    #conflicts("+rocm", when="@:1.5")
 
     # Restrictions for 1.5.x
     conflicts("cxxstd=11", when="@1.5:")
@@ -180,20 +179,20 @@ class Hpx(CMakePackage, CudaPackage, ROCmPackage):
     conflicts("^asio@1.17.0:", when="+cuda cxxstd=17 ^cuda@:11.2")
 
     # Starting from ROCm 5.0.0 hipcc miscompiles asio 1.17.0 and newer
-    conflicts("^asio@1.17.0:", when="+rocm ^hip@5:")
+    #conflicts("^asio@1.17.0:", when="+rocm ^hip@5:")
 
     # Boost and HIP don't work together in certain versions:
     # https://github.com/boostorg/config/issues/392. Boost 1.78.0 and HPX 1.8.0
     # both include a fix.
-    conflicts("^boost@:1.77.0", when="@:1.7 +rocm")
+    #conflicts("^boost@:1.77.0", when="@:1.7 +rocm")
 
     # libstdc++ has a broken valarray in some versions that clang/hipcc refuses
     # to compile:
     # https://github.com/spack/spack/issues/38104
     # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=103022
-    conflicts("%gcc@9.1:9.4", when="+rocm")
-    conflicts("%gcc@10.1:10.3", when="+rocm")
-    conflicts("%gcc@11.2", when="+rocm")
+    #conflicts("%gcc@9.1:9.4", when="+rocm")
+    #conflicts("%gcc@10.1:10.3", when="+rocm")
+    #conflicts("%gcc@11.2", when="+rocm")
 
     # boost 1.73.0 build problem with HPX 1.4.0 and 1.4.1
     # https://github.com/STEllAR-GROUP/hpx/issues/4728#issuecomment-640685308
@@ -237,7 +236,7 @@ class Hpx(CMakePackage, CudaPackage, ROCmPackage):
             self.define("HPX_WITH_CXX{0}".format(spec.variants["cxxstd"].value), True),
             self.define_from_variant("HPX_WITH_MALLOC", "malloc"),
             self.define_from_variant("HPX_WITH_CUDA", "cuda"),
-            self.define_from_variant("HPX_WITH_HIP", "rocm"),
+            #self.define_from_variant("HPX_WITH_HIP", "rocm"),
             self.define_from_variant("HPX_WITH_TOOLS", "tools"),
             self.define_from_variant("HPX_WITH_EXAMPLES", "examples"),
             self.define_from_variant("HPX_WITH_ASYNC_MPI", "async_mpi"),
@@ -266,10 +265,10 @@ class Hpx(CMakePackage, CudaPackage, ROCmPackage):
             args += [self.define("HPX_WITH_UNITY_BUILD", True)]
 
         # HIP support requires compiling with hipcc
-        if self.spec.satisfies("+rocm"):
-            args += [self.define("CMAKE_CXX_COMPILER", self.spec["hip"].hipcc)]
-            if self.spec.satisfies("^cmake@3.21.0:3.21.2"):
-                args += [self.define("__skip_rocmclang", True)]
+        #if self.spec.satisfies("+rocm"):
+        #    args += [self.define("CMAKE_CXX_COMPILER", self.spec["hip"].hipcc)]
+        #    if self.spec.satisfies("^cmake@3.21.0:3.21.2"):
+        #        args += [self.define("__skip_rocmclang", True)]
 
         # Instrumentation
         args += self.instrumentation_args()

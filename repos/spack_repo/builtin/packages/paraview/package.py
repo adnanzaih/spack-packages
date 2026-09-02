@@ -10,7 +10,6 @@ from subprocess import Popen
 
 from spack_repo.builtin.build_systems.cmake import CMakePackage, generator
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
@@ -41,10 +40,10 @@ supported_cuda_archs = {
 
 
 # This is a list of paraview variants that require the viskores library.
-viskores_dependency_variants = ["+cuda", "+fides", "+rocm"]
+viskores_dependency_variants = ["+cuda", "+fides"]
 
 
-class Paraview(CMakePackage, CudaPackage, ROCmPackage):
+class Paraview(CMakePackage, CudaPackage):
     """ParaView is an open-source, multi-platform data analysis and
     visualization application. This package includes the Catalyst
     in-situ library for versions 5.7 and greater, otherwise use the
@@ -166,8 +165,8 @@ class Paraview(CMakePackage, CudaPackage, ROCmPackage):
     conflicts("+openpmd", when="~adios2 ~hdf5", msg="openPMD needs ADIOS2 and/or HDF5")
     conflicts("~shared", when="+cuda")
     conflicts("+cuda", when="use_vtkm=off")
-    conflicts("+rocm", when="+cuda")
-    conflicts("+rocm", when="use_vtkm=off")
+    #conflicts("+rocm", when="+cuda")
+    #conflicts("+rocm", when="use_vtkm=off")
     # Legacy rendering dropped in 5.5
     # See commit: https://gitlab.kitware.com/paraview/paraview/-/commit/798d328c
     conflicts("~opengl2", when="@5")
@@ -177,7 +176,7 @@ class Paraview(CMakePackage, CudaPackage, ROCmPackage):
     depends_on("fortran", type="build")  # generated
 
     depends_on("cmake@3.3:", type="build")
-    depends_on("cmake@3.21:", type="build", when="+rocm")
+    #depends_on("cmake@3.21:", type="build", when="+rocm")
 
     extends("python", when="+python")
 
@@ -256,14 +255,14 @@ class Paraview(CMakePackage, CudaPackage, ROCmPackage):
             )
 
         # Dependencies for vendored VTK-m
-        depends_on("hip@5.2:", when="+rocm")
+        #depends_on("hip@5.2:", when="+rocm")
         # CUDA thrust is already include in the CUDA pkg
-        depends_on("rocthrust", when="@5.13: +rocm ^cmake@3.24:")
-        for target in ROCmPackage.amdgpu_targets:
-            depends_on(
-                "kokkos@:3.7 +rocm amdgpu_target={0}".format(target),
-                when="+rocm amdgpu_target={0}".format(target),
-            )
+        #depends_on("rocthrust", when="@5.13: +rocm ^cmake@3.24:")
+        #for target in ROCmPackage.amdgpu_targets:
+        #    depends_on(
+        #        "kokkos@:3.7 +rocm amdgpu_target={0}".format(target),
+        #        when="+rocm amdgpu_target={0}".format(target),
+        #    )
 
     with when("@6:"):
         # ParaView 6 and later will not support Spack builds with Qt5.
@@ -299,10 +298,10 @@ class Paraview(CMakePackage, CudaPackage, ROCmPackage):
             for _arch in CudaPackage.cuda_arch_values:
                 depends_on(f"viskores cuda_arch={_arch}", when=f"cuda_arch={_arch}")
 
-        with when("+rocm"):
-            depends_on("viskores +rocm")
-            for target in ROCmPackage.amdgpu_targets:
-                depends_on(f"viskores amdgpu_target={target}", when=f"amdgpu_target={target}")
+        #with when("+rocm"):
+        #    depends_on("viskores +rocm")
+        #    for target in ROCmPackage.amdgpu_targets:
+        #        depends_on(f"viskores amdgpu_target={target}", when=f"amdgpu_target={target}")
 
     depends_on("ospray@2.1:2", when="+raytracing")
     depends_on("openimagedenoise", when="+raytracing")
@@ -563,8 +562,8 @@ class Paraview(CMakePackage, CudaPackage, ROCmPackage):
         if spec.satisfies("@5.11:"):
             cmake_args.append("-DVTK_MODULE_USE_EXTERNAL_VTK_verdict:BOOL=OFF")
 
-        if spec.satisfies("%cce"):
-            cmake_args.append("-DVTK_PYTHON_OPTIONAL_LINK:BOOL=OFF")
+        #if spec.satisfies("%cce"):
+        #    cmake_args.append("-DVTK_PYTHON_OPTIONAL_LINK:BOOL=OFF")
 
         # The assumed qt version changed to QT5 (as of paraview 5.2.1),
         # so explicitly specify which QT major version is actually being used
@@ -667,20 +666,20 @@ class Paraview(CMakePackage, CudaPackage, ROCmPackage):
 
         # Configure ROCM/Kokkos
         if spec.satisfies("@5.11:5"):
-            cmake_args.append(self.define_from_variant("PARAVIEW_USE_HIP", "rocm"))
+            cmake_args.append("PARAVIEW_USE_HIP:BOOL=OFF")
         elif spec.satisfies("@6:"):
-            cmake_args.append(self.define_from_variant("PARAVIEW_USE_KOKKOS", "rocm"))
+            cmake_args.append("PARAVIEW_USE_KOKKOS:BOOL=OFF")
 
-        if "+rocm" in spec:
-            if spec.satisfies("@6:"):
-                cmake_args.append("-DPARAVIEW_KOKKOS_BACKEND:STRING=HIP")
+        #if "+rocm" in spec:
+        #    if spec.satisfies("@6:"):
+        #        cmake_args.append("-DPARAVIEW_KOKKOS_BACKEND:STRING=HIP")
 
-            archs = spec.variants["amdgpu_target"].value
+        #    archs = spec.variants["amdgpu_target"].value
 
-            if archs != "none":
-                arch_str = ",".join(archs)
-                cmake_args.append("-DCMAKE_HIP_ARCHITECTURES=%s" % arch_str)
-            cmake_args.append("-DKokkos_CXX_COMPILER=%s" % spec["hip"].hipcc)
+        #    if archs != "none":
+        #        arch_str = ",".join(archs)
+        #        cmake_args.append("-DCMAKE_HIP_ARCHITECTURES=%s" % arch_str)
+        #    cmake_args.append("-DKokkos_CXX_COMPILER=%s" % spec["hip"].hipcc)
 
         if "+catalyst" in spec:
             cmake_args.append("-DVTK_MODULE_ENABLE_ParaView_Catalyst=YES")

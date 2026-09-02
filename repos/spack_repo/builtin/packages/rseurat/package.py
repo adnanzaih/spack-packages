@@ -8,6 +8,9 @@ from spack.package import *
 
 
 class Rseurat(RCollectivePackage):
+    """Easily Install and Load the Seurat.
+
+    Seurat is a single cell analysis package for R."""
     cran = "Seurat"
     #cran_mirror = "https://repo.miserver.it.umich.edu/cran/"
 

@@ -4,12 +4,11 @@
 
 from spack_repo.builtin.build_systems.cmake import CMakePackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class Slate(CMakePackage, CudaPackage, ROCmPackage):
+class Slate(CMakePackage, CudaPackage):
     """The Software for Linear Algebra Targeting Exascale (SLATE) project
     provides fundamental dense linear algebra capabilities to the US
     Department of Energy and to the high-performance computing (HPC) community
@@ -86,18 +85,18 @@ class Slate(CMakePackage, CudaPackage, ROCmPackage):
     depends_on("blaspp +cuda", when="+cuda")
     depends_on("blaspp ~sycl", when="~sycl")
     depends_on("blaspp +sycl", when="+sycl")
-    depends_on("blaspp ~rocm", when="~rocm")
+    #depends_on("blaspp ~rocm", when="~rocm")
     depends_on("lapackpp ~cuda", when="~cuda")
     depends_on("lapackpp +cuda", when="+cuda")
     depends_on("lapackpp ~sycl", when="~sycl")
     depends_on("lapackpp +sycl", when="+sycl")
-    depends_on("lapackpp ~rocm", when="~rocm")
+    #depends_on("lapackpp ~rocm", when="~rocm")
     for val in CudaPackage.cuda_arch_values:
         depends_on("blaspp +cuda cuda_arch=%s" % val, when="cuda_arch=%s" % val)
         depends_on("lapackpp +cuda cuda_arch=%s" % val, when="cuda_arch=%s" % val)
-    for val in ROCmPackage.amdgpu_targets:
-        depends_on("blaspp +rocm amdgpu_target=%s" % val, when="amdgpu_target=%s" % val)
-        depends_on("lapackpp +rocm amdgpu_target=%s" % val, when="amdgpu_target=%s" % val)
+    #for val in ROCmPackage.amdgpu_targets:
+    #    depends_on("blaspp +rocm amdgpu_target=%s" % val, when="amdgpu_target=%s" % val)
+    #    depends_on("lapackpp +rocm amdgpu_target=%s" % val, when="amdgpu_target=%s" % val)
     depends_on("lapackpp@2025.05.28:", when="@2025.05.28:")
     depends_on("lapackpp@2024.10.26:", when="@2024.10.29:")
     depends_on("lapackpp@2024.05.31:", when="@2024.05.31:")
@@ -110,12 +109,12 @@ class Slate(CMakePackage, CudaPackage, ROCmPackage):
     depends_on("lapackpp@master", when="@master")
     depends_on("scalapack", when="@:2022.07.00", type="test")
     depends_on("python", type="test")
-    depends_on("hipify-clang", when="@:2021.05.02 +rocm ^hip@5:")
-    depends_on("comgr", when="+rocm")
-    depends_on("rocblas", when="+rocm")
-    depends_on("rocsolver", when="+rocm")
+    #depends_on("hipify-clang", when="@:2021.05.02 +rocm ^hip@5:")
+    #depends_on("comgr", when="+rocm")
+    #depends_on("rocblas", when="+rocm")
+    #depends_on("rocsolver", when="+rocm")
     depends_on("cuda@11:", when="@2025.05.28 +cuda")  # for c++17 support
-    depends_on("hip@5:", when="@2025.05.28 +rocm")  # for c++17 support
+    #depends_on("hip@5:", when="@2025.05.28 +rocm")  # for c++17 support
 
     requires("%oneapi", when="+sycl", msg="slate+sycl must be compiled with %oneapi")
     requires("+mpi", msg="MPI is required (use of the 'mpi' variant is deprecated)")
@@ -126,12 +125,12 @@ class Slate(CMakePackage, CudaPackage, ROCmPackage):
     conflicts("%xl", msg=cpp_17_msg)
     conflicts("%xl_r", msg=cpp_17_msg)
     conflicts("%intel@19:", msg="Does not currently build with icpc >= 2019")
-    conflicts(
-        "+rocm", when="@:2020.10.00", msg="ROCm support requires SLATE 2021.05.01 or greater"
-    )
+    #conflicts(
+    #    "+rocm", when="@:2020.10.00", msg="ROCm support requires SLATE 2021.05.01 or greater"
+    #)
     backend_msg = "SLATE supports only one GPU backend at a time"
-    conflicts("+rocm", when="+cuda", msg=backend_msg)
-    conflicts("+rocm", when="+sycl", msg=backend_msg)
+    #conflicts("+rocm", when="+cuda", msg=backend_msg)
+    #conflicts("+rocm", when="+sycl", msg=backend_msg)
     conflicts("+cuda", when="+sycl", msg=backend_msg)
     conflicts("+sycl", when="@:2022.07.00", msg="SYCL support requires SLATE version 2023.08.25")
     conflicts("^hip@5.6.0:", when="@:2023.08.25", msg="Incompatible version of HIP/ROCm")
@@ -149,8 +148,8 @@ class Slate(CMakePackage, CudaPackage, ROCmPackage):
             backend = "none"
             if "+cuda" in spec:
                 backend = "cuda"
-            if "+rocm" in spec:
-                backend = "hip"
+            #if "+rocm" in spec:
+            #    backend = "hip"
             if "+sycl" in spec:
                 backend = "sycl"
             backend_config = "-Dgpu_backend=%s" % backend
@@ -163,9 +162,9 @@ class Slate(CMakePackage, CudaPackage, ROCmPackage):
         if "+cuda" in spec:
             archs = ";".join(spec.variants["cuda_arch"].value)
             config.append("-DCMAKE_CUDA_ARCHITECTURES=%s" % archs)
-        if "+rocm" in spec:
-            archs = ";".join(spec.variants["amdgpu_target"].value)
-            config.append("-DCMAKE_HIP_ARCHITECTURES=%s" % archs)
+        #if "+rocm" in spec:
+        #    archs = ";".join(spec.variants["amdgpu_target"].value)
+        #    config.append("-DCMAKE_HIP_ARCHITECTURES=%s" % archs)
 
         slibs = spec["scalapack"].libs.joined(";") if "scalapack" in spec else "none"
         config.append(f"-DSCALAPACK_LIBRARIES={slibs}")
@@ -201,8 +200,8 @@ class Slate(CMakePackage, CudaPackage, ROCmPackage):
             # This package must directly depend on all packages listed here.
             # Otherwise, it will not work when some packages are external to spack.
             deps = "slate blaspp lapackpp mpi"
-            if self.spec.satisfies("+rocm"):
-                deps += " rocblas hip llvm-amdgpu comgr hsa-rocr-dev rocsolver "
+            #if self.spec.satisfies("+rocm"):
+            #    deps += " rocblas hip llvm-amdgpu comgr hsa-rocr-dev rocsolver "
             prefixes = ";".join([self.spec[x].prefix for x in deps.split()])
 
             cmake("-DCMAKE_PREFIX_PATH=" + prefixes, "..")

@@ -7,14 +7,14 @@ import sys
 
 from spack_repo.builtin.build_systems.cmake import CMakeBuilder, CMakePackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
+#from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 IS_WINDOWS = sys.platform == "win32"
 
 
-class Adios2(CMakePackage, CudaPackage, ROCmPackage):
+class Adios2(CMakePackage, CudaPackage):
     """The Adaptable Input Output System version 2,
     developed in the Exascale Computing Program"""
 
@@ -131,7 +131,7 @@ class Adios2(CMakePackage, CudaPackage, ROCmPackage):
     with when("+kokkos"):
         depends_on("kokkos@3.7:")
         depends_on("kokkos +cuda +wrapper", when="+cuda")
-        depends_on("kokkos +rocm", when="+rocm")
+        #depends_on("kokkos +rocm", when="+rocm")
         depends_on("kokkos +sycl", when="+sycl")
 
     # Propagate CUDA target to kokkos for +cuda
@@ -141,20 +141,20 @@ class Adios2(CMakePackage, CudaPackage, ROCmPackage):
         )
 
     # Propagate AMD GPU target to kokkos for +rocm
-    for amdgpu_value in ROCmPackage.amdgpu_targets:
-        depends_on(
-            "kokkos amdgpu_target=%s" % amdgpu_value,
-            when="+kokkos +rocm amdgpu_target=%s" % amdgpu_value,
-        )
+    #for amdgpu_value in ROCmPackage.amdgpu_targets:
+    #    depends_on(
+    #        "kokkos amdgpu_target=%s" % amdgpu_value,
+    #        when="+kokkos +rocm amdgpu_target=%s" % amdgpu_value,
+    #    )
 
     conflicts("+cuda", when="@:2.7")
-    conflicts("+rocm", when="@:2.8")
+    #conflicts("+rocm", when="@:2.8")
 
     conflicts("+cuda", when="+sycl")
-    conflicts("+rocm", when="+cuda")
-    conflicts("+rocm", when="+sycl")
+    #conflicts("+rocm", when="+cuda")
+    #conflicts("+rocm", when="+sycl")
 
-    conflicts("+rocm", when="~kokkos", msg="ADIOS2 does not support HIP without Kokkos")
+    #conflicts("+rocm", when="~kokkos", msg="ADIOS2 does not support HIP without Kokkos")
     conflicts("+sycl", when="~kokkos", msg="ADIOS2 does not support SYCL without Kokkos")
 
     for _platform in ["linux", "darwin"]:
@@ -315,7 +315,7 @@ class Adios2(CMakePackage, CudaPackage, ROCmPackage):
             self.define("ADIOS2_USE_CUDA", self.spec.satisfies("+cuda ~kokkos")),
             self.define("ADIOS2_USE_Kokkos", self.spec.satisfies("+kokkos")),
             self.define("Kokkos_ENABLE_CUDA", self.spec.satisfies("+cuda +kokkos")),
-            self.define("Kokkos_ENABLE_HIP", self.spec.satisfies("+rocm")),
+            #self.define("Kokkos_ENABLE_HIP", self.spec.satisfies("+rocm")),
             self.define("Kokkos_ENABLE_SYCL", self.spec.satisfies("+sycl")),
             self.define("BUILD_TESTING", self.run_tests),
             self.define("ADIOS2_BUILD_EXAMPLES", False),
@@ -348,8 +348,8 @@ class Adios2(CMakePackage, CudaPackage, ROCmPackage):
             args.append(CMakeBuilder.define_cuda_architectures(self))
 
         # hip support
-        if spec.satisfies("+rocm"):
-            args.append(CMakeBuilder.define_hip_architectures(self))
+        #if spec.satisfies("+rocm"):
+        #    args.append(CMakeBuilder.define_hip_architectures(self))
 
         if spec.satisfies("@2.12: +encryption"):
             args.append(CMakeBuilder.define("ADIOS2_USE_SealKeygen", True))

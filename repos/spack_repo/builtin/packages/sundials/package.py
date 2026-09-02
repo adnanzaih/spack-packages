@@ -7,12 +7,11 @@ import sys
 
 from spack_repo.builtin.build_systems.cmake import CMakePackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class Sundials(CMakePackage, CudaPackage, ROCmPackage):
+class Sundials(CMakePackage, CudaPackage):
     """SUNDIALS (SUite of Nonlinear and DIfferential/ALgebraic equation
     Solvers)"""
 
@@ -187,7 +186,7 @@ class Sundials(CMakePackage, CudaPackage, ROCmPackage):
     # Conflicts
     # ==========================================================================
 
-    conflicts("+rocm", when="@:5.6.0")
+    #conflicts("+rocm", when="@:5.6.0")
 
     # External libraries incompatible with 64-bit indices
     conflicts("+lapack", when="+int64")
@@ -203,7 +202,7 @@ class Sundials(CMakePackage, CudaPackage, ROCmPackage):
     conflicts("+klu", when="precision=extended")
 
     # rocm+examples and cstd do not work together in 6.0.0
-    conflicts("+rocm+examples", when="@6.0.0")
+    #conflicts("+rocm+examples", when="@6.0.0")
 
     # ==========================================================================
     # Dependencies
@@ -225,7 +224,7 @@ class Sundials(CMakePackage, CudaPackage, ROCmPackage):
     # Other parallelism dependencies
     depends_on("raja", when="+raja")
     depends_on("raja+cuda", when="+raja +cuda")
-    depends_on("raja+rocm", when="+raja +rocm")
+    #depends_on("raja+rocm", when="+raja +rocm")
 
     # External libraries
     depends_on("caliper", when="+caliper")
@@ -241,11 +240,11 @@ class Sundials(CMakePackage, CudaPackage, ROCmPackage):
             "kokkos-kernels+cuda cuda_arch=%s" % cuda_arch,
             when="+kokkos-kernels +cuda cuda_arch=%s" % cuda_arch,
         )
-    for rocm_arch in ROCmPackage.amdgpu_targets:
-        depends_on(
-            "kokkos+rocm amdgpu_target=%s" % rocm_arch,
-            when="+kokkos +rocm amdgpu_target=%s" % rocm_arch,
-        )
+    #for rocm_arch in ROCmPackage.amdgpu_targets:
+    #    depends_on(
+    #        "kokkos+rocm amdgpu_target=%s" % rocm_arch,
+    #        when="+kokkos +rocm amdgpu_target=%s" % rocm_arch,
+    #    )
     depends_on("lapack", when="+lapack")
     depends_on("blas", when="+lapack")
     depends_on("hypre+mpi~int64", when="@5.7.1: +hypre ~int64")
@@ -277,14 +276,14 @@ class Sundials(CMakePackage, CudaPackage, ROCmPackage):
     # ==========================================================================
     # https://github.com/LLNL/sundials/pull/434
     # https://github.com/LLNL/sundials/pull/437
-    patch("sundials-hip-platform.patch", when="@6.7.0:7.0.0 +rocm")
+    #patch("sundials-hip-platform.patch", when="@6.7.0:7.0.0 +rocm")
 
     # https://github.com/spack/spack/issues/29526
-    patch("nvector-pic.patch", when="@6.1.0:6.2.0 +rocm")
+    #patch("nvector-pic.patch", when="@6.1.0:6.2.0 +rocm")
 
     # Backward compatibility is stopped from ROCm 6.0
     # Need to follow the changes similar to PR https://github.com/LLNL/RAJA/pull/1568
-    patch("Change-HIP_PLATFORM-from-HCC-to-AMD-and-NVCC-to-NVIDIA.patch", when="^hip@6.0 +rocm")
+    #patch("Change-HIP_PLATFORM-from-HCC-to-AMD-and-NVCC-to-NVIDIA.patch", when="^hip@6.0 +rocm")
 
     # remove OpenMP header file and function from hypre vector test code
     patch("FindPackageMultipass.cmake.patch", when="@5.0.0")
@@ -369,7 +368,7 @@ class Sundials(CMakePackage, CudaPackage, ROCmPackage):
                 from_variant("PTHREAD_ENABLE", "pthread"),
                 from_variant("ENABLE_SYCL", "sycl"),
                 from_variant("CUDA_ENABLE", "cuda"),
-                from_variant("ENABLE_HIP", "rocm"),
+                define("ENABLE_HIP", "OFF"),
                 from_variant("HYPRE_ENABLE", "hypre"),
                 from_variant("KLU_ENABLE", "klu"),
                 from_variant("LAPACK_ENABLE", "lapack"),
@@ -388,17 +387,17 @@ class Sundials(CMakePackage, CudaPackage, ROCmPackage):
             args.append(define("CMAKE_CUDA_ARCHITECTURES", spec.variants["cuda_arch"].value))
             args.append(define("CUDAToolkit_ROOT", self.spec["cuda"].prefix))
 
-        if "+rocm" in spec:
-            args.extend(
-                [
-                    define("CMAKE_C_COMPILER", spec["llvm-amdgpu"].prefix.bin.amdclang),
-                    define("CMAKE_CXX_COMPILER", spec["hip"].hipcc),
-                    define("HIP_PATH", spec["hip"].prefix),
-                    define("HIP_CLANG_INCLUDE_PATH", spec["llvm-amdgpu"].prefix.include),
-                    define("ROCM_PATH", spec["llvm-amdgpu"].prefix),
-                    define("AMDGPU_TARGETS", spec.variants["amdgpu_target"].value),
-                ]
-            )
+        #if "+rocm" in spec:
+        #    args.extend(
+        #        [
+        #            define("CMAKE_C_COMPILER", spec["llvm-amdgpu"].prefix.bin.amdclang),
+        #            define("CMAKE_CXX_COMPILER", spec["hip"].hipcc),
+        #            define("HIP_PATH", spec["hip"].prefix),
+        #            define("HIP_CLANG_INCLUDE_PATH", spec["llvm-amdgpu"].prefix.include),
+        #            define("ROCM_PATH", spec["llvm-amdgpu"].prefix),
+        #            define("AMDGPU_TARGETS", spec.variants["amdgpu_target"].value),
+        #        ]
+        #    )
 
         # MPI support
         if "+mpi" in spec:
@@ -418,8 +417,8 @@ class Sundials(CMakePackage, CudaPackage, ROCmPackage):
                 gko_backends.append("OMP")
             if "+cuda" in spec["ginkgo"] and "+cuda" in spec:
                 gko_backends.append("CUDA")
-            if "+rocm" in spec["ginkgo"] and "+rocm" in spec:
-                gko_backends.append("HIP")
+            #if "+rocm" in spec["ginkgo"] and "+rocm" in spec:
+            #    gko_backends.append("HIP")
             if "+oneapi" in spec["ginkgo"] and "+sycl" in spec:
                 gko_backends.append("DPCPP")
             args.extend(
@@ -466,8 +465,8 @@ class Sundials(CMakePackage, CudaPackage, ROCmPackage):
             args.extend([define("ENABLE_MAGMA", True), define("MAGMA_DIR", spec["magma"].prefix)])
             if "+cuda" in spec:
                 args.extend([define("SUNDIALS_MAGMA_BACKENDS", "CUDA")])
-            if "+rocm" in spec:
-                args.extend([define("SUNDIALS_MAGMA_BACKENDS", "HIP")])
+            #if "+rocm" in spec:
+            #    args.extend([define("SUNDIALS_MAGMA_BACKENDS", "HIP")])
 
         # Building with PETSc
         if "+petsc" in spec:
@@ -772,19 +771,19 @@ class Sundials(CMakePackage, CudaPackage, ROCmPackage):
 
         self.run_example(join_path("cvode", "cuda", "cvAdvDiff_kry_cuda"), [], True)
 
-    def test_nvector_hip(self):
-        """build and run ROCM N_Vector"""
-        if "+rocm" not in self.spec:
-            raise SkipTest("Package must be installed with +rocm")
+    #def test_nvector_hip(self):
+    #    """build and run ROCM N_Vector"""
+    #    #if "+rocm" not in self.spec:
+    #        raise SkipTest("Package must be installed with +rocm")
 
         self.run_example(join_path("nvector", "hip", "test_nvector_hip"), ["10", "0", "0"], True)
 
-    def test_cvadvdiff_hip(self):
-        """build and run ROCM cvAdvDiff_kry"""
-        if "+rocm" not in self.spec or "+CVODE" not in self.spec:
-            raise SkipTest("Package must be installed with +rocm+CVODE")
+    #def test_cvadvdiff_hip(self):
+    #    """build and run ROCM cvAdvDiff_kry"""
+    #    if "+rocm" not in self.spec or "+CVODE" not in self.spec:
+    #        raise SkipTest("Package must be installed with +rocm+CVODE")
 
-        self.run_example(join_path("cvode", "hip", "cvAdvDiff_kry_hip"), [], True)
+    #    self.run_example(join_path("cvode", "hip", "cvAdvDiff_kry_hip"), [], True)
 
     def test_nvector_sycl(self):
         """build and run SYCL N_Vector"""

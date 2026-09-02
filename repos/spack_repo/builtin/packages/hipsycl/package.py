@@ -6,12 +6,11 @@ import json
 import os
 
 from spack_repo.builtin.build_systems.cmake import CMakePackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class Hipsycl(CMakePackage, ROCmPackage):
+class Hipsycl(CMakePackage):
     """hipSYCL is an implementation of the SYCL standard programming model
     over NVIDIA CUDA/AMD HIP"""
 
@@ -36,7 +35,7 @@ class Hipsycl(CMakePackage, ROCmPackage):
     version("develop", branch="develop", submodules=True)
 
     variant("cuda", default=False, description="Enable CUDA backend for SYCL kernels")
-    variant("rocm", default=False, description="Enable ROCM backend for SYCL kernels")
+    #variant("rocm", default=False, description="Enable ROCM backend for SYCL kernels")
 
     depends_on("c", type="build")
     depends_on("cxx", type="build")
@@ -101,7 +100,7 @@ class Hipsycl(CMakePackage, ROCmPackage):
         spec = self.spec
         args = [
             "-DWITH_CPU_BACKEND:Bool=TRUE",
-            "-DWITH_ROCM_BACKEND:Bool={0}".format("TRUE" if spec.satisfies("+rocm") else "FALSE"),
+            #"-DWITH_ROCM_BACKEND:Bool={0}".format("TRUE" if spec.satisfies("+rocm") else "FALSE"),
             "-DWITH_CUDA_BACKEND:Bool={0}".format("TRUE" if spec.satisfies("+cuda") else "FALSE"),
             # prevent hipSYCL's cmake to look for other LLVM installations
             # if the specified one isn't compatible
@@ -140,11 +139,11 @@ class Hipsycl(CMakePackage, ROCmPackage):
         # explicit CUDA toolkit
         if spec.satisfies("+cuda"):
             args.append("-DCUDA_TOOLKIT_ROOT_DIR:String={0}".format(spec["cuda"].prefix))
-        if spec.satisfies("+rocm"):
-            args.append("-DWITH_ACCELERATED_CPU:STRING=OFF")
-            args.append("-DROCM_PATH:STRING={0}".format(os.environ.get("ROCM_PATH")))
-            if self.spec.satisfies("@24.02.0:"):
-                args.append("-DWITH_SSCP_COMPILER=OFF")
+        #if spec.satisfies("+rocm"):
+        #    args.append("-DWITH_ACCELERATED_CPU:STRING=OFF")
+        #    args.append("-DROCM_PATH:STRING={0}".format(os.environ.get("ROCM_PATH")))
+        #    if self.spec.satisfies("@24.02.0:"):
+        #        args.append("-DWITH_SSCP_COMPILER=OFF")
         return args
 
     @run_after("install")

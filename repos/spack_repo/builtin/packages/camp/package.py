@@ -5,12 +5,11 @@
 from spack_repo.builtin.build_systems.cached_cmake import cmake_cache_string
 from spack_repo.builtin.build_systems.cmake import CMakePackage
 from spack_repo.builtin.build_systems.cuda import CudaPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class Camp(CMakePackage, CudaPackage, ROCmPackage):
+class Camp(CMakePackage, CudaPackage):
     """
     Compiler agnostic metaprogramming library providing concepts,
     type operations and tuples for C++ and cuda
@@ -116,15 +115,15 @@ class Camp(CMakePackage, CudaPackage, ROCmPackage):
 
     patch("libstdc++-13-missing-header.patch", when="@:2022.10")
 
-    patch("camp-rocm6.patch", when="@0.2.3 +rocm ^hip@6:")
+    #patch("camp-rocm6.patch", when="@0.2.3 +rocm ^hip@6:")
     # Version 2022.03.0 to 2023.06.0 requires patch
-    patch("camp-rocm6.patch", when="@2022.03.0:2023.06.0 +rocm ^hip@6:")
+    #patch("camp-rocm6.patch", when="@2022.03.0:2023.06.0 +rocm ^hip@6:")
 
-    conflicts("^blt@:0.3.6", when="+rocm")
+    #conflicts("^blt@:0.3.6", when="+rocm")
 
-    conflicts("+omptarget +rocm")
+    #conflicts("+omptarget +rocm")
     conflicts("+sycl +omptarget")
-    conflicts("+sycl +rocm")
+    #conflicts("+sycl +rocm")
     conflicts(
         "+sycl",
         when="@:2024.02.99",
@@ -147,15 +146,15 @@ class Camp(CMakePackage, CudaPackage, ROCmPackage):
                 cuda_arch = spec.variants["cuda_arch"].value
                 options.append("-DCMAKE_CUDA_ARCHITECTURES={0}".format(";".join(cuda_arch)))
 
-        options.append(self.define_from_variant("ENABLE_HIP", "rocm"))
-        if spec.satisfies("+rocm"):
-            rocm_root = spec["llvm-amdgpu"].prefix
-            options.append(self.define("ROCM_PATH", rocm_root))
+        #options.append(self.define_from_variant("ENABLE_HIP", "rocm"))
+        #if spec.satisfies("+rocm"):
+        #    rocm_root = spec["llvm-amdgpu"].prefix
+        #    options.append(self.define("ROCM_PATH", rocm_root))
 
-            archs = ";".join(self.spec.variants["amdgpu_target"].value)
-            options.append("-DCMAKE_HIP_ARCHITECTURES={0}".format(archs))
-            options.append("-DGPU_TARGETS={0}".format(archs))
-            options.append("-DAMDGPU_TARGETS={0}".format(archs))
+        #    archs = ";".join(self.spec.variants["amdgpu_target"].value)
+        #    options.append("-DCMAKE_HIP_ARCHITECTURES={0}".format(archs))
+        #    options.append("-DGPU_TARGETS={0}".format(archs))
+        #    options.append("-DAMDGPU_TARGETS={0}".format(archs))
 
         if spec.satisfies("+omptarget"):
             options.append(cmake_cache_string("RAJA_DATA_ALIGN", 64))

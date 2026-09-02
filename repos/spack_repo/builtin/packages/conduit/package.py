@@ -291,10 +291,10 @@ class Conduit(CachedCMakePackage):
                 )
             )
 
-        if spec.satisfies("%cce"):
-            entries.append(
-                cmake_cache_string("CMAKE_Fortran_FLAGS", "${CMAKE_Fortran_FLAGS} -ef", force=True)
-            )
+        #if spec.satisfies("%cce"):
+        #    entries.append(
+        #        cmake_cache_string("CMAKE_Fortran_FLAGS", "${CMAKE_Fortran_FLAGS} -ef", force=True)
+        #    )
 
         sys_type = os.environ.get("SYS_TYPE", str(spec.architecture))
         on_blueos = "blueos" in sys_type

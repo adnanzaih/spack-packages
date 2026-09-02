@@ -6,12 +6,11 @@ import os
 import sys
 
 from spack_repo.builtin.build_systems.autotools import AutotoolsPackage
-from spack_repo.builtin.build_systems.rocm import ROCmPackage
 
 from spack.package import *
 
 
-class Papi(AutotoolsPackage, ROCmPackage):
+class Papi(AutotoolsPackage):
     """PAPI provides the tool designer and application engineer with a
     consistent interface and methodology for use of the performance
     counter hardware found in most major microprocessors. PAPI
@@ -54,8 +53,8 @@ class Papi(AutotoolsPackage, ROCmPackage):
     variant("sde", default=False, description="Enable software defined events")
     variant("cuda", default=False, description="Enable CUDA support")
     variant("nvml", default=False, description="Enable NVML support")
-    variant("rocm_smi", default=False, description="Enable ROCm SMI support")
-    variant("rocp_sdk", default=False, when="@7.2:", description="Enable ROCp support")
+    #variant("rocm_smi", default=False, description="Enable ROCm SMI support")
+    #variant("rocp_sdk", default=False, when="@7.2:", description="Enable ROCp support")
     variant(
         "rdpmc",
         default=True,
@@ -80,12 +79,12 @@ class Papi(AutotoolsPackage, ROCmPackage):
     depends_on("cuda", when="+cuda")
     depends_on("cuda", when="+nvml")
     depends_on("bc", when="+cuda", type="build")
-    depends_on("hsa-rocr-dev", when="+rocm")
-    depends_on("rocprofiler-dev", when="+rocm")
-    depends_on("rocprofiler-sdk", when="+rocp_sdk")
-    depends_on("llvm-amdgpu", when="+rocm")
-    depends_on("rocm-openmp-extras", when="+rocm")
-    depends_on("rocm-smi-lib", when="+rocm_smi")
+    #depends_on("hsa-rocr-dev", when="+rocm")
+    #depends_on("rocprofiler-dev", when="+rocm")
+    #depends_on("rocprofiler-sdk", when="+rocp_sdk")
+    #depends_on("llvm-amdgpu", when="+rocm")
+    #depends_on("rocm-openmp-extras", when="+rocm")
+    #depends_on("rocm-smi-lib", when="+rocm_smi")
 
     conflicts("%gcc@8:", when="@5.3.0", msg="Requires GCC version less than 8.0")
     conflicts("+sde", when="@:5", msg="Software defined events (SDE) added in 6.0.0")
@@ -94,7 +93,7 @@ class Papi(AutotoolsPackage, ROCmPackage):
     conflicts("^cuda@12.4:", when="@:7.1")
     # https://github.com/spack/spack-packages/pull/3028#issuecomment-3749940489
     conflicts("^cuda@13.1:")
-    conflicts("%cce", when="@7.1:", msg="-ffree-form flag not recognized")
+    #conflicts("%cce", when="@7.1:", msg="-ffree-form flag not recognized")
 
     conflicts("@=6.0.0", when="+static_tools", msg="Static tools cannot build on version 6.0.0")
 
@@ -108,7 +107,7 @@ class Papi(AutotoolsPackage, ROCmPackage):
     patch("perl-in-env.patch", when="@7.1.0:")
     # 7.1.0 erroneously adds -ffree-form for all fortran compilers
     patch("sysdetect-free-form-fix.patch", when="@7.1.0")
-    patch("crayftn-fixes.patch", when="@6.0.0:%cce@9:")
+    #patch("crayftn-fixes.patch", when="@6.0.0:%cce@9:")
     patch("intel-oneapi-compiler-fixes.patch", when="@6.0.0:7.0.1%oneapi")
     patch("intel-cray-freeform.patch", when="@7.0.1")
     patch("spack-hip-path.patch", when="@7.0.1")
@@ -121,21 +120,21 @@ class Papi(AutotoolsPackage, ROCmPackage):
             env.set("PAPI_LMSENSORS_ROOT", spec["lm-sensors"].prefix)
         if "+cuda" in spec:
             env.set("PAPI_CUDA_ROOT", spec["cuda"].prefix)
-        if "+rocm" in spec:
-            env.set("PAPI_ROCM_ROOT", spec["hsa-rocr-dev"].prefix)
-            env.set("HSA_TOOLS_LIB", "%s/librocprofiler64.so" % spec["rocprofiler-dev"].prefix.lib)
-            env.append_flags("CFLAGS", "-I%s/rocprofiler/include" % spec["rocprofiler-dev"].prefix)
-            env.append_flags("LDFLAGS", "-L%s/lib" % spec["llvm-amdgpu"].prefix)
-            env.set(
-                "ROCP_METRICS", "%s/rocprofiler/lib/metrics.xml" % spec["rocprofiler-dev"].prefix
-            )
-            env.set("ROCPROFILER_LOG", "1")
-            env.set("HSA_VEN_AMD_AQLPROFILE_LOG", "1")
-            env.set("AQLPROFILE_READ_API", "1")
-        if "+rocm_smi" in spec:
-            env.append_flags("CFLAGS", "-I%s/rocm_smi" % spec["rocm-smi-lib"].prefix.include)
-        if "+rocp_sdk" in spec:
-            env.set("PAPI_ROCP_SDK_ROOT", spec["rocprofiler-sdk"].prefix)
+        #if "+rocm" in spec:
+        #    env.set("PAPI_ROCM_ROOT", spec["hsa-rocr-dev"].prefix)
+        #    env.set("HSA_TOOLS_LIB", "%s/librocprofiler64.so" % spec["rocprofiler-dev"].prefix.lib)
+        #    env.append_flags("CFLAGS", "-I%s/rocprofiler/include" % spec["rocprofiler-dev"].prefix)
+        #    env.append_flags("LDFLAGS", "-L%s/lib" % spec["llvm-amdgpu"].prefix)
+        #    env.set(
+        #        "ROCP_METRICS", "%s/rocprofiler/lib/metrics.xml" % spec["rocprofiler-dev"].prefix
+        #    )
+        #    env.set("ROCPROFILER_LOG", "1")
+        #    env.set("HSA_VEN_AMD_AQLPROFILE_LOG", "1")
+        #    env.set("AQLPROFILE_READ_API", "1")
+        #if "+rocm_smi" in spec:
+        #    env.append_flags("CFLAGS", "-I%s/rocm_smi" % spec["rocm-smi-lib"].prefix.include)
+        #if "+rocp_sdk" in spec:
+        #    env.set("PAPI_ROCP_SDK_ROOT", spec["rocprofiler-sdk"].prefix)
         #
         # Intel OneAPI LLVM cannot compile papi unless the DBG enviroment variable is cleared
         #
@@ -167,9 +166,9 @@ class Papi(AutotoolsPackage, ROCmPackage):
                 "sde",
                 "cuda",
                 "nvml",
-                "rocm",
-                "rocm_smi",
-                "rocp_sdk",
+                #"rocm",
+                #"rocm_smi",
+                #"rocp_sdk",
                 "topdown",
             ],
         )
