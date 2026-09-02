@@ -51,7 +51,9 @@ class Libtiff(CMakePackage, AutotoolsPackage):
         sha256="67160e3457365ab96c5b3286a0903aa6e78bdc44c4bc737d2e486bcecb6ba976",
         deprecated=True,
     )
-
+    version("4.5.1", sha256="d7f38b6788e4a8f5da7940c5ac9424f494d8a79eba53d555f4a507167dca5e2b")
+    version("4.0.10", sha256="2c52d11ccaf767457db0c46795d9c7d1a8d8f76f68b0b800a3dfe45786b996e4")
+    
     # GUI
     variant("opengl", default=False, description="use OpenGL (required for tiffgt viewer)")
 

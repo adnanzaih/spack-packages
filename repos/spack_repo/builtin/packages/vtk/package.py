@@ -103,6 +103,8 @@ class Vtk(CMakePackage):
     # patch seems to effectively been added to vtk@9.2.3 (e81a2fe)
     patch("xdmf2-hdf51.13.2.patch", when="@9:9.2.2 io=xdmf")
 
+    patch("vtk_8.2_qt_5.15.patch", when="@8.2 +qt ^qt@5.15:")
+
     # We cannot build with both osmesa and qt in spack
     conflicts("^osmesa", when="+qt")
 

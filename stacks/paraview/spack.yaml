@@ -4,63 +4,52 @@
 # configuration settings.
 spack:
   config:
-    install_tree:
-      root: /sw/test/opt
-      padded_length: 128
-  mirrors:
-    buildcache: file:///sw/spack/buildcache
-  upstreams:
-    arc-compiler-stacks:
-      install_tree: /sw/spack/opt/pkgs
-      modules:
-        lmod: /sw/spack/opt/moduless
+      install_tree:
+        root: /sw/spack/opt/pkgs
   view: false
   specs:
   ##########################################################################################
   #                                       Software                                         #
   ##########################################################################################
-  - group: bioinformatics
+  - group: paraview
     specs:
     - paraview@6.1.1+cuda+mpi+qt+raytracing+hdf5 cuda_arch=80 ^ninja@1.13.2 ^python/c3sfkjb ^meson@1.11.1
-    override:
-      packages:
-        c:
-          prefer: [gcc@14.3.1]
-        cxx:
-          prefer: [gcc@14.3.1]
-        fortran:
-          prefer: [gcc@14.3.1]
-        apr-util:
-          prefer:
-          - '~crypto'    
+    - paraview@6.1.1~cuda~mpi+qt+raytracing+hdf5 ^ninja@1.13.2 ^python/c3sfkjb ^meson@1.11.1
   concretizer:
     unify: false
     reuse: true
-    compiler_mixing: true
     ##########################################################################################
     #                                         Modules                                        #
     ##########################################################################################
   modules:
     default:
       roots:
-        lmod: /sw/test/modules
-        tcl: /sw/test/modules
+        lmod: /sw/spack/opt/modules
+        tcl: /sw/spack/opt/modules
       lmod:
-        hide_implicits: true
         projections:
           r: 'R/{version}'
           hdf5~threadsafe: 'hdf5/{version}-nonatomic'
           intel-oneapi-compilers-classic: 'intel/{version}'
           miniforge3: 'mamba/{version}'
           py-mpi4py: 'mpi4py/{version}'
-          rseurat: "rseurat/{version}-R-{^r.version}"
+          intel-oneapi-mpi: 'impi/{version}'
+          gh: 'github-cli/{version}'
+          paraview~mpi~cuda: 'paraview/{version}-nompicuda'
         hash_length: 0
+        all:
+          suffixes:
+            'binutils target=x86_64': x86_64
+            'gmp target=x86_64': x86_64
+            'mpc target=x86_64': x86_64
+            'mpfr target=x86_64': x86_64
+            'zlib-ng target=x86_64': x86_64
+            'zstd target=x86_64': x86_64
         core_compilers:
-        - gcc@14.3.1
-        - aocc
-        - oneapi
-        - llvm
-        hierarchy:: []
+          - gcc@14.3.1
+        hierarchy:
+          - r
+          - mpi
         core_specs:
         - gcc@14.3.1
         - gcc-runtime@14.3.1
@@ -68,7 +57,6 @@ spack:
         - gcc-runtime@14.3.1
         - glibc
         - autoconf
-        - compiler-wrapper
         - compiler-wrapper
         - util-macros
         - py-pip
@@ -78,3 +66,22 @@ spack:
         - python-venv
         gcc-runtime:
           template: gcc-runtime.lua
+        miniforge3:
+          environment:
+            set:
+              CONDA_ENVS_PATH: "~/.conda/envs"
+              CONDA_PKGS_DIRS: "~/.conda/pkgs"
+        openmpi@5.0.10+arc:
+          environment:
+            set:
+              UCX_LOG_LEVEL: error
+        intel-oneapi-mpi@2021.18.0:
+          environment:
+            set:
+              SLURM_MPI_TYPE: pmi2
+              I_MPI_HYDRA_BOOSTRAP: slurm
+              I_MPI_PMI_LIBRARY: /usr/lib64/libpmi2.so
+        aocc@5.2.0:
+          environment:
+            prepend_path:
+              MODULEPATH: /sw/spack/chemistry/opt/modules/linux-rhel10-x86_64/aocc/5.2.0

@@ -6,6 +6,8 @@ spack:
   config:
       install_tree:
         root: /sw/spack/opt/pkgs
+  mirrors:
+    buildcache: file:///sw/spack/buildcache
   view: false
   specs:
   ##########################################################################################
@@ -40,6 +42,7 @@ spack:
     - netcdf-fortran ^hdf5@1.14.6+cxx+fortran+hl+threadsafe+mpi ^libaec@1.1.4
     - libjpeg-turbo@3.1.3
     - libtiff@4.7.1
+    - libtiff@4.0.10
     - sqlite@3.53.1
     #- archivetar@0.18.2 ^python@3.13.13 ^openmpi@5.0.10
     - libsodium@1.0.22
@@ -117,8 +120,20 @@ spack:
   - group: imaging
     specs:
     - freesurfer
-    - vtk
+    - vtk/mby2353
+    - vtk@9.0.1+qt~versioned_install ^qt@5.15.2^libtiff@4.0.10 ^harfbuzz@11.4
     - fsl@6.0.5.2+cuda cuda_arch=80 ^openblas@0.3.33
+    override:
+      packages:
+        c:
+          prefer: [gcc@14.3.1]
+        cxx:
+          prefer: [gcc@14.3.1]
+        fortran:
+          prefer: [gcc@14.3.1]
+  - group: paraview
+    specs:
+    - paraview@6.1.1+cuda+mpi+qt+raytracing+hdf5 cuda_arch=80 ^ninja@1.13.2 ^python/c3sfkjb ^meson@1.11.1
   concretizer:
     unify: false
     reuse: true
@@ -139,6 +154,15 @@ spack:
           py-mpi4py: 'mpi4py/{version}'
           intel-oneapi-mpi: 'impi/{version}'
           gh: 'github-cli/{version}'
+        glew:
+          suffixes:
+            '^glx': glx
+        gl2ps:
+          suffixes:
+            '^glx': glx
+        vtk:
+          suffixes:
+            '^glx': glx
         hash_length: 0
         all:
           suffixes:
