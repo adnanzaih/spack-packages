@@ -11,15 +11,19 @@ class Rseurat(RCollectivePackage):
     """Easily Install and Load the Seurat.
 
     Seurat is a single cell analysis package for R."""
-    cran = "Seurat"
-    #cran_mirror = "https://repo.miserver.it.umich.edu/cran/"
 
     license("MIT")
+    has_code = False
+    metalist = {
+    "5.1.0_4.6.1": [('r', '4.6.1'), ("r-seurat", "5.1.0")]
+    }
 
-    version("5.5.1", sha256="9614ef02d3e1010c40be5916a309103a76c4221a667cbc4b312e5126459a5821")
-    version("5.1.0", sha256="adcfb43d7a8cc55eaa7a0954a082ac95e14059a82901913379bfec115e224d59")
+    for key in metalist.keys():
+        version(key)
+        for pairing in metalist[key]:
+             depends_on(f"{pairing[0]}@{pairing[1]}", when=f"@{key}", type="run")
+
 
 
     depends_on("c", type="build")
     depends_on("cxx", type="build")
-    depends_on("r@3.3:", type=("build", "run"))
