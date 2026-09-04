@@ -14,22 +14,29 @@ class Rgeospatial(RCollectivePackage):
     packages in R, ensuring that all necessary dependencies are correctly
     configured."""
 
-    cran = "geosphere"
-    cran_packages = ["chromote", "leafem", "leaflet", "satellite", "s2", "terra", "sf", "foreign", "stars", "raster", "spatstat", "mapproj", "gdalUtilities", "mapview", "OpenStreetMap", "tigris", "igraph", "tidygraph", "sfnetworks"]
-    #cran_mirror = "https://repo.miserver.it.umich.edu/cran/"
+    has_code = False
+    metalist = {
+    "1.5-18_4.6.1": [('r', '4.6.1'), ("r-geosphere", "1.5-18"), ("r-chromote", "0.5.1"),
+                     ("r-leafem", "0.2.3"), ("r-leaflet", "2.2.2"), ("r-satellite", "1.0.5"),
+                     ("r-tidyverse", "2.0.0"), ("r-s2", "1.1.7"), ("r-terra", "1.9-11"),
+                     ("r-foreign", "0.8-87"), ("r-raster", "3.6-26"), ("r-sfnetworks", "0.6.6"),
+                     ("r-spatstat", "3.1-1"), ("r-mapproj", "1.2.11"), ("r-openstreetmap", "0.4.1"),
+                     ("r-gdalutilities", "1.2.5"), ("r-mapview", "2.11.2"), ("r-tigris", "2.1"),
+                     ],
+    }
 
-    license("MIT")
-
-    version("1.5-18", sha256="99ff6ff050cc8c2d565b6bb1488607fc7950a6d448930f8d9642eccefbc6dac0")
-
+    for key in metalist.keys():
+        version(key)
+        for pairing in metalist[key]:
+             depends_on(f"{pairing[0]}@{pairing[1]}", when=f"@{key}", type="run")
 
     depends_on("c", type="build")
     depends_on("cxx", type="build")
 
 
-    depends_on("r@3.3:", type=("build", "run"))
-    #depends_on("r-rcpp", type=("build", "run"))
-    depends_on("rtidyverse")
+
+    depends_on("c", type="build")
+    depends_on("cxx", type="build")
     depends_on("gdal")
     depends_on("proj")
     depends_on("geos")
